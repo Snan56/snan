@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Car Factory Tycoon</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Arial Rounded MT Bold',Arial,sans-serif; user-select:none; }
+
+body {
+  background: #0d1117;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+#game-wrap {
+  width: min(420px, 100vw);
+  height: min(780px, 100vh);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 24px;
+  box-shadow: 0 0 60px rgba(0,120,255,0.3);
+}
+
+/* ===== GAME FIELD ===== */
+#game-field {
+  flex: 1;
+  background: linear-gradient(180deg, #1b3a5c 0%, #0d1f35 100%);
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Ground line */
+#game-field::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0; right: 0;
+  height: 18px;
+  background: repeating-linear-gradient(90deg, #3a3a3a 0px, #3a3a3a 16px, #2a2a2a 16px, #2a2a2a 32px);
+  border-top: 3px solid #555;
+}
+
+/* ===== HUD ===== */
+#hud {
+  position: absolute;
+  top: 10px; right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  z-index: 100;
+}
+
+.hud-pill {
+  background: white;
+  border-radius: 22px;
+  padding: 4px 10px 4px 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 900;
+  font-size: 17px;
+  min-width: 95px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.hud-icon {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.ic-money { background: #2ecc40; }
+.ic-gold  { background: #f5a623; }
+
+#top-btns {
+  position: absolute;
+  top: 12px;
+  right: 120px;
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+}
+
+.top-btn {
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  width: 36px; height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  color: white;
+  transition: background 0.2s;
+}
+.top-btn:hover { background: rgba(255,255,255,0.3); }
+
+/* ===== LEVEL BADGE ===== */
+#lvl-badge {
+  position: absolute;
+  top: 10px; left: 10px;
+  background: rgba(0,0,0,0.6);
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 14px;
+  padding: 4px 12px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 100;
+}
+
+/* ===== FACTORY PIPE ===== */
+#pipe {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 50;
+  cursor: pointer;
+  transition: left 0.15s linear;
+}
+
+.pipe-cap {
+  width: 56px; height: 16px;
+  background: linear-gradient(180deg, #00d4ff, #0097c4);
+  border-radius: 6px 6px 0 0;
+  border: 2px solid #00b8d4;
+}
+
+.pipe-body {
+  width: 40px; height: 65px;
+  background: linear-gradient(180deg, #7c3aed, #5b21b6);
+  border: 2px solid #6d28d9;
+  border-radius: 0 0 6px 6px;
+}
+
+/* ===== ITEMS (floating collectibles) ===== */
+.item {
+  position: absolute;
+  cursor: pointer;
+  z-index: 20;
+  transition: transform 0.1s;
+}
+.item:active { transform: scale(0.85) !important; }
+
+.money-txt {
+  color: #00d664;
+  font-weight: 900;
+  font-size: 22px;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.8), 0 0 12px rgba(0,214,100,0.6);
+  animation: float-bob 2s ease-in-out infinite;
+}
+
+.circle-item {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  color: white;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+.mult-circle {
+  width: 62px; height: 62px;
+  font-size: 15px;
+  background: radial-gradient(circle at 35% 35%, #ff69b4, #c2185b);
+  border: 3px solid #f48fb1;
+  box-shadow: 0 0 20px rgba(233,30,140,0.7);
+  animation: float-bob 2.2s ease-in-out infinite, glow-pink 1s infinite alternate;
+}
+
+.bonus-circle {
+  width: 58px; height: 58px;
+  font-size: 17px;
+  background: radial-gradient(circle at 35% 35%, #26c6da, #00838f);
+  border: 3px solid #4dd0e1;
+  box-shadow: 0 0 20px rgba(0,188,212,0.7);
+  animation: float-bob 1.9s ease-in-out infinite, glow-cyan 1s infinite alternate;
+}
+
+.free-circle {
+  width: 78px; height: 78px;
+  background: rgba(0,0,0,0.45);
+  border: 2px dashed #888;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 10px;
+  color: #ccc;
+  animation: float-bob 2.5s ease-in-out infinite;
+}
+
+.free-circle .f-label {
+  color: #ffd600;
+  font-weight: 900;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.coin-circle {
+  width: 72px; height: 72px;
+  background: rgba(0,0,0,0.4);
+  border: 2px dashed #555;
+  color: #bbb;
+  font-size: 13px;
+  animation: float-bob 2.8s ease-in-out infinite;
+}
+
+@keyframes float-bob {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-14px); }
+}
+@keyframes glow-pink {
+  from { box-shadow: 0 0 12px rgba(233,30,140,0.4); }
+  to   { box-shadow: 0 0 28px rgba(233,30,140,0.9); }
+}
+@keyframes glow-cyan {
+  from { box-shadow: 0 0 12px rgba(0,188,212,0.4); }
+  to   { box-shadow: 0 0 28px rgba(0,188,212,0.9); }
+}
+
+/* ===== NEXT LEVEL BUTTON ===== */
+#next-lvl-btn {
+  position: absolute;
+  bottom: 24px; right: 10px;
+  background: linear-gradient(135deg, #f5c518, #e5a000);
+  border: none; border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #1a1a00;
+  box-shadow: 0 4px 14px rgba(245,197,24,0.5);
+  z-index: 50;
+}
+
+/* ===== PASSIVE INCOME ===== */
+#passive-info {
+  position: absolute;
+  bottom: 22px; left: 10px;
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+  font-weight: bold;
+  z-index: 50;
+}
+
+/* ===== BOOST TAB ===== */
+#boost-tab {
+  position: absolute;
+  right: -46px;
+  top: 38%;
+  width: 86px; height: 52px;
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  border-radius: 12px 0 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 200;
+  transition: right 0.3s ease;
+  box-shadow: -4px 0 20px rgba(124,58,237,0.5);
+}
+#boost-tab:hover { right: -2px; }
+#boost-tab.active-boost { right: -2px; background: linear-gradient(135deg, #ff6f00, #e65100); }
+
+.boost-tab-inner {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  color: white;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ===== BOOST TIMER BAR ===== */
+#boost-bar {
+  position: absolute;
+  bottom: 3px; left: 4px; right: 4px;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 3px;
+  display: none;
+}
+#boost-fill {
+  height: 100%;
+  background: #FF9800;
+  border-radius: 3px;
+  width: 100%;
+  transition: width 0.5s linear;
+}
+
+/* ===== FLOATING TEXT ===== */
+.ft {
+  position: absolute;
+  font-weight: 900;
+  font-size: 19px;
+  pointer-events: none;
+  animation: ft-anim 1.1s forwards;
+  z-index: 500;
+  white-space: nowrap;
+}
+@keyframes ft-anim {
+  0%   { opacity:1; transform: translateY(0) scale(1); }
+  60%  { opacity:1; transform: translateY(-55px) scale(1.1); }
+  100% { opacity:0; transform: translateY(-90px) scale(0.8); }
+}
+
+/* ===== BOOST PANEL (overlay) ===== */
+#boost-panel {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 230px;
+  background: rgba(10,15,30,0.95);
+  border-left: 2px solid #7c3aed;
+  z-index: 300;
+  padding: 16px 12px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+#boost-panel h3 {
+  color: #a78bfa;
+  font-size: 16px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.boost-card {
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.boost-card:hover { background: rgba(255,255,255,0.1); border-color: #a78bfa; }
+.boost-card.active-card { border-color: #f59e0b; background: rgba(245,158,11,0.12); }
+.boost-card.cant-afford { opacity: 0.4; cursor: not-allowed; }
+
+.bc-header { display: flex; align-items: center; gap: 8px; }
+.bc-icon { font-size: 22px; }
+.bc-title { color: white; font-weight: bold; font-size: 13px; }
+.bc-desc { color: #9ca3af; font-size: 11px; line-height: 1.4; }
+.bc-cost {
+  background: rgba(16,185,129,0.2);
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  padding: 3px 8px;
+  color: #6ee7b7;
+  font-size: 12px;
+  font-weight: bold;
+  align-self: flex-start;
+}
+
+#close-boost-panel {
+  background: #ef4444;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  padding: 7px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 13px;
+  margin-top: auto;
+}
+
+/* ===== BOTTOM PANEL ===== */
+#bottom-panel {
+  background: #f1f3f5;
+  padding: 8px 8px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#info-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+#lvl-limit-info {
+  background: #e3f2fd;
+  border: 2px solid #1976d2;
+  border-radius: 8px;
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: column;
+  font-size: 10px;
+  color: #0d47a1;
+  font-weight: bold;
+  min-width: 90px;
+  cursor: pointer;
+}
+
+#mult-ball {
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #9c27b0, #6a1b9a);
+  border: 3px solid #ce93d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 900;
+  font-size: 15px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(156,39,176,0.5);
+}
+
+#free-ad-btn {
+  background: linear-gradient(135deg, #f5c518, #e5a000);
+  border: none;
+  border-radius: 22px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 13px;
+  color: #1a1a00;
+  box-shadow: 0 3px 10px rgba(245,197,24,0.4);
+  white-space: nowrap;
+}
+
+#cars-area {
+  display: flex;
+  gap: 6px;
+}
+
+#cars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 4px;
+  flex: 1;
+}
+
+.slot {
+  background: white;
+  border: 2.5px solid #dde1e7;
+  border-radius: 10px;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.12s, border-color 0.2s;
+}
+.slot:hover { transform: scale(1.04); }
+.slot.filled { border-color: #4caf50; background: linear-gradient(135deg, #f1fff3, #e8f5e9); }
+.slot.mergeable {
+  border-color: #ff9800;
+  animation: merge-pulse 0.7s infinite alternate;
+}
+@keyframes merge-pulse {
+  from { border-color: #ff9800; box-shadow: 0 0 6px rgba(255,152,0,0.3); }
+  to   { border-color: #f44336; box-shadow: 0 0 14px rgba(244,67,54,0.6); }
+}
+
+.slot-tier {
+  position: absolute; top: 2px; left: 3px;
+  background: #2196f3; color: white;
+  border-radius: 50%;
+  width: 17px; height: 17px;
+  font-size: 9px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.slot-emoji { font-size: 26px; line-height: 1; }
+
+.slot-income {
+  position: absolute; bottom: 1px; right: 3px;
+  color: #2e7d32;
+  font-size: 8px; font-weight: 900;
+}
+
+.slot-plus { color: #ccc; font-size: 22px; font-weight: 900; }
+
+#action-col {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 88px;
+}
+
+#upg-btn {
+  background: linear-gradient(135deg, #ff9800, #e65100);
+  border: none; border-radius: 10px;
+  padding: 10px 6px;
+  color: white; font-weight: 900; font-size: 12px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  flex: 1;
+  box-shadow: 0 3px 10px rgba(255,152,0,0.4);
+}
+#upg-btn:hover { filter: brightness(1.1); }
+
+#add-btn {
+  background: linear-gradient(135deg, #1565c0, #0d47a1);
+  border: none; border-radius: 10px;
+  padding: 6px 5px;
+  color: white; font-weight: 900; font-size: 11px;
+  cursor: pointer;
+  display: flex; flex-direction: column; align-items: center;
+  box-shadow: 0 3px 10px rgba(21,101,192,0.4);
+}
+#add-btn:hover { filter: brightness(1.1); }
+
+/* ===== BOTTOM NAV ===== */
+#bottom-nav {
+  display: flex;
+  background: white;
+  border-top: 2px solid #e5e7eb;
+  height: 58px;
+  flex-shrink: 0;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px;
+  font-size: 9px; font-weight: bold; color: #6b7280;
+  cursor: pointer;
+  position: relative;
+}
+.nav-item .ni { font-size: 20px; }
+.nav-item.active { color: #4caf50; background: #f0fdf4; }
+.nav-item.active .ni { font-size: 28px; }
+.nav-item.locked { opacity: 0.45; cursor: default; }
+
+/* ===== MERGE FLASH ===== */
+@keyframes merge-flash {
+  0%   { transform: scale(1); filter: brightness(1); }
+  40%  { transform: scale(1.35); filter: brightness(2) drop-shadow(0 0 10px #FFD700); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+.merging { animation: merge-flash 0.45s; }
+
+/* ===== AUTO FACTORY INDICATOR ===== */
+#auto-factory-indicator {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(16,185,129,0.9);
+  border-radius: 12px;
+  padding: 3px 10px;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  display: none;
+  z-index: 100;
+}
+</style>
+</head>
+<body>
+<div id="game-wrap">
+
+  <!-- GAME FIELD -->
+  <div id="game-field">
+
+    <div id="lvl-badge">Niveau <span id="lvl-num">1</span></div>
+
+    <!-- Factory pipe dropper -->
+    <div id="pipe" title="Usine à voitures">
+      <div class="pipe-cap"></div>
+      <div class="pipe-body"></div>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud">
+      <div class="hud-pill">
+        <div class="hud-icon ic-money">💵</div>
+        <span id="coins-disp">500</span>
+      </div>
+      <div class="hud-pill">
+        <div class="hud-icon ic-gold">🥇</div>
+        <span id="gold-disp">5</span>
+      </div>
+    </div>
+
+    <!-- Top buttons -->
+    <div id="top-btns">
+      <div class="top-btn" title="Sans pubs">🚫</div>
+      <div class="top-btn" title="Paramètres">⚙️</div>
+    </div>
+
+    <!-- Auto factory indicator -->
+    <div id="auto-factory-indicator">🏭 Auto-Usine active!</div>
+
+    <!-- Items container -->
+    <div id="items-container" style="position:absolute;inset:0;pointer-events:none;z-index:10;"></div>
+
+    <!-- Next level button -->
+    <button id="next-lvl-btn" onclick="tryNextLevel()">
+      <span style="font-size:9px;opacity:.8">Niveau</span>
+      <span style="font-size:13px">Suivant</span>
+      <span id="next-lvl-cost" style="color:#7c3a00;font-size:9px">50M 💵</span>
+    </button>
+
+    <!-- Passive income -->
+    <div id="passive-info">+<span id="passive-rate">0</span>/s</div>
+
+    <!-- Boost bar -->
+    <div id="boost-bar"><div id="boost-fill"></div></div>
+
+    <!-- Boost tab -->
+    <div id="boost-tab" onclick="toggleBoostPanel()">
+      <div class="boost-tab-inner">⚡ BOOST</div>
+    </div>
+
+    <!-- Boost panel -->
+    <div id="boost-panel">
+      <h3>⚡ Boosts de Création</h3>
+
+      <div class="boost-card" id="bc-speed" onclick="buyBoost('speed')">
+        <div class="bc-header">
+          <span class="bc-icon">⚡</span>
+          <span class="bc-title">Turbo Revenu</span>
+        </div>
+        <div class="bc-desc">×2 revenus pendant 30 secondes</div>
+        <div class="bc-cost" id="cost-speed">💵 500</div>
+      </div>
+
+      <div class="boost-card" id="bc-factory" onclick="buyBoost('factory')">
+        <div class="bc-header">
+          <span class="bc-icon">🏭</span>
+          <span class="bc-title">Auto-Usine</span>
+        </div>
+        <div class="bc-desc">Crée une voiture automatiquement toutes les 15s pendant 60s</div>
+        <div class="bc-cost" id="cost-factory">💵 1 000</div>
+      </div>
+
+      <div class="boost-card" id="bc-discount" onclick="buyBoost('discount')">
+        <div class="bc-header">
+          <span class="bc-icon">🔧</span>
+          <span class="bc-title">Réduction Création</span>
+        </div>
+        <div class="bc-desc">−50% sur le prochain achat de voiture</div>
+        <div class="bc-cost" id="cost-discount">💵 300</div>
+      </div>
+
+      <div class="boost-card" id="bc-merge" onclick="buyBoost('merge')">
+        <div class="bc-header">
+          <span class="bc-icon">🔀</span>
+          <span class="bc-title">Mega Fusion</span>
+        </div>
+        <div class="bc-desc">Fusionne instantanément toutes les paires disponibles</div>
+        <div class="bc-cost" id="cost-merge">💵 800</div>
+      </div>
+
+      <div class="boost-card" id="bc-spawn" onclick="buyBoost('spawn')">
+        <div class="bc-header">
+          <span class="bc-icon">🎁</span>
+          <span class="bc-title">Pluie de Bonus</span>
+        </div>
+        <div class="bc-desc">Fait apparaître 8 collectibles sur le terrain</div>
+        <div class="bc-cost" id="cost-spawn">💵 200</div>
+      </div>
+
+      <div class="boost-card" id="bc-upgrade" onclick="buyBoost('upgrade')">
+        <div class="bc-header">
+          <span class="bc-icon">🚀</span>
+          <span class="bc-title">Boost Multiplicateur</span>
+        </div>
+        <div class="bc-desc">+0.5 au multiplicateur permanent</div>
+        <div class="bc-cost" id="cost-upgrade">💵 2 000</div>
+      </div>
+
+      <button id="close-boost-panel" onclick="toggleBoostPanel()">✕ Fermer</button>
+    </div>
+
+  </div><!-- end game-field -->
+
+  <!-- BOTTOM PANEL -->
+  <div id="bottom-panel">
+    <div id="info-row">
+      <div id="lvl-limit-info">
+        <span>ℹ Limite Niveau</span>
+        <span id="lvl-limit-txt" style="font-size:12px">1 Million (M)</span>
+      </div>
+
+      <div id="mult-ball">
+        x<span id="mult-val">1.0</span>
+      </div>
+
+      <button id="free-ad-btn" onclick="watchAd()">▶ GRATUIT</button>
+    </div>
+
+    <div id="cars-area">
+      <div id="cars-grid">
+        <!-- slots rendered by JS -->
+      </div>
+      <div id="action-col">
+        <button id="upg-btn" onclick="upgradeMultiplier()">
+          <span style="font-size:18px">⬆</span>
+          <span>Améliorer</span>
+          <span id="upg-cost-disp" style="font-size:10px;opacity:.8">💵 250</span>
+        </button>
+        <button id="add-btn" onclick="addCar()">
+          Ajouter<br>Voiture<br>
+          <span id="add-cost-disp" style="font-size:10px;color:#90caf9">💵 <span id="car-cost-val">100</span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div id="bottom-nav">
+    <div class="nav-item">
+      <span class="ni">🏪</span><span>SHOP</span>
+    </div>
+    <div class="nav-item locked">
+      <span class="ni">🔒</span><span>Niv. 3</span>
+    </div>
+    <div class="nav-item active">
+      <span class="ni">🚗</span><span>JEU</span>
+    </div>
+    <div class="nav-item locked">
+      <span class="ni">🔒</span><span>Niv. 2</span>
+    </div>
+    <div class="nav-item locked">
+      <span class="ni">🔒</span><span>Niv. 2</span>
+    </div>
+  </div>
+
+</div><!-- end game-wrap -->
+
+<script>
+// =====================
+//   GAME STATE
+// =====================
+const G = {
+  coins: 500,
+  gold: 5,
+  level: 1,
+  multiplier: 1.0,
+  boostActive: false,
+  boostTimeLeft: 0,
+  autoFactoryActive: false,
+  discountActive: false,
+  cars: Array(6).fill(null),
+  carCost: 100,
+  upgMultCost: 250,
+  nextLvlCost: 50_000_000,
+  passiveIncome: 0,
+  boostPanelOpen: false,
+};
+
+// Boost base costs
+const BOOST_COSTS = {
+  speed:    500,
+  factory:  1000,
+  discount: 300,
+  merge:    800,
+  spawn:    200,
+  upgrade:  2000,
+};
+
+// =====================
+//   CAR TIERS
+// =====================
+const TIERS = [
+  { emoji:'🚗', name:'Berline',   income:1,     color:'#4caf50' },
+  { emoji:'🏎️', name:'Sport',     income:6,     color:'#2196f3' },
+  { emoji:'🚕', name:'Muscle',    income:25,    color:'#ff9800' },
+  { emoji:'🚙', name:'SUV',       income:90,    color:'#9c27b0' },
+  { emoji:'🛻', name:'Pick-up',   income:300,   color:'#f44336' },
+  { emoji:'🚒', name:'V8 Custom', income:1000,  color:'#e91e63' },
+  { emoji:'🏍️', name:'Moto Luxe', income:3500,  color:'#ff5722' },
+  { emoji:'🚀', name:'Hypercar',  income:12000, color:'#ffd700' },
+];
+
+// =====================
+//   NUMBER FORMAT
+// =====================
+function fmt(n) {
+  n = Math.floor(n);
+  if (n >= 1e12) return (n/1e12).toFixed(1)+'T';
+  if (n >= 1e9)  return (n/1e9).toFixed(1)+'B';
+  if (n >= 1e6)  return (n/1e6).toFixed(1)+'M';
+  if (n >= 1e3)  return (n/1e3).toFixed(1)+'k';
+  return n.toString();
+}
+
+// =====================
+//   UPDATE HUD
+// =====================
+function updateHUD() {
+  document.getElementById('coins-disp').textContent = fmt(G.coins);
+  document.getElementById('gold-disp').textContent  = G.gold;
+  document.getElementById('mult-val').textContent   = G.multiplier.toFixed(1);
+  document.getElementById('lvl-num').textContent    = G.level;
+  document.getElementById('upg-cost-disp').textContent = '💵 ' + fmt(G.upgMultCost);
+
+  // Passive
+  G.passiveIncome = G.cars.reduce((s, c) => s + (c !== null ? TIERS[c].income * G.multiplier : 0), 0);
+  const eff = G.passiveIncome * (G.boostActive ? 2 : 1);
+  document.getElementById('passive-rate').textContent = fmt(eff);
+
+  // Car cost
+  const cost = G.discountActive ? Math.floor(G.carCost * 0.5) : G.carCost;
+  document.getElementById('car-cost-val').textContent = fmt(cost);
+
+  // Level limit display
+  const lvlLimits = ['1 Million (M)', '5 Millions', '20 Millions', '100 Millions', '500 Millions', '2 Milliards'];
+  document.getElementById('lvl-limit-txt').textContent = lvlLimits[Math.min(G.level - 1, lvlLimits.length - 1)];
+
+  // Next level cost
+  document.getElementById('next-lvl-cost').textContent = fmt(G.nextLvlCost) + ' 💵';
+
+  // Boost cards afford check
+  Object.keys(BOOST_COSTS).forEach(k => {
+    const card = document.getElementById('bc-' + k);
+    if (card) {
+      card.classList.toggle('cant-afford', G.coins < BOOST_COSTS[k]);
+    }
+  });
+}
+
+// =====================
+//   RENDER CAR SLOTS
+// =====================
+function renderCars() {
+  const grid = document.getElementById('cars-grid');
+  grid.innerHTML = '';
+
+  // Count tiers for merge detection
+  const counts = {};
+  G.cars.forEach(c => { if (c !== null) counts[c] = (counts[c] || 0) + 1; });
+
+  G.cars.forEach((car, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+
+    if (car !== null) {
+      const t = TIERS[car];
+      const mergeable = counts[car] >= 2 && car < TIERS.length - 1;
+      if (mergeable) slot.classList.add('mergeable');
+      slot.classList.add('filled');
+
+      slot.innerHTML = `
+        <div class="slot-tier">${car + 1}</div>
+        <span class="slot-emoji">${t.emoji}</span>
+        <div class="slot-income">+${fmt(t.income * G.multiplier)}/s</div>
+      `;
+
+      if (mergeable) {
+        slot.title = 'Cliquer pour fusionner!';
+        slot.onclick = () => mergeCars(car, slot);
+      } else {
+        slot.onclick = () => floatText(`${t.emoji} ${t.name}: +${fmt(t.income * G.multiplier)}/s`, '#game-field', t.color);
+      }
+    } else {
+      slot.innerHTML = '<span class="slot-plus">+</span>';
+      slot.onclick   = addCar;
+    }
+
+    grid.appendChild(slot);
+  });
+
+  updateHUD();
+}
+
+// =====================
+//   ADD CAR
+// =====================
+function addCar() {
+  const empty = G.cars.indexOf(null);
+  if (empty === -1) {
+    floatText('Grille pleine! Fusionnez!', '#game-field', '#f44336');
+    return;
+  }
+  const realCost = G.discountActive ? Math.floor(G.carCost * 0.5) : G.carCost;
+  if (G.coins < realCost) {
+    floatText('Coins insuffisants!', '#game-field', '#f44336');
+    return;
+  }
+  G.coins -= realCost;
+  G.cars[empty] = 0;
+  G.carCost = Math.floor(G.carCost * 1.55);
+  G.discountActive = false;
+  floatText('🚗 Berline créée!', '#game-field', '#4caf50');
+  renderCars();
+}
+
+// =====================
+//   MERGE CARS
+// =====================
+function mergeCars(tier, slotEl) {
+  if (tier >= TIERS.length - 1) {
+    floatText('Niveau maximum!', '#game-field', '#ffd700');
+    return;
+  }
+  let removed = 0;
+  for (let i = 0; i < G.cars.length && removed < 2; i++) {
+    if (G.cars[i] === tier) { G.cars[i] = null; removed++; }
+  }
+  if (removed === 2) {
+    const empty = G.cars.indexOf(null);
+    if (empty !== -1) {
+      G.cars[empty] = tier + 1;
+      const nt = TIERS[tier + 1];
+      floatText(`⬆ ${nt.emoji} ${nt.name} débloqué!`, '#game-field', '#ffd700');
+      G.coins += nt.income * 30;
+      floatText(`+${fmt(nt.income * 30)} 💵 Bonus!`, '#game-field', '#4caf50');
+    }
+  }
+  renderCars();
+}
+
+// =====================
+//   UPGRADE MULTIPLIER
+// =====================
+function upgradeMultiplier() {
+  if (G.coins < G.upgMultCost) { floatText('Coins insuffisants!', '#game-field', '#f44336'); return; }
+  G.coins -= G.upgMultCost;
+  G.multiplier = Math.round((G.multiplier + 0.1) * 10) / 10;
+  G.upgMultCost = Math.floor(G.upgMultCost * 2.2);
+  floatText(`✨ Multiplicateur x${G.multiplier.toFixed(1)}`, '#game-field', '#9c27b0');
+  renderCars();
+}
+
+// =====================
+//   NEXT LEVEL
+// =====================
+function tryNextLevel() {
+  if (G.coins < G.nextLvlCost) {
+    floatText(`Besoin de ${fmt(G.nextLvlCost)} 💵`, '#game-field', '#f44336'); return;
+  }
+  G.coins -= G.nextLvlCost;
+  G.level++;
+  G.nextLvlCost = Math.floor(G.nextLvlCost * 8);
+  floatText(`🏆 NIVEAU ${G.level} ATTEINT!`, '#game-field', '#ffd700');
+  renderCars();
+}
+
+// =====================
+//   WATCH AD (free)
+// =====================
+function watchAd() {
+  G.multiplier = Math.round((G.multiplier + 0.2) * 10) / 10;
+  floatText('🎁 +x0.2 GRATUIT!', '#game-field', '#4caf50');
+  renderCars();
+}
+
+// =====================
+//   BOOST PANEL
+// =====================
+function toggleBoostPanel() {
+  G.boostPanelOpen = !G.boostPanelOpen;
+  const panel = document.getElementById('boost-panel');
+  const tab   = document.getElementById('boost-tab');
+  panel.style.display = G.boostPanelOpen ? 'flex' : 'none';
+  tab.style.right = G.boostPanelOpen ? '-2px' : '-46px';
+}
+
+function buyBoost(type) {
+  const cost = BOOST_COSTS[type];
+  if (G.coins < cost) { floatText('Coins insuffisants!', '#game-field', '#f44336'); return; }
+  G.coins -= cost;
+
+  switch (type) {
+    case 'speed':
+      activateSpeedBoost();
+      BOOST_COSTS.speed = Math.floor(BOOST_COSTS.speed * 1.5);
+      document.getElementById('cost-speed').textContent = '💵 ' + fmt(BOOST_COSTS.speed);
+      break;
+
+    case 'factory':
+      activateAutoFactory();
+      BOOST_COSTS.factory = Math.floor(BOOST_COSTS.factory * 1.6);
+      document.getElementById('cost-factory').textContent = '💵 ' + fmt(BOOST_COSTS.factory);
+      break;
+
+    case 'discount':
+      G.discountActive = true;
+      floatText('🔧 −50% prochain achat!', '#game-field', '#00bcd4');
+      BOOST_COSTS.discount = Math.floor(BOOST_COSTS.discount * 1.4);
+      document.getElementById('cost-discount').textContent = '💵 ' + fmt(BOOST_COSTS.discount);
+      renderCars();
+      break;
+
+    case 'merge':
+      activateMegaMerge();
+      BOOST_COSTS.merge = Math.floor(BOOST_COSTS.merge * 1.5);
+      document.getElementById('cost-merge').textContent = '💵 ' + fmt(BOOST_COSTS.merge);
+      break;
+
+    case 'spawn':
+      for (let i = 0; i < 8; i++) setTimeout(spawnItem, i * 100);
+      floatText('🎁 Pluie de bonus!', '#game-field', '#ff9800');
+      BOOST_COSTS.spawn = Math.floor(BOOST_COSTS.spawn * 1.3);
+      document.getElementById('cost-spawn').textContent = '💵 ' + fmt(BOOST_COSTS.spawn);
+      break;
+
+    case 'upgrade':
+      G.multiplier = Math.round((G.multiplier + 0.5) * 10) / 10;
+      floatText(`🚀 Multiplicateur x${G.multiplier.toFixed(1)}!`, '#game-field', '#9c27b0');
+      BOOST_COSTS.upgrade = Math.floor(BOOST_COSTS.upgrade * 2);
+      document.getElementById('cost-upgrade').textContent = '💵 ' + fmt(BOOST_COSTS.upgrade);
+      renderCars();
+      break;
+  }
+
+  updateHUD();
+}
+
+// Speed boost (×2 revenue, 30s)
+function activateSpeedBoost() {
+  if (G.boostActive) return;
+  G.boostActive = true;
+  G.boostTimeLeft = 30;
+
+  const tab  = document.getElementById('boost-tab');
+  const bar  = document.getElementById('boost-bar');
+  const fill = document.getElementById('boost-fill');
+  tab.classList.add('active-boost');
+  tab.querySelector('.boost-tab-inner').textContent = '⚡ ×2 ON';
+  bar.style.display = 'block';
+  fill.style.transition = 'none';
+  fill.style.width = '100%';
+  setTimeout(() => { fill.style.transition = 'width 30s linear'; fill.style.width = '0%'; }, 50);
+
+  floatText('⚡ TURBO ×2 ACTIVÉ!', '#game-field', '#ff9800');
+
+  const interval = setInterval(() => {
+    G.boostTimeLeft--;
+    if (G.boostTimeLeft <= 0) {
+      clearInterval(interval);
+      G.boostActive = false;
+      tab.classList.remove('active-boost');
+      tab.querySelector('.boost-tab-inner').textContent = '⚡ BOOST';
+      bar.style.display = 'none';
+      fill.style.width = '100%';
+      floatText('Boost terminé', '#game-field', '#888');
+      updateHUD();
+    }
+  }, 1000);
+
+  updateHUD();
+}
+
+// Auto factory (creates car every 15s for 60s)
+function activateAutoFactory() {
+  const ind = document.getElementById('auto-factory-indicator');
+  ind.style.display = 'block';
+  floatText('🏭 Auto-Usine activée!', '#game-field', '#10b981');
+
+  let remaining = 4;
+  const doCreate = () => {
+    const empty = G.cars.indexOf(null);
+    if (empty !== -1) {
+      G.cars[empty] = 0;
+      floatText('🏭 Voiture créée automatiquement!', '#game-field', '#10b981');
+      renderCars();
+    }
+    remaining--;
+    if (remaining <= 0) {
+      ind.style.display = 'none';
+      G.autoFactoryActive = false;
+      floatText('Auto-Usine terminée', '#game-field', '#888');
+    }
+  };
+
+  G.autoFactoryActive = true;
+  for (let i = 1; i <= 4; i++) setTimeout(doCreate, i * 15000);
+}
+
+// Mega merge (merges all pairs at once)
+function activateMegaMerge() {
+  let merged = 0;
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const counts = {};
+    G.cars.forEach((c, i) => { if (c !== null) counts[c] = (counts[c] || []).concat(i); });
+    for (const [tier, indices] of Object.entries(counts)) {
+      if (indices.length >= 2 && parseInt(tier) < TIERS.length - 1) {
+        G.cars[indices[0]] = null;
+        G.cars[indices[1]] = null;
+        const empty = G.cars.indexOf(null);
+        if (empty !== -1) G.cars[empty] = parseInt(tier) + 1;
+        merged++;
+        changed = true;
+        break;
+      }
+    }
+  }
+  if (merged > 0) {
+    floatText(`🔀 ${merged} fusion(s) effectuée(s)!`, '#game-field', '#ffd700');
+    renderCars();
+  } else {
+    floatText('Aucune paire à fusionner', '#game-field', '#888');
+    G.coins += BOOST_COSTS.merge; // refund if nothing to merge
+  }
+}
+
+// =====================
+//   FLOATING TEXT
+// =====================
+function floatText(text, container, color) {
+  const parent = typeof container === 'string'
+    ? document.querySelector(container)
+    : container;
+  const el = document.createElement('div');
+  el.className = 'ft';
+  el.textContent = text;
+  el.style.color  = color || '#4caf50';
+  el.style.left   = (10 + Math.random() * 60) + '%';
+  el.style.top    = (15 + Math.random() * 45) + '%';
+  el.style.textShadow = '1px 1px 4px rgba(0,0,0,0.9)';
+  parent.appendChild(el);
+  setTimeout(() => el.remove(), 1100);
+}
+
+// =====================
+//   FALLING / FLOATING ITEMS
+// =====================
+const ITEM_TYPES = [
+  { type:'money',      w:35 },
+  { type:'multiplier', w:18 },
+  { type:'bonus',      w:18 },
+  { type:'free',       w:14 },
+  { type:'coins',      w:15 },
+];
+
+function rndType() {
+  const total = ITEM_TYPES.reduce((s, i) => s + i.w, 0);
+  let r = Math.random() * total;
+  for (const t of ITEM_TYPES) { r -= t.w; if (r <= 0) return t.type; }
+  return 'money';
+}
+
+function spawnItem() {
+  const field = document.getElementById('game-field');
+  const type  = rndType();
+  const item  = document.createElement('div');
+  item.className = 'item';
+
+  const fw = field.clientWidth  || 400;
+  const fh = field.clientHeight || 440;
+
+  const x = 5 + Math.random() * 78;
+  const y = 8 + Math.random() * 62;
+  item.style.left = x + '%';
+  item.style.top  = y + '%';
+  item.style.pointerEvents = 'auto';
+
+  let html = '';
+  let clickFn;
+
+  switch (type) {
+    case 'money': {
+      const v = Math.floor((5 + Math.random() * 95) * G.level * G.multiplier);
+      html = `<div class="money-txt">$${fmt(v)}</div>`;
+      clickFn = () => {
+        const got = Math.floor(v * (G.boostActive ? 2 : 1));
+        G.coins += got;
+        floatText(`+$${fmt(got)}`, '#game-field', '#00d664');
+        item.remove(); updateHUD();
+      };
+      break;
+    }
+    case 'multiplier': {
+      const v = +(0.1 + Math.random() * 0.4).toFixed(1);
+      html = `<div class="circle-item mult-circle">x${v}</div>`;
+      clickFn = () => {
+        G.multiplier = Math.round((G.multiplier + v) * 10) / 10;
+        floatText(`✨ Multiplicateur x${G.multiplier.toFixed(1)}`, '#game-field', '#e91e8c');
+        item.remove(); renderCars();
+      };
+      break;
+    }
+    case 'bonus': {
+      const v = Math.floor(3 + Math.random() * 10);
+      html = `<div class="circle-item bonus-circle">+${v}</div>`;
+      clickFn = () => {
+        const bonus = v * Math.max(G.passiveIncome, 1) * 10;
+        G.coins += bonus;
+        floatText(`⚡ +${fmt(bonus)} Bonus!`, '#game-field', '#26c6da');
+        item.remove(); updateHUD();
+      };
+      break;
+    }
+    case 'free': {
+      html = `<div class="circle-item free-circle"><span class="f-label">▶ GRATUIT</span></div>`;
+      clickFn = () => {
+        const empty = G.cars.indexOf(null);
+        if (empty !== -1 && Math.random() < 0.5) {
+          G.cars[empty] = 0;
+          floatText('🚗 Voiture GRATUITE!', '#game-field', '#4caf50');
+          renderCars();
+        } else {
+          const got = Math.floor(500 * G.level * G.multiplier);
+          G.coins += got;
+          floatText(`🎁 $${fmt(got)} GRATUIT!`, '#game-field', '#ffd700');
+          updateHUD();
+        }
+        item.remove();
+      };
+      break;
+    }
+    case 'coins': {
+      const v = Math.floor((100 + Math.random() * 900) * G.level);
+      html = `<div class="circle-item coin-circle">${fmt(v)} 💵</div>`;
+      clickFn = () => {
+        const got = Math.floor(v * (G.boostActive ? 2 : 1));
+        G.coins += got;
+        floatText(`+${fmt(got)} 💵`, '#game-field', '#4caf50');
+        item.remove(); updateHUD();
+      };
+      break;
+    }
+  }
+
+  item.innerHTML = html;
+  item.addEventListener('click', clickFn);
+
+  // Drift animation
+  const dur = 1.8 + Math.random() * 2.5;
+  item.querySelector('*').style.animationDuration = dur + 's';
+
+  document.getElementById('items-container').appendChild(item);
+
+  // Slowly drift horizontally
+  const drift = (Math.random() - 0.5) * 30;
+  setTimeout(() => {
+    item.style.transition = `left ${6 + Math.random() * 4}s linear`;
+    item.style.left = (x + drift) + '%';
+  }, 50);
+
+  // Auto-remove
+  const lifetime = 7000 + Math.random() * 5000;
+  setTimeout(() => { if (item.parentNode) item.remove(); }, lifetime);
+}
+
+// =====================
+//   PIPE MOVEMENT
+// =====================
+let pipeX = 50, pipeDir = 1;
+setInterval(() => {
+  pipeX += pipeDir * 1.2;
+  if (pipeX > 75) pipeDir = -1;
+  if (pipeX < 20) pipeDir =  1;
+  document.getElementById('pipe').style.left = pipeX + '%';
+}, 80);
+
+// =====================
+//   PASSIVE INCOME TICK
+// =====================
+setInterval(() => {
+  if (G.passiveIncome > 0) {
+    G.coins += G.passiveIncome * (G.boostActive ? 2 : 1);
+    updateHUD();
+  }
+}, 1000);
+
+// =====================
+//   SPAWN TIMER
+// =====================
+setInterval(spawnItem, 1800);
+
+// =====================
+//   INIT
+// =====================
+G.cars[0] = 0; // Start with 1 Berline
+G.coins   = 500;
+
+// Initial items
+for (let i = 0; i < 7; i++) setTimeout(spawnItem, i * 300);
+
+renderCars();
+updateHUD();
+</script>
+</body>
+</html>
