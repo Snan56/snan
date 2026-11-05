@@ -1,0 +1,12 @@
+{
+  "appId": "fr.snan56.parcours",
+  "appName": "Parcours",
+  "webDir": "www",
+  "android": {
+    "useLegacyBridge": true,
+    "backgroundColor": "#162033"
+  },
+  "plugins": {
+    "SystemBars": { "insetsHandling": "css", "style": "DARK" }
+  }
+}

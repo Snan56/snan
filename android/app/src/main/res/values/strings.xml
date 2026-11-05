@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Parcours</string>
+    <string name="title_activity_main">Parcours</string>
+    <string name="package_name">fr.snan56.parcours</string>
+    <string name="custom_url_scheme">fr.snan56.parcours</string>
+    <string name="capacitor_background_geolocation_notification_channel_name">Suivi des sorties</string>
+    <string name="capacitor_background_geolocation_notification_icon">drawable/ic_stat_parcours</string>
+</resources>

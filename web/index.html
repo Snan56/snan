@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#162033">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Parcours">
+<title>Parcours – GPS, vitesse et pas</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<style>
+  :root{
+    --nuit:#162033; --nuit-2:#1d2b45; --nuit-3:#24365a;
+    --relief:#5f7fa8; --relief-clair:#9db7d9;
+    --rouge:#e5322d; --rouge-fonce:#a51f1b;
+    --blanc:#f4f6fb; --jaune:#ffd23f; --jaune-fonce:#b98f10;
+    --encre:#14213a; --gris:#a9b6c9;
+    --safe-t:var(--safe-area-inset-top,env(safe-area-inset-top,0px)); --safe-b:var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px));
+    --top:calc(var(--safe-t) + 58px); --bottom:calc(var(--safe-b) + 78px); --tilt:0deg;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;margin:0;background:var(--nuit);color:var(--blanc);overflow:hidden;overscroll-behavior:none;
+    font-family:'Archivo',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:16px;line-height:1.4}
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:3px solid var(--jaune);outline-offset:3px}
+  .num{font-variant-numeric:tabular-nums;font-stretch:70%;font-weight:800}
+  .hidden{display:none!important}
+
+  /* ---------- Fond : ciel + relief 3D ---------- */
+  .sky{position:fixed;inset:0;z-index:0;background:linear-gradient(to bottom,#111a2c 0%,#17243d 34%,#1b2a46 52%,#1b2a46 100%)}
+  #relief{position:fixed;inset:0;width:100%;height:100%;z-index:1;display:block;opacity:0;transition:opacity 1.4s ease}
+  #relief.on{opacity:1}
+  body.dim #relief.on{opacity:.4}
+  body.no-relief #relief{display:none}
+  body.no-relief .sky{background:
+      repeating-radial-gradient(ellipse 120% 70% at 30% 115%,transparent 0 26px,rgba(95,127,168,.20) 26px 27px),
+      linear-gradient(to bottom,#111a2c,#1b2a46)}
+
+  /* ---------- En-tête ---------- */
+  .top{position:fixed;top:0;left:0;right:0;z-index:30;height:var(--top);padding:var(--safe-t) 16px 0;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none;transition:background .3s}
+  .top>*{pointer-events:auto}
+  body.on-map .top{background:linear-gradient(to bottom,rgba(22,32,51,.92),rgba(22,32,51,0))}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-stretch:78%;font-size:23px;letter-spacing:-.01em}
+  .blaze{width:24px;height:16px;display:inline-grid;grid-template-rows:1fr 1fr;flex:none}
+  .blaze::before{content:"";background:var(--blanc)} .blaze::after{content:"";background:var(--rouge)}
+  .gps{display:flex;align-items:center;gap:7px;background:rgba(17,26,44,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border:1px solid rgba(157,183,217,.22);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--gris);white-space:nowrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:#5b6578;flex:none}
+  .gps.wait .dot{background:var(--jaune);animation:blink 1s infinite}
+  .gps.good .dot{background:#3fd47e} .gps.ok .dot{background:var(--jaune)} .gps.weak .dot{background:var(--rouge)}
+  @keyframes blink{50%{opacity:.2}}
+  .banner{position:fixed;z-index:31;top:calc(var(--top) + 2px);left:14px;right:14px;max-width:540px;margin:0 auto;
+    border-radius:14px;padding:11px 14px;font-size:14px;line-height:1.45;background:#2b2412;border:1px solid #6b5615;color:#ffe9a3;
+    box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .banner.err{background:#2e1518;border-color:#77262b;color:#ffc7c7}
+  .banner.info{background:#15233d;border-color:#2c4c80;color:#d3e2ff}
+  .banner-actions{display:flex;gap:18px;margin-top:6px}
+  .banner button{background:none;border:0;padding:2px 0;font-weight:700;text-decoration:underline;color:inherit;cursor:pointer}
+  .toast{position:fixed;z-index:65;left:50%;top:calc(var(--top) + 6px);transform:translate(-50%,-12px);opacity:0;pointer-events:none;
+    background:var(--blanc);color:var(--encre);font-weight:700;font-size:15px;border-radius:999px;padding:10px 18px;max-width:calc(100% - 32px);
+    box-shadow:0 10px 26px rgba(0,0,0,.35);transition:opacity .25s,transform .35s cubic-bezier(.2,1.3,.4,1);text-align:center}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+
+  /* ---------- Scène et écrans (transition en cube) ---------- */
+  .stage{position:fixed;inset:0;z-index:10;perspective:1100px;perspective-origin:50% 45%;overflow:hidden}
+  .view{position:absolute;inset:0;padding:var(--top) 18px var(--bottom);visibility:hidden;
+    -webkit-backface-visibility:hidden;backface-visibility:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    max-width:600px;margin:0 auto}
+  .view.is-active{visibility:visible}
+
+  /* ---------- Écran Sortie ---------- */
+  #v-sortie{display:flex;flex-direction:column;overflow:hidden}
+  .acts{display:flex;gap:8px;margin:2px 0 10px}
+  .act{border:1px solid rgba(157,183,217,.3);background:rgba(17,26,44,.62);color:var(--gris);border-radius:999px;padding:7px 15px;
+    font-weight:700;font-size:14px;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+  .act[aria-pressed="true"]{background:var(--blanc);color:var(--encre);border-color:var(--blanc)}
+  .speed-num{font-size:clamp(80px,27vw,132px);line-height:.84;letter-spacing:-.02em;font-stretch:66%;display:flex;align-items:flex-end}
+  .speed-num .unit{font-size:20px;font-weight:600;font-stretch:90%;color:var(--gris);margin:0 0 10px 10px;letter-spacing:0}
+  .speed-bar{position:relative;margin:22px 0 10px;height:12px;width:min(100%,280px);background:rgba(157,183,217,.13)}
+  .speed-bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(var(--blanc) 0 50%,var(--rouge) 50% 100%);
+    transition:width .8s cubic-bezier(.2,.8,.2,1)}
+  .speed-meta{display:flex;flex-wrap:wrap;gap:2px 20px;font-size:15px;color:var(--gris)}
+  .speed-meta b{color:var(--blanc);font-weight:700;font-variant-numeric:tabular-nums}
+
+  .post{position:relative;flex:1;margin-top:18px;padding-left:34px;perspective:900px;min-height:0}
+  .pole{position:absolute;left:34px;top:-14px;bottom:calc(-1 * var(--bottom) - 20px);width:11px;margin-left:-6px;border-radius:3px;
+    background:linear-gradient(90deg,#5d6b84,#bcc7d8 45%,#56637a)}
+  .pole::before{content:"";position:absolute;top:0;left:-3px;right:-3px;height:8px;border-radius:3px;background:#cfd8e6}
+  .po{position:relative;height:56px;margin-bottom:10px;transform-style:preserve-3d;transform-origin:0 50%;
+    transform:rotateY(calc(var(--ry) + var(--tilt)));width:calc(100% - 6px)}
+  .plate{position:absolute;inset:0;transform-style:preserve-3d}
+  .face,.back{position:absolute;inset:0;clip-path:polygon(0 0,calc(100% - 26px) 0,100% 50%,calc(100% - 26px) 100%,0 100%)}
+  .back{background:var(--jaune-fonce);transform:translateZ(-7px)}
+  .face{background:linear-gradient(180deg,#ffe066 0%,#ffd23f 55%,#f2c22a 100%);color:var(--encre);
+    display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 42px 0 18px}
+  .face .lbl{font-size:15px;font-weight:600;font-stretch:92%;line-height:1.2}
+  .face .val{font-size:32px;line-height:1;white-space:nowrap}
+  .face .val small{font-size:15px;font-weight:700;font-stretch:90%;margin-left:4px}
+  .post.intro .po{animation:swing 1s cubic-bezier(.2,1.35,.4,1) both;animation-delay:calc(var(--i) * 95ms + 350ms)}
+  @keyframes swing{from{transform:rotateY(-100deg);opacity:0}25%{opacity:1}to{transform:rotateY(var(--ry));opacity:1}}
+  .plate.flip{animation:flip 1.1s cubic-bezier(.3,1.25,.5,1)}
+  @keyframes flip{from{transform:rotateX(0)}to{transform:rotateX(360deg)}}
+  .hint{align-self:flex-start;font-size:14px;color:var(--gris);margin:4px 0 10px 52px;max-width:34ch;position:relative;padding:8px 12px;border-radius:12px;
+    background:rgba(17,26,44,.78);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+  .hint:empty{display:none}
+
+  /* ---------- Écran Carte ---------- */
+  #v-carte{padding:0;max-width:none;background:#1b2a46;overflow:hidden}
+  #map{position:absolute;inset:0}
+  .map-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;color:var(--gris);font-size:15px}
+  .hud{position:absolute;z-index:5;top:calc(var(--top) + 2px);left:14px;height:56px;width:min(78%,330px);filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))}
+  .hud .face{padding:0 40px 0 16px;gap:14px;justify-content:flex-start}
+  .hud .val{font-size:29px}
+  .map-btns{position:absolute;z-index:5;right:14px;bottom:calc(var(--bottom) + 18px);display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+  .mbtn{background:var(--blanc);color:var(--encre);border:0;border-radius:14px;padding:11px 15px;font-weight:700;font-size:15px;cursor:pointer;
+    box-shadow:0 4px 0 #b6c0d1,0 10px 22px rgba(0,0,0,.3)}
+  .mbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #b6c0d1,0 6px 14px rgba(0,0,0,.3)}
+  .maplibregl-ctrl-top-right{top:calc(var(--top) + 64px)!important}
+  .me{width:24px;height:24px;border-radius:50%;background:var(--rouge);border:4px solid var(--blanc);box-shadow:0 2px 8px rgba(0,0,0,.4);position:relative}
+  .me::after{content:"";position:absolute;inset:-12px;border-radius:50%;border:3px solid var(--rouge);animation:ring 1.8s ease-out infinite}
+  .replay{position:absolute;z-index:6;left:14px;right:14px;bottom:calc(var(--bottom) + 16px);display:flex;gap:12px;align-items:center;
+    background:rgba(15,23,39,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(157,183,217,.2);border-radius:18px;padding:10px 10px 10px 14px}
+  .rp-info{display:flex;flex-direction:column;min-width:86px}
+  .rp-info b{font-size:22px;font-stretch:70%;font-weight:800;font-variant-numeric:tabular-nums}
+  .rp-info span{font-size:13px;color:var(--gris);font-variant-numeric:tabular-nums}
+  .rp-track{flex:1;height:10px;background:rgba(157,183,217,.15)}
+  .rp-track i{display:block;height:100%;width:0;background:linear-gradient(var(--blanc) 0 50%,var(--rouge) 50% 100%)}
+
+  /* ---------- Écran Progrès ---------- */
+  .h-title{font-size:30px;font-weight:800;font-stretch:72%;margin:6px 0 16px;letter-spacing:-.01em}
+  .set,.block{background:rgba(29,43,69,.8);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(157,183,217,.18);border-radius:18px;padding:4px 16px;margin-bottom:14px}
+  .block{padding:14px 16px}
+  .bh{font-size:21px;font-weight:800;font-stretch:76%;margin:0 0 6px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .goal{margin:12px 0 4px}
+  .goal-top{display:flex;justify-content:space-between;gap:10px;font-size:15px;margin-bottom:6px}
+  .goal-top b{font-variant-numeric:tabular-nums}
+  .goal-bar{height:12px;background:rgba(157,183,217,.14)}
+  .goal-bar i{display:block;height:100%;width:0;background:linear-gradient(var(--blanc) 0 50%,var(--rouge) 50% 100%);transition:width 1s cubic-bezier(.2,.8,.2,1)}
+  .goal.done .goal-bar i{background:linear-gradient(var(--jaune) 0 50%,var(--rouge) 50% 100%)}
+  .streak{font-size:15px;color:var(--gris);margin:12px 0 2px} .streak b{color:var(--blanc)}
+  .rec{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(157,183,217,.14)}
+  .rec:first-of-type{border-top:0}
+  .rec small{display:block;color:var(--gris);font-size:12px}
+  .rec .v{font-size:24px;font-variant-numeric:tabular-nums;font-stretch:70%;font-weight:800;white-space:nowrap;text-align:right}
+  .seg{display:inline-flex;background:var(--nuit);border-radius:999px;padding:3px;flex:none}
+  .seg button{border:0;background:none;color:var(--gris);padding:6px 12px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer}
+  .seg button[aria-pressed="true"]{background:var(--blanc);color:var(--encre)}
+  .chart{display:block;width:100%;height:auto;margin:8px 0 6px}
+  .chart text{font-family:inherit;fill:var(--gris);font-size:11px}
+  .chart .lbl-v{fill:var(--blanc);font-weight:700;font-size:11px}
+  .period{font-size:14px;color:var(--gris);display:flex;flex-wrap:wrap;gap:2px 14px} .period b{color:var(--blanc);font-variant-numeric:tabular-nums}
+  .total{height:66px;margin:0 0 14px;perspective:800px}
+  .total .po{--ry:-8deg;height:66px;margin:0}
+  .runs{list-style:none;margin:6px 0 0;padding:0}
+  .run{display:grid;grid-template-columns:66px 1fr;gap:14px;align-items:center;padding:14px 0;border:0;border-top:1px solid rgba(157,183,217,.16);
+    width:100%;background:none;text-align:left;cursor:pointer}
+  .thumb{width:66px;height:66px;border-radius:12px;background:var(--nuit-3);display:block}
+  .run-date{font-size:14px;color:var(--gris)}
+  .run-dist{font-size:32px;line-height:1.05}
+  .run-dist small{font-size:15px;font-weight:700;font-stretch:90%;margin-left:3px}
+  .run-meta{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:14px;color:var(--gris)}
+  .run.new{transform-origin:50% 0;animation:dropin .8s cubic-bezier(.2,1.25,.4,1)}
+  @keyframes dropin{from{transform:perspective(700px) rotateX(-85deg);opacity:0}}
+  .empty{color:var(--gris);font-size:15px;max-width:34ch;margin:6px 0}
+
+  /* ---------- Réglages ---------- */
+  .row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-top:1px solid rgba(157,183,217,.14)}
+  .row:first-child{border-top:0}
+  .row label,.row .rl{flex:1;font-weight:600}
+  .row small{display:block;font-weight:400;color:var(--gris);font-size:13px;margin-top:2px}
+  .set-title{font-size:13px;color:var(--gris);font-weight:700;margin:18px 4px 6px}
+  input[type=number],select{background:var(--nuit);color:var(--blanc);border:1px solid rgba(157,183,217,.3);border-radius:10px;padding:8px 10px;font:inherit;font-size:16px;width:124px}
+  .unitfield{display:flex;align-items:center;gap:6px;color:var(--gris);font-weight:600}
+  .unitfield input{width:92px}
+  .switch{position:relative;width:52px;height:30px;flex:none}
+  .switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+  .switch span{position:absolute;inset:0;border-radius:999px;background:#3a4864;transition:background .2s;pointer-events:none}
+  .switch span::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--blanc);transition:transform .2s}
+  .switch input:checked+span{background:var(--rouge)}
+  .switch input:checked+span::after{transform:translateX(22px)}
+  .switch input:focus-visible+span{outline:3px solid var(--jaune);outline-offset:3px}
+  .linkbtn{background:none;border:0;color:var(--jaune);font-weight:700;padding:13px 0;cursor:pointer;text-align:left}
+  .danger-btn{background:none;border:0;color:#ff8f8f;font-weight:700;padding:14px 0;cursor:pointer}
+  .about{font-size:14px;color:var(--gris);margin:0 0 20px;padding:12px 16px;border-radius:18px;background:rgba(29,43,69,.8);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+
+  /* ---------- Barre d'onglets + bouton principal ---------- */
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;height:var(--bottom);padding-bottom:var(--safe-b);
+    display:grid;grid-template-columns:1fr 1fr 96px 1fr 1fr;align-items:center;
+    background:rgba(15,23,39,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid rgba(157,183,217,.16)}
+  .tab{background:none;border:0;color:var(--gris);font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;cursor:pointer;position:relative}
+  .tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+  .tab[aria-current="page"]{color:var(--blanc)}
+  .tab[aria-current="page"]::after{content:"";position:absolute;bottom:1px;width:18px;height:6px;background:linear-gradient(var(--blanc) 0 50%,var(--rouge) 50% 100%)}
+  .fab{justify-self:center;width:74px;height:74px;border-radius:50%;border:0;margin-top:-36px;cursor:pointer;position:relative;display:grid;place-items:center;
+    background:var(--rouge);color:#fff;box-shadow:0 6px 0 var(--rouge-fonce),0 14px 26px rgba(0,0,0,.4);transition:transform .12s,box-shadow .12s,background .25s}
+  .fab svg{width:30px;height:30px;fill:currentColor}
+  .fab:active{transform:translateY(5px);box-shadow:0 1px 0 var(--rouge-fonce),0 6px 12px rgba(0,0,0,.35)}
+  .fab.running{background:var(--blanc);color:var(--rouge);box-shadow:0 6px 0 #aeb9cc,0 14px 26px rgba(0,0,0,.4)}
+  .fab.running:active{box-shadow:0 1px 0 #aeb9cc,0 6px 12px rgba(0,0,0,.35)}
+  .fab.running::after{content:"";position:absolute;inset:-9px;border-radius:50%;border:2px solid var(--rouge);animation:ring 1.7s ease-out infinite;pointer-events:none}
+  @keyframes ring{from{transform:scale(.88);opacity:.9}to{transform:scale(1.4);opacity:0}}
+  .end-btn{position:fixed;z-index:35;left:50%;bottom:calc(var(--bottom) + 16px);transform:translate(-50%,24px);opacity:0;pointer-events:none;
+    background:var(--blanc);color:var(--encre);border:0;border-radius:999px;padding:13px 24px;font-weight:700;font-size:16px;cursor:pointer;
+    box-shadow:0 5px 0 #aeb9cc,0 12px 26px rgba(0,0,0,.4);transition:transform .35s cubic-bezier(.2,1.3,.4,1),opacity .25s}
+  .end-btn.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+  body.on-map .end-btn{bottom:calc(var(--bottom) + 84px)}
+
+  /* ---------- Fenêtres ---------- */
+  .modal{position:fixed;inset:0;z-index:60;background:rgba(8,12,22,.62);display:flex;align-items:flex-end;justify-content:center;
+    padding:calc(var(--safe-t) + 14px) 14px calc(var(--safe-b) + 14px);perspective:900px}
+  .sheet{background:var(--nuit-2);border:1px solid rgba(157,183,217,.22);border-radius:22px;padding:20px;width:100%;max-width:520px;max-height:100%;overflow-y:auto;
+    transform-origin:50% 100%;animation:sheetIn .6s cubic-bezier(.2,1.25,.4,1);box-shadow:0 20px 50px rgba(0,0,0,.5)}
+  @keyframes sheetIn{from{transform:rotateX(-80deg);opacity:0}}
+  .sheet h2{margin:0 0 14px;font-size:24px;font-weight:800;font-stretch:75%;line-height:1.15}
+  .d-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+  .xbtn{background:var(--nuit-3);border:0;border-radius:50%;width:36px;height:36px;font-size:22px;line-height:1;cursor:pointer;flex:none}
+  .sum{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+  .sum div{background:var(--nuit);border-radius:14px;padding:10px 12px}
+  .sum span{display:block;font-size:13px;color:var(--gris)}
+  .sum b{font-size:25px;font-variant-numeric:tabular-nums;font-stretch:70%;font-weight:800}
+  .sheet .btns{display:flex;flex-direction:column;gap:10px}
+  .sbtn{border:0;border-radius:16px;padding:15px;font-weight:700;font-size:16px;cursor:pointer}
+  .sbtn.save{background:var(--rouge);color:#fff;box-shadow:0 4px 0 var(--rouge-fonce)}
+  .sbtn.del{background:transparent;color:#ff9b9b;border:1px solid rgba(255,155,155,.35)}
+  .sbtn.cancel{background:var(--nuit-3);color:var(--blanc)}
+  .d-route{display:block;width:100%;height:auto;border-radius:16px;background:var(--nuit);margin-bottom:12px}
+  .d-sub{font-size:15px;font-weight:700;margin:16px 0 8px}
+  .splits{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
+  .splits td{padding:6px 0;border-top:1px solid rgba(157,183,217,.12)}
+  .splits td:first-child{width:56px;color:var(--gris)} .splits td:last-child{width:64px;text-align:right;font-weight:700}
+  .splits .bar{height:10px;background:var(--relief);margin-right:12px}
+  .splits tr.best .bar{background:var(--rouge)} .splits tr.best td:last-child{color:#ff9b93}
+  .alt{display:block;width:100%;height:auto}
+  .alt text{font-family:inherit;fill:var(--gris);font-size:11px}
+  #shareImg{display:block;width:100%;height:auto;border-radius:14px;margin-bottom:14px;background:var(--nuit)}
+
+  /* ---------- Médaille de record ---------- */
+  .medal{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+    background:rgba(8,12,22,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);perspective:800px;text-align:center;padding:30px;cursor:pointer}
+  .coin{width:190px;height:190px;position:relative;transform-style:preserve-3d;animation:coin 2.6s cubic-bezier(.2,.8,.2,1) both}
+  .coin .cf,.coin .cb{position:absolute;inset:0;border-radius:50%;-webkit-backface-visibility:hidden;backface-visibility:hidden;display:grid;place-items:center}
+  .coin .cf{background:radial-gradient(circle at 35% 30%,#fff0a6,#ffd23f 45%,#d9a514 100%);border:9px solid #b98f10;color:var(--encre);
+    box-shadow:inset 0 0 0 4px rgba(255,255,255,.35)}
+  .coin .cf b{font-size:38px;font-stretch:68%;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;padding:0 14px}
+  .coin .cb{transform:rotateY(180deg);background:radial-gradient(circle at 35% 30%,#fff0a6,#ffd23f 45%,#d9a514 100%);border:9px solid #b98f10}
+  .coin .cb::before{content:"";width:84px;height:56px;background:linear-gradient(var(--blanc) 0 50%,var(--rouge) 50% 100%)}
+  .coin .edge{position:absolute;inset:0;border-radius:50%;background:#9c780c;transform:translateZ(-6px)}
+  @keyframes coin{0%{transform:scale(.2) rotateY(-900deg);opacity:0}55%{transform:scale(1.1) rotateY(25deg);opacity:1}75%{transform:scale(.97) rotateY(-8deg)}100%{transform:scale(1) rotateY(0)}}
+  .medal h3{margin:0;font-size:30px;font-weight:800;font-stretch:74%}
+  .medal p{margin:-12px 0 0;color:var(--gris);font-size:16px;max-width:30ch}
+
+  @media (max-height:700px){
+    .speed-num{font-size:clamp(64px,22vw,100px)}
+    .po{height:48px;margin-bottom:8px} .face .val{font-size:26px} .post{margin-top:10px} .hint{display:none}
+    .acts{margin-bottom:6px} .act{padding:5px 13px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  }
+  body.anim-off .post.intro .po,body.anim-off .plate.flip,body.anim-off .run.new,body.anim-off .sheet,body.anim-off .coin{animation:none}
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"></div>
+<canvas id="relief" aria-hidden="true"></canvas>
+
+<header class="top">
+  <div class="brand"><span class="blaze" aria-hidden="true"></span>Parcours</div>
+  <div id="gps" class="gps" role="status"><span class="dot"></span><span id="gpsText">GPS inactif</span></div>
+</header>
+<div id="banner" class="banner hidden" role="alert"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<main class="stage" id="stage">
+  <!-- Sortie -->
+  <section class="view is-active" id="v-sortie" aria-label="Sortie en cours">
+    <div class="acts" role="group" aria-label="Activité">
+      <button class="act" type="button" data-act="marche">Marche</button>
+      <button class="act" type="button" data-act="course">Course</button>
+      <button class="act" type="button" data-act="velo">Vélo</button>
+    </div>
+    <div class="speed">
+      <div class="speed-num num"><span id="speed">0,0</span><span class="unit">km/h</span></div>
+      <div class="speed-bar" aria-hidden="true"><i id="bar"></i></div>
+      <div class="speed-meta"><span>Max <b id="maxSpeed">0,0</b></span><span>Moyenne <b id="avgSpeed">0,0</b></span><span id="metaUp">Montée <b id="dplus">0</b> m</span></div>
+    </div>
+    <div class="post intro" id="post">
+      <div class="pole" aria-hidden="true"></div>
+      <div class="po" style="--ry:-13deg;--i:0" id="pDist"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Distance</span><span class="val num"><span id="dist">0,00</span><small>km</small></span></div></div></div>
+      <div class="po" style="--ry:9deg;--i:1"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Durée</span><span class="val num" id="time">0:00</span></div></div></div>
+      <div class="po" style="--ry:-5deg;--i:2"><div class="plate"><div class="back"></div><div class="face"><span class="lbl" id="p3Lbl">Pas</span><span class="val num" id="p3Val">0</span></div></div></div>
+      <div class="po" style="--ry:15deg;--i:3" id="pPace"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Allure</span><span class="val num"><span id="pace">–</span><small>min/km</small></span></div></div></div>
+      <div class="po" style="--ry:-9deg;--i:4"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Calories</span><span class="val num"><span id="kcal">0</span><small>kcal</small></span></div></div></div>
+    </div>
+    <p class="hint" id="hint"></p>
+  </section>
+
+  <!-- Carte -->
+  <section class="view" id="v-carte" aria-label="Carte" inert>
+    <div id="map"></div>
+    <div id="mapMsg" class="map-msg hidden"></div>
+    <div class="hud" id="hud"><div class="plate"><div class="back"></div><div class="face"><span class="val num"><span id="hudSpeed">0,0</span><small>km/h</small></span><span class="val num"><span id="hudDist">0,00</span><small>km</small></span></div></div></div>
+    <div class="map-btns" id="mapBtns">
+      <button id="btn3d" class="mbtn" type="button">Vue 2D</button>
+      <button id="recenter" class="mbtn hidden" type="button">Recentrer</button>
+    </div>
+    <div id="replayBar" class="replay hidden">
+      <div class="rp-info"><b id="rpDist">0,00 km</b><span id="rpTime">0:00</span></div>
+      <div class="rp-track"><i id="rpFill"></i></div>
+      <button id="rpStop" class="mbtn" type="button">Arrêter</button>
+    </div>
+  </section>
+
+  <!-- Progrès -->
+  <section class="view" id="v-progres" aria-label="Progrès" inert>
+    <h2 class="h-title">Tes progrès</h2>
+    <div id="progress"></div>
+  </section>
+
+  <!-- Réglages -->
+  <section class="view" id="v-reglages" aria-label="Réglages" inert>
+    <h2 class="h-title">Réglages</h2>
+    <div class="set-title">Ton profil</div>
+    <div class="set">
+      <div class="row"><label for="height">Ta taille<small>Sert à calculer la longueur de tes pas</small></label><span class="unitfield"><input id="height" type="number" min="100" max="230" step="1" inputmode="numeric" placeholder="170"> cm</span></div>
+      <div class="row"><label for="weight">Ton poids<small>Sert à calculer les calories dépensées</small></label><span class="unitfield"><input id="weight" type="number" min="30" max="250" step="1" inputmode="numeric" placeholder="70"> kg</span></div>
+      <div class="row"><div class="rl">Longueur d'un pas<small id="stepInfo"></small></div></div>
+    </div>
+    <div class="set-title">Objectifs</div>
+    <div class="set">
+      <div class="row"><label for="goalSteps">Pas par jour<small>Compte les pas faits pendant tes sorties</small></label><span class="unitfield"><input id="goalSteps" type="number" min="500" max="60000" step="500" inputmode="numeric"></span></div>
+      <div class="row"><label for="goalKm">Kilomètres par semaine<small>Du lundi au dimanche</small></label><span class="unitfield"><input id="goalKm" type="number" min="1" max="500" step="1" inputmode="numeric"> km</span></div>
+    </div>
+    <div class="set-title">Annonces vocales</div>
+    <div class="set">
+      <div class="row"><label for="voice">Annonces vocales<small>Distance, temps et allure annoncés à voix haute</small></label>
+        <span class="switch"><input id="voice" type="checkbox" role="switch"><span></span></span></div>
+      <div class="row"><label for="voiceEvery">Fréquence</label>
+        <select id="voiceEvery"><option value="500">Tous les 500 m</option><option value="1000">Tous les km</option><option value="2000">Tous les 2 km</option><option value="5000">Tous les 5 km</option></select></div>
+      <div class="row"><button id="voiceTest" class="linkbtn" type="button">Écouter un exemple</button></div>
+    </div>
+    <div class="set-title">Affichage et capteurs</div>
+    <div class="set">
+      <div class="row"><label for="anim3d">Animations 3D<small>Relief animé et transitions. Coupe-les pour économiser la batterie.</small></label>
+        <span class="switch"><input id="anim3d" type="checkbox" role="switch"><span></span></span></div>
+      <div class="row"><label for="sens">Sensibilité du podomètre<small>Augmente-la si des pas sont oubliés</small></label>
+        <select id="sens"><option value="faible">Faible</option><option value="moyenne">Moyenne</option><option value="forte">Forte</option></select></div>
+      <div class="row"><label for="maxAcc">Précision GPS minimale<small>Les points moins précis sont ignorés</small></label>
+        <select id="maxAcc"><option value="20">20 m</option><option value="30">30 m</option><option value="50">50 m</option></select></div>
+    </div>
+    <div class="set" id="apkBox" hidden><div class="row"><div class="rl">Appli Android<small>Avec l'appli, le suivi continue quand l'écran est verrouillé.</small></div></div>
+      <a class="linkbtn" href="parcours.apk" download style="display:block;text-decoration:none">Télécharger l'appli Android</a></div>
+    <div class="set" id="installBox" hidden><button id="installBtn" class="linkbtn" type="button">Installer l'appli sur l'écran d'accueil</button></div>
+    <div class="set"><button id="clearHist" class="danger-btn" type="button">Effacer l'historique</button></div>
+    <p class="about" id="about">Les calories sont une estimation calculée avec ton poids, ta vitesse et la pente : équations de l'ACSM pour la marche et la course, valeurs du Compendium des activités physiques pour le vélo. Ta taille, ton poids et tes sorties restent enregistrés sur ton téléphone. Rien n'est envoyé sur internet.</p>
+  </section>
+</main>
+
+<button id="btnEnd" class="end-btn" type="button">Terminer la sortie</button>
+
+<nav class="tabbar" aria-label="Navigation">
+  <button class="tab" type="button" data-view="0" aria-current="page"><svg viewBox="0 0 24 24"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/></svg>Sortie</button>
+  <button class="tab" type="button" data-view="1"><svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>Carte</button>
+  <button id="fab" class="fab" type="button" aria-label="Démarrer la sortie"><svg viewBox="0 0 24 24" id="fabIcon"><path d="M8 5v14l11-7z"/></svg></button>
+  <button class="tab" type="button" data-view="2"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Progrès</button>
+  <button class="tab" type="button" data-view="3"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>Réglages</button>
+</nav>
+
+<!-- Fin de sortie -->
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="sheet">
+    <h2 id="modalTitle">Terminer la sortie ?</h2>
+    <div class="sum" id="modalSum"></div>
+    <div class="btns">
+      <button id="mSave" class="sbtn save" type="button">Enregistrer la sortie</button>
+      <button id="mCancel" class="sbtn cancel" type="button">Continuer la sortie</button>
+      <button id="mDiscard" class="sbtn del" type="button">Supprimer sans enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Détail d'une sortie -->
+<div id="detail" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+  <div class="sheet">
+    <div class="d-head"><h2 id="dTitle"></h2><button id="dClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
+    <div id="dBody"></div>
+    <div class="btns">
+      <button id="dReplay" class="sbtn save" type="button">Rejouer en 3D</button>
+      <button id="dShare" class="sbtn cancel" type="button">Partager l'image</button>
+      <button id="dGpx" class="sbtn cancel" type="button">Exporter en GPX</button>
+      <button id="dDelete" class="sbtn del" type="button">Supprimer la sortie</button>
+    </div>
+  </div>
+</div>
+
+<!-- Image à partager -->
+<div id="sharebox" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="sTitle">
+  <div class="sheet">
+    <div class="d-head"><h2 id="sTitle">Image à partager</h2><button id="sClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
+    <img id="shareImg" alt="Aperçu de l'image de ta sortie">
+    <div class="btns">
+      <button id="sShare" class="sbtn save" type="button">Partager</button>
+      <button id="sSave" class="sbtn cancel" type="button">Enregistrer l'image</button>
+    </div>
+  </div>
+</div>
+
+<div id="medal" class="medal hidden" role="dialog" aria-modal="true" aria-labelledby="medalTitle">
+  <div class="coin"><div class="edge"></div><div class="cf"><b id="medalVal"></b></div><div class="cb"></div></div>
+  <h3 id="medalTitle">Nouveau record</h3>
+  <p id="medalText"></p>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const nf1 = new Intl.NumberFormat('fr-FR', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const nf2 = new Intl.NumberFormat('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const nf0 = new Intl.NumberFormat('fr-FR', {maximumFractionDigits: 0});
+  const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- Appli native (Android) ou navigateur ----------
+  const Cap = window.Capacitor;
+  const isNative = !!(Cap && Cap.isNativePlatform && Cap.isNativePlatform());
+  const plugin = name => { if (!isNative) return null; try { return (Cap.Plugins && Cap.Plugins[name]) || (Cap.registerPlugin ? Cap.registerPlugin(name) : null); } catch (e) { return null; } };
+
+  const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+  const MAPLIBRE_URL = 'https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js';
+  const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+  const RASTER_STYLE = { version: 8,
+    sources: { osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap' } },
+    layers: [{ id: 'osm', type: 'raster', source: 'osm' }] };
+
+  // ---------- Stockage local ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  const K_SET = 'parcours.settings', K_CUR = 'parcours.current', K_HIST = 'parcours.history';
+  const settings = Object.assign({
+    height: null, weight: null, measuredStep: null, activity: 'marche',
+    goalSteps: 10000, goalKm: 20, voice: true, voiceEvery: 1000, goalSaidDay: '',
+    sens: 'moyenne', maxAcc: 30, anim3d: !reduceMotion, map3d: true
+  }, store.get(K_SET, {}));
+  const saveSettings = () => store.set(K_SET, settings);
+  const anim = () => !!settings.anim3d;
+  const SENS = { faible: {hi: 1.9, lo: 0.4}, moyenne: {hi: 1.3, lo: 0.25}, forte: {hi: 0.85, lo: 0.15} };
+  const ACT_LABEL = { marche: 'Marche', course: 'Course', velo: 'Vélo' };
+
+  // ---------- État d'une sortie ----------
+  const fresh = () => ({ status: 'idle', activity: settings.activity, activeMs: 0, resumedAt: 0, startTime: 0, distance: 0, lastKm: 0,
+    sensorSteps: 0, estSteps: 0, kcal: 0, motionOk: false, maxKmh: 0, track: [], savedAt: 0,
+    dplus: 0, dminus: 0, altSmooth: null, altAnchor: null, grade: 0, gradeD: 0, gradeAlt: null,
+    splits: [], splitBaseMs: 0, lastPtMs: 0, lastAnnounce: 0 });
+  let S = fresh();
+  let watchId = null, nativeWatcher = null, last = null, curKmh = 0, lastMoveTs = 0, lastFix = null, lastFixAt = 0;
+  let wakeLock = null, motionSeen = false, renderQueued = false, lastSave = 0, wasRunningBeforeModal = false;
+  let currentView = 0, lastKcalAt = 0, profileAsked = false;
+
+  // ---------- Utilitaires ----------
+  const R = 6371008.8, rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
+  function haversine(a, b) {
+    const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  const distPts = (p, q) => haversine({ lat: p[0], lon: p[1] }, { lat: q[0], lon: q[1] });
+  function bearing(p, q) {
+    const f1 = rad(p[0]), f2 = rad(q[0]), dl = rad(q[1] - p[1]);
+    return (deg(Math.atan2(Math.sin(dl) * Math.cos(f2), Math.cos(f1) * Math.sin(f2) - Math.sin(f1) * Math.cos(f2) * Math.cos(dl))) + 360) % 360;
+  }
+  const lerpAngle = (a, b, t) => a + ((((b - a) % 360) + 540) % 360 - 180) * t;
+  const r6 = x => Math.round(x * 1e6) / 1e6;
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const pad = n => String(n).padStart(2, '0');
+  const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : s;
+  function fmtClock(ms) {
+    const s = Math.max(0, Math.round(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60;
+    return h ? h + ':' + pad(m) + ':' + pad(s % 60) : m + ':' + pad(s % 60);
+  }
+  function fmtDurWords(ms) {
+    const min = Math.round(ms / 60000);
+    if (min < 1) return Math.max(1, Math.round(ms / 1000)) + ' s';
+    return min < 60 ? min + ' min' : Math.floor(min / 60) + ' h ' + pad(min % 60);
+  }
+  function fmtPace(ms, m) {
+    if (m < 20) return '–';
+    const spk = (ms / 1000) / (m / 1000);
+    if (!isFinite(spk) || spk > 5999) return '–';
+    return fmtClock(spk * 1000);
+  }
+  const dayKey = t => { const d = new Date(t); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+  function weekStart(t) { const d = new Date(t); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.getTime(); }
+  const elapsed = () => S.activeMs + (S.status === 'running' ? Date.now() - S.resumedAt : 0);
+  const avgKmh = () => { const h = elapsed() / 3600000; return h > 0.0014 ? (S.distance / 1000) / h : 0; };
+  const steps = () => Math.round(S.motionOk ? S.sensorSteps : (S.estSteps || 0));
+  const heightM = () => (settings.height || 170) / 100;
+  const weightKg = () => settings.weight || 70;
+  const hasProfile = () => !!(settings.height && settings.weight);
+  const actNow = () => S.status === 'idle' ? settings.activity : (S.activity || settings.activity);
+
+  // ---------- Calculs : pas, cadence, calories ----------
+  // Longueur d'UN pas : marche 0,414 × taille (ou ta valeur mesurée), course ~0,57 × taille à 10 km/h.
+  function stepWalkM() { const ms = settings.measuredStep; return (ms && ms > 0.3 && ms < 1.2) ? ms : 0.414 * heightM(); }
+  function stepRunM(kmh) { return clamp(0.57 + 0.025 * (kmh - 10), 0.5, 0.75) * heightM(); }
+  function stepLenM(kmh) { const t = runShare(kmh); return stepWalkM() * (1 - t) + stepRunM(Math.max(kmh, 7)) * t; }
+  // Cadence (pas/min) sur les 10 dernières secondes, quand le capteur compte les pas
+  function cadence() {
+    if (!S.motionOk || !M.times.length) return 0;
+    const now = performance.now();
+    while (M.times.length && now - M.times[0] > 10000) M.times.shift();
+    if (!M.times.length || now - M.times[M.times.length - 1] > 3000) return 0;
+    return now - M.cadStart >= 10000 ? M.times.length * 6 : 0;
+  }
+  // Part de course (0 = marche, 1 = course). L'activité choisie décale les seuils.
+  function runShare(kmh) {
+    const course = actNow() === 'course';
+    const c = cadence();
+    if (c >= 60) return clamp((c - (course ? 115 : 145)) / 15, 0, 1);
+    return clamp((kmh - (course ? 5 : 8)) / 1.5, 0, 1);
+  }
+  // Vélo : METs du Compendium des activités physiques selon la vitesse (km/h → MET)
+  const BIKE = [[0, 1.3], [5, 2.5], [8.9, 3.5], [15.1, 5.8], [17.7, 6.8], [20.9, 8.0], [24.1, 10.0], [28.2, 12.0], [32.2, 15.8], [50, 15.8]];
+  function bikeMet(kmh) {
+    if (kmh < 1 || kmh > 55) return 1;
+    let i = 1; while (i < BIKE.length - 1 && kmh > BIKE[i][0]) i++;
+    const [x0, y0] = BIKE[i - 1], [x1, y1] = BIKE[i];
+    let met = y0 + (y1 - y0) * clamp((kmh - x0) / (x1 - x0), 0, 1);
+    if (S.grade < -0.03) met = Math.min(met, 3.5); // en descente on pédale peu
+    return met;
+  }
+  // Calories par minute. À pied : équations métaboliques de l'ACSM avec la pente.
+  // marche VO2 = 0,1·v + 1,8·v·pente + 3,5 ; course VO2 = 0,2·v + 0,9·v·pente + 3,5 (v en m/min) ; 1 L d'O2 ≈ 5 kcal
+  function kcalPerMin(kmh) {
+    const kg = weightKg();
+    if (actNow() === 'velo') return bikeMet(kmh) * kg * 0.0175;
+    let vo2 = 3.5; // arrêt, ou trop rapide pour être à pied (véhicule)
+    if (kmh >= 1 && kmh <= 25) {
+      const v = Math.min(kmh, 20) * 1000 / 60, g = Math.max(0, S.grade || 0), r = runShare(kmh);
+      vo2 = (0.1 * v + 1.8 * v * g + 3.5) * (1 - r) + (0.2 * v + 0.9 * v * g + 3.5) * r;
+    }
+    return vo2 * kg / 1000 * 5;
+  }
+  function accrueKcal() {
+    if (S.status !== 'running' || !lastKcalAt) return;
+    const now = Date.now(), dt = Math.min(30, (now - lastKcalAt) / 1000);
+    lastKcalAt = now;
+    S.kcal = (S.kcal || 0) + kcalPerMin(curKmh) * dt / 60;
+  }
+
+  // ---------- Messages ----------
+  function banner(msg, kind, closeLabel, extra) {
+    const b = $('banner');
+    if (!msg) { b.classList.add('hidden'); return; }
+    b.className = 'banner ' + (kind || '');
+    b.dataset.tag = (extra && extra.tag) || '';
+    b.textContent = msg;
+    const row = document.createElement('div'); row.className = 'banner-actions';
+    if (extra && extra.label) {
+      const a = document.createElement('button'); a.type = 'button'; a.textContent = extra.label;
+      a.addEventListener('click', () => { b.classList.add('hidden'); extra.fn(); });
+      row.appendChild(a);
+    }
+    const close = document.createElement('button');
+    close.type = 'button'; close.textContent = closeLabel || 'Fermer';
+    close.addEventListener('click', () => b.classList.add('hidden'));
+    row.appendChild(close);
+    b.appendChild(row);
+  }
+  let toastTimer = 0;
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+  function setGps(cls, text) { $('gps').className = 'gps ' + cls; $('gpsText').textContent = text; }
+
+  // ---------- Voix ----------
+  let frVoice = null;
+  function pickVoice() {
+    try { const v = speechSynthesis.getVoices(); frVoice = v.find(x => /^fr(-|_)FR/i.test(x.lang)) || v.find(x => /^fr/i.test(x.lang)) || null; } catch (e) {}
+  }
+  if ('speechSynthesis' in window) { pickVoice(); try { speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) {} }
+  function speak(text, force) {
+    if (!settings.voice && !force) return;
+    const tts = plugin('TextToSpeech');
+    if (tts) { tts.speak({ text, lang: 'fr-FR', rate: 1.0 }).catch(() => {}); return; }
+    if (!('speechSynthesis' in window)) return;
+    try {
+      const u = new SpeechSynthesisUtterance(text); u.lang = 'fr-FR'; if (frVoice) u.voice = frVoice; u.rate = 1;
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+  function sayDur(sec) {
+    sec = Math.round(sec); const h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60, s = sec % 60, out = [];
+    if (h) out.push(h + (h > 1 ? ' heures' : ' heure'));
+    if (m) out.push(m + (m > 1 ? ' minutes' : ' minute'));
+    if (!h && s) out.push(s + (s > 1 ? ' secondes' : ' seconde'));
+    return out.join(' ') || '0 seconde';
+  }
+  function sayPace(spk) {
+    const m = Math.floor(spk / 60), s = Math.round(spk % 60);
+    return m + (m > 1 ? ' minutes' : ' minute') + (s ? ' ' + s : '') + ' par kilomètre';
+  }
+  function sayKm(m) {
+    if (m < 1000) { const r = Math.round(m); return r + (r >= 2 ? ' mètres' : ' mètre'); }
+    const km = m / 1000;
+    return (Number.isInteger(km) ? String(km) : nf1.format(km)) + (km >= 2 ? ' kilomètres' : ' kilomètre');
+  }
+  function announce(markM, newSplit) {
+    const sec = elapsed() / 1000;
+    let t = sayKm(markM) + '. Temps : ' + sayDur(sec) + '. ';
+    if (actNow() === 'velo') t += 'Vitesse moyenne : ' + nf1.format(avgKmh()) + ' kilomètres heure.';
+    else {
+      t += 'Allure moyenne : ' + sayPace(sec / (S.distance / 1000)) + '.';
+      if (newSplit) t += ' Dernier kilomètre en ' + sayDur(newSplit) + '.';
+    }
+    speak(t);
+  }
+
+  // ---------- Affichage de la sortie ----------
+  const ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
+  const ICON_PAUSE = '<rect x="6" y="5" width="4.2" height="14" rx="1"/><rect x="13.8" y="5" width="4.2" height="14" rx="1"/>';
+  let fabState = '';
+  function render() {
+    renderQueued = false;
+    const ms = elapsed(), live = S.status === 'running' ? curKmh : 0, velo = actNow() === 'velo';
+    $('speed').textContent = nf1.format(live);
+    $('bar').style.width = (Math.min(1, live / Math.max(velo ? 30 : 15, S.maxKmh * 1.1)) * 100).toFixed(1) + '%';
+    $('maxSpeed').textContent = nf1.format(S.maxKmh);
+    $('avgSpeed').textContent = nf1.format(avgKmh());
+    $('dplus').textContent = nf0.format(S.dplus || 0);
+    $('dist').textContent = nf2.format(S.distance / 1000);
+    $('time').textContent = fmtClock(ms);
+    if (velo) { $('p3Lbl').textContent = 'Montée'; $('p3Val').innerHTML = nf0.format(S.dplus || 0) + '<small>m</small>'; }
+    else { $('p3Lbl').textContent = (S.status !== 'idle' && !S.motionOk) ? 'Pas estimés' : 'Pas'; $('p3Val').textContent = nf0.format(steps()); }
+    $('pPace').classList.toggle('hidden', velo);
+    $('metaUp').classList.toggle('hidden', velo);
+    $('pace').textContent = fmtPace(ms, S.distance);
+    $('kcal').textContent = nf0.format(S.kcal || 0);
+    $('hudSpeed').textContent = nf1.format(live);
+    $('hudDist').textContent = nf2.format(S.distance / 1000);
+    $('hint').textContent = {
+      idle: 'Choisis ton activité, puis appuie sur le bouton rouge pour démarrer.',
+      running: isNative ? 'Sortie en cours. Tu peux verrouiller l\'écran : le suivi continue.' : "Sortie en cours. Garde l'écran allumé pour que le GPS continue.",
+      paused: ''
+    }[S.status];
+    document.querySelectorAll('.act').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.act === actNow())));
+    if (fabState !== S.status) {
+      fabState = S.status;
+      const fab = $('fab');
+      fab.classList.toggle('running', S.status === 'running');
+      $('fabIcon').innerHTML = S.status === 'running' ? ICON_PAUSE : ICON_PLAY;
+      fab.setAttribute('aria-label', { idle: 'Démarrer la sortie', running: 'Mettre en pause', paused: 'Reprendre la sortie' }[S.status]);
+      $('btnEnd').classList.toggle('show', S.status === 'paused');
+    }
+  }
+  const queueRender = () => { if (!renderQueued) { renderQueued = true; requestAnimationFrame(render); } };
+  document.querySelectorAll('.act').forEach(b => b.addEventListener('click', () => {
+    settings.activity = b.dataset.act; saveSettings();
+    if (S.status !== 'idle') { S.activity = b.dataset.act; save(true); }
+    render();
+  }));
+
+  function save(force) {
+    const now = Date.now();
+    if (!force && now - lastSave < 3000) return;
+    lastSave = now;
+    if (S.status === 'idle') { store.del(K_CUR); return; }
+    S.savedAt = now;
+    store.set(K_CUR, S);
+  }
+  function flipPlate(el) {
+    if (!anim() || !el) return;
+    const p = el.querySelector('.plate');
+    p.classList.remove('flip'); void p.offsetWidth; p.classList.add('flip');
+  }
+
+  // ---------- GPS ----------
+  function startGeo() {
+    if (watchId !== null || nativeWatcher !== null) return;
+    setGps('wait', 'Recherche GPS…');
+    const bg = plugin('BackgroundGeolocation');
+    if (bg) {
+      // Appli Android : suivi qui continue écran verrouillé (notification affichée)
+      nativeWatcher = 'pending';
+      bg.addWatcher({ backgroundMessage: 'Ta sortie est en cours d\'enregistrement.', backgroundTitle: 'Parcours', requestPermissions: true, stale: false, distanceFilter: 0 },
+        (loc, err) => {
+          if (err) { onGeoErr({ code: err.code === 'NOT_AUTHORIZED' ? 1 : 2 }); return; }
+          if (!loc) return;
+          onPos({ timestamp: loc.time || Date.now(), coords: { latitude: loc.latitude, longitude: loc.longitude, accuracy: loc.accuracy,
+            altitude: loc.altitude, altitudeAccuracy: loc.altitudeAccuracy, speed: loc.speed, heading: loc.bearing } });
+        }).then(id => { if (nativeWatcher === 'stop') bg.removeWatcher({ id }); else nativeWatcher = id; })
+        .catch(() => { nativeWatcher = null; onGeoErr({ code: 1 }); });
+      return;
+    }
+    try {
+      watchId = navigator.geolocation.watchPosition(onPos, onGeoErr, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+    } catch (e) { onGeoErr({ code: 1 }); }
+  }
+  function stopGeo() {
+    if (watchId !== null) { try { navigator.geolocation.clearWatch(watchId); } catch (e) {} watchId = null; }
+    if (nativeWatcher !== null) {
+      const bg = plugin('BackgroundGeolocation');
+      if (nativeWatcher === 'pending') nativeWatcher = 'stop';
+      else if (bg && nativeWatcher !== 'stop') bg.removeWatcher({ id: nativeWatcher }).catch(() => {});
+      if (nativeWatcher !== 'stop') nativeWatcher = null;
+    }
+    setGps('', 'GPS en pause');
+  }
+  function onGeoErr(err) {
+    if (err.code === 1) {
+      banner(isNative ? "La position est refusée. Autorise la localisation pour Parcours dans les réglages du téléphone (Applications → Parcours → Autorisations → Position)."
+        : "La position est refusée. Autorise la localisation pour ce site (iPhone : Réglages → Confidentialité → Service de localisation → Safari ; Android : touche le cadenas à côté de l'adresse → Autorisations), puis recharge la page.", 'err');
+      setGps('weak', 'Position refusée');
+      if (S.status === 'running') pause();
+    } else setGps('weak', err.code === 3 ? 'GPS lent…' : 'Signal GPS perdu');
+  }
+  function setSpeed(kmh) {
+    if (!isFinite(kmh) || kmh < 0) return;
+    curKmh = curKmh * 0.45 + kmh * 0.55;
+    if (curKmh < 0.8) curKmh = 0;
+  }
+  function handleAltitude(c) {
+    if (typeof c.altitude !== 'number' || !isFinite(c.altitude)) return null;
+    if (typeof c.altitudeAccuracy === 'number' && c.altitudeAccuracy > 25) return null;
+    S.altSmooth = S.altSmooth == null ? c.altitude : S.altSmooth + (c.altitude - S.altSmooth) * 0.25;
+    if (S.altAnchor == null) S.altAnchor = S.altSmooth;
+    const diff = S.altSmooth - S.altAnchor;
+    if (diff >= 4) { S.dplus += diff; S.altAnchor = S.altSmooth; }
+    else if (diff <= -4) { S.dminus += -diff; S.altAnchor = S.altSmooth; }
+    // pente moyenne sur les 25 derniers mètres parcourus
+    if (S.gradeAlt == null) { S.gradeAlt = S.altSmooth; S.gradeD = S.distance; }
+    else if (S.distance - S.gradeD >= 25) {
+      S.grade = clamp((S.altSmooth - S.gradeAlt) / (S.distance - S.gradeD), -0.2, 0.25);
+      S.gradeAlt = S.altSmooth; S.gradeD = S.distance;
+    }
+    return Math.round(S.altSmooth * 10) / 10;
+  }
+  function onPos(pos) {
+    const c = pos.coords, ts = pos.timestamp || Date.now();
+    lastFix = { lat: c.latitude, lon: c.longitude, acc: c.accuracy, ts, heading: (typeof c.heading === 'number' && isFinite(c.heading)) ? c.heading : null };
+    lastFixAt = Date.now();
+    const acc = Math.round(c.accuracy);
+    setGps(acc <= 15 ? 'good' : acc <= settings.maxAcc ? 'ok' : 'weak', 'GPS ±' + acc + ' m');
+    mapOnFix(false);
+    if (S.status !== 'running') return;
+    accrueKcal();
+    if (c.accuracy > settings.maxAcc) return;
+
+    const gpsKmh = (typeof c.speed === 'number' && c.speed >= 0 && isFinite(c.speed)) ? c.speed * 3.6 : null;
+    const p = { lat: c.latitude, lon: c.longitude, acc: c.accuracy, ts };
+    const seg = S.track[S.track.length - 1];
+    const tSec = Math.round((ts - S.startTime) / 1000);
+    if (!last) {
+      const alt = handleAltitude(c);
+      last = p; lastMoveTs = ts; S.lastPtMs = elapsed();
+      seg.push([r6(p.lat), r6(p.lon), alt, tSec]);
+      if (gpsKmh !== null) setSpeed(gpsKmh);
+      mapOnFix(true); queueRender(); return;
+    }
+    const dt = (ts - last.ts) / 1000;
+    if (dt <= 0) return;
+    const d = haversine(last, p), v = d / dt;
+    if (v > 70) return; // saut aberrant
+    const threshold = Math.max(4, (last.acc + p.acc) / 4);
+    let moved = false;
+    if (d >= threshold) {
+      const prevD = S.distance, prevMs = S.lastPtMs, nowMs = elapsed();
+      S.distance += d;
+      const alt = handleAltitude(c);
+      seg.push([r6(p.lat), r6(p.lon), alt, tSec]);
+      const segKmh = gpsKmh !== null ? gpsKmh : v * 3.6;
+      S.estSteps = (S.estSteps || 0) + d / stepLenM(segKmh);
+      // écran éteint : le capteur ne répond plus, on complète les pas avec la distance
+      if (document.hidden && S.motionOk && actNow() !== 'velo') S.sensorSteps += d / stepLenM(segKmh);
+      setSpeed(segKmh);
+      last = p; lastMoveTs = ts; S.lastPtMs = nowMs; moved = true;
+      // Temps par kilomètre (interpolé au passage exact du km)
+      let newSplit = 0;
+      while (S.distance >= (S.splits.length + 1) * 1000) {
+        const mark = (S.splits.length + 1) * 1000;
+        const f = (mark - prevD) / Math.max(1e-6, S.distance - prevD);
+        const crossMs = prevMs + f * (nowMs - prevMs);
+        newSplit = Math.round((crossMs - S.splitBaseMs) / 1000);
+        S.splits.push(newSplit); S.splitBaseMs = crossMs;
+      }
+      const km = Math.floor(S.distance / 1000);
+      if (km > S.lastKm) {
+        S.lastKm = km; flipPlate($('pDist'));
+        try { navigator.vibrate && navigator.vibrate([60, 60, 60]); } catch (e) {}
+      }
+      // Annonce vocale
+      const every = +settings.voiceEvery || 1000, n = Math.floor(S.distance / every);
+      if (n > S.lastAnnounce) { S.lastAnnounce = n; announce(n * every, newSplit && n * every % 1000 === 0 ? newSplit : 0); }
+    } else if (gpsKmh !== null) setSpeed(gpsKmh);
+    else if (ts - lastMoveTs > 6000) { setSpeed(0); curKmh = 0; }
+    if (p.acc <= 25 && curKmh > S.maxKmh) S.maxKmh = curKmh;
+    if (moved) mapOnFix(true);
+    save(); queueRender();
+  }
+
+  // ---------- Capteur de mouvement : pas + inclinaison 3D ----------
+  const M = { g: null, f: 0, above: false, lastStep: 0, lastT: 0, times: [], cadStart: 0 };
+  const T = { bx: null, by: null, tx: 0, ty: 0, queued: false };
+  function onMotion(e) {
+    const a = e.accelerationIncludingGravity;
+    if (!a || a.x == null || a.y == null || a.z == null) return;
+    motionSeen = true;
+    if (T.bx === null) { T.bx = a.x; T.by = a.y; }
+    T.bx += (a.x - T.bx) * 0.012; T.by += (a.y - T.by) * 0.012;
+    const k = S.status === 'running' ? 0.45 : 1;
+    T.tx += (clamp((a.x - T.bx) / 3, -1, 1) * k - T.tx) * 0.06;
+    T.ty += (clamp((a.y - T.by) / 3, -1, 1) * k - T.ty) * 0.06;
+    queueTilt();
+    if (!S.motionOk && S.status !== 'idle') { const est = steps(); S.motionOk = true; S.sensorSteps = est; queueRender(); }
+    if (S.status !== 'running' || actNow() === 'velo') return;
+    const m = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+    const now = e.timeStamp || performance.now();
+    const dt = M.lastT ? clamp((now - M.lastT) / 1000, 0.005, 0.2) : 1 / 60;
+    M.lastT = now;
+    if (M.g === null) M.g = m;
+    M.g += (m - M.g) * (1 - Math.exp(-dt / 0.8));
+    M.f += ((m - M.g) - M.f) * (1 - Math.exp(-dt / 0.04));
+    const th = SENS[settings.sens] || SENS.moyenne;
+    if (!M.above && M.f > th.hi) {
+      M.above = true;
+      if (now - M.lastStep > 280) {
+        S.sensorSteps++; M.lastStep = now;
+        if (!M.cadStart) M.cadStart = now;
+        M.times.push(now); if (M.times.length > 60) M.times.shift();
+        queueRender();
+      }
+    } else if (M.above && M.f < th.lo) M.above = false;
+  }
+  window.addEventListener('devicemotion', onMotion);
+  function queueTilt() {
+    if (T.queued || !anim()) return;
+    T.queued = true;
+    requestAnimationFrame(() => {
+      T.queued = false;
+      $('post').style.setProperty('--tilt', (T.tx * -9).toFixed(2) + 'deg');
+      relief.tx = T.tx; relief.ty = T.ty;
+    });
+  }
+  window.addEventListener('pointermove', e => {
+    if (motionSeen || e.pointerType !== 'mouse') return;
+    T.tx = (e.clientX / innerWidth - 0.5) * 1.2; T.ty = (e.clientY / innerHeight - 0.5) * 1.2; queueTilt();
+  });
+
+  // ---------- Écran allumé ----------
+  async function requestWake() {
+    try {
+      if ('wakeLock' in navigator && !wakeLock) {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+      }
+    } catch (e) {}
+  }
+  function releaseWake() { try { if (wakeLock) wakeLock.release(); } catch (e) {} wakeLock = null; }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') { if (S.status === 'running' && !isNative) requestWake(); relief.resume(); queueRender(); }
+    else { save(true); relief.stop(); }
+  });
+
+  // ---------- Démarrer / pause / terminer ----------
+  const INSECURE = "Le GPS ne marche que si la page est ouverte depuis une adresse sécurisée (https://…). Ouvre le lien en ligne de l'appli sur ton téléphone.";
+  function startOrResume() {
+    if (typeof window.DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      try { DeviceMotionEvent.requestPermission().catch(() => {}); } catch (e) {}
+    }
+    if (!isNative && !('geolocation' in navigator)) { banner("Ce navigateur ne permet pas d'accéder au GPS.", 'err'); return; }
+    if (!window.isSecureContext && !isNative) banner(INSECURE, 'err'); else banner('');
+    const resuming = S.status === 'paused';
+    if (S.status === 'idle') { S = fresh(); S.startTime = Date.now(); M.g = null; M.f = 0; M.above = false; M.lastT = 0; mapRouteDirty = true; }
+    S.status = 'running'; S.resumedAt = Date.now(); lastKcalAt = Date.now();
+    M.times = []; M.cadStart = 0;
+    S.track.push([]); last = null; curKmh = 0; lastMoveTs = Date.now();
+    startGeo(); if (!isNative) requestWake();
+    speak(resuming ? 'Reprise.' : "C'est parti !");
+    if ((window.isSecureContext || isNative) && !hasProfile() && !profileAsked) {
+      profileAsked = true;
+      banner('Ajoute ta taille et ton poids dans Réglages : ils servent à calculer la longueur de tes pas et tes calories. En attendant, l\'appli utilise 170 cm et 70 kg.', 'info', 'Plus tard', { label: 'Ouvrir les réglages', fn: () => go(3), tag: 'profile' });
+    }
+    save(true); render();
+  }
+  function pause(silent) {
+    if (S.status !== 'running') return;
+    accrueKcal();
+    S.activeMs += Date.now() - S.resumedAt;
+    S.status = 'paused'; curKmh = 0; last = null; lastKcalAt = 0;
+    stopGeo(); releaseWake(); save(true); render();
+    if (!silent) speak('Pause.');
+  }
+  function reset() {
+    stopGeo(); releaseWake(); setGps('', 'GPS inactif');
+    S = fresh(); curKmh = 0; last = null; store.del(K_CUR); mapRouteDirty = true; flushRoute(); render();
+  }
+  $('fab').addEventListener('click', () => { if (S.status === 'running') pause(); else startOrResume(); });
+
+  function measuredStepM() {
+    if (!S.motionOk || S.sensorSteps < 20 || S.distance < 15 || S.activity === 'velo') return 0;
+    const m = S.distance / S.sensorSteps;
+    return (m > 0.3 && m < 2) ? m : 0;
+  }
+  const cell = (l, v) => '<div><span>' + l + '</span><b>' + v + '</b></div>';
+  function openModal() {
+    wasRunningBeforeModal = S.status === 'running';
+    pause(true);
+    const velo = S.activity === 'velo', avg = avgKmh();
+    let h = cell('Distance', nf2.format(S.distance / 1000) + ' km') + cell('Durée', fmtClock(S.activeMs));
+    if (velo) h += cell('Vitesse moyenne', nf1.format(avg) + ' km/h') + cell('Vitesse max', nf1.format(S.maxKmh) + ' km/h');
+    else h += cell(S.motionOk ? 'Pas' : 'Pas estimés', nf0.format(steps())) + cell('Allure moyenne', fmtPace(S.activeMs, S.distance) + ' /km');
+    h += cell('Calories', nf0.format(S.kcal || 0) + ' kcal') + cell('Montée', nf0.format(S.dplus || 0) + ' m');
+    if (!velo) h += cell(measuredStepM() ? 'Longueur de pas mesurée' : 'Longueur de pas estimée', Math.round((measuredStepM() || stepLenM(avg)) * 100) + ' cm') + cell('Vitesse moyenne', nf1.format(avg) + ' km/h');
+    $('modalSum').innerHTML = h;
+    $('mCancel').textContent = wasRunningBeforeModal ? 'Continuer la sortie' : 'Fermer';
+    $('modal').classList.remove('hidden');
+    $('mSave').focus();
+  }
+  const closeModal = () => $('modal').classList.add('hidden');
+  $('btnEnd').addEventListener('click', openModal);
+  $('mCancel').addEventListener('click', () => { closeModal(); if (wasRunningBeforeModal) startOrResume(); });
+  $('mDiscard').addEventListener('click', () => { closeModal(); reset(); });
+  $('mSave').addEventListener('click', saveSortie);
+
+  function saveSortie() {
+    const hist = store.get(K_HIST, []);
+    const before = computeRecords(hist);
+    const entry = {
+      date: S.startTime || Date.now(), activity: S.activity || settings.activity, durationMs: S.activeMs,
+      distanceM: Math.round(S.distance * 10) / 10, steps: S.activity === 'velo' ? 0 : steps(), stepsEstimated: !S.motionOk,
+      avgKmh: Math.round(avgKmh() * 10) / 10, maxKmh: Math.round(S.maxKmh * 10) / 10, kcal: Math.round(S.kcal || 0),
+      stepCm: S.activity === 'velo' ? null : Math.round((measuredStepM() || stepLenM(avgKmh())) * 100),
+      dplus: Math.round(S.dplus || 0), dminus: Math.round(S.dminus || 0), splits: S.splits.slice(), track: simplifyTrack(S.track)
+    };
+    hist.unshift(entry);
+    let kept = hist.slice(0, 150);
+    while (!store.set(K_HIST, kept) && kept.length > 10) kept = kept.slice(0, Math.floor(kept.length * 0.8)); // mémoire pleine : on garde les plus récentes
+    const msr = measuredStepM();
+    if (msr && S.sensorSteps >= 50 && avgKmh() < 6.5 && msr < 1.2) { settings.measuredStep = Math.round(msr * 100) / 100; saveSettings(); updateStepInfo(); }
+    const after = computeRecords(kept);
+    const beaten = Object.keys(after).filter(k => after[k].date === entry.date && before[k] && before[k].v !== after[k].v);
+    closeModal(); reset();
+    renderProgress(true);
+    go(2);
+    speak('Sortie enregistrée : ' + sayKm(Math.round(entry.distanceM / 10) * 10) + ' en ' + sayDur(entry.durationMs / 1000) + '.');
+    if (beaten.length) setTimeout(() => showMedal(beaten, after), anim() ? 700 : 50);
+  }
+  function simplifyTrack(track) {
+    const pts = track.flat().filter(p => p && p.length >= 2);
+    if (pts.length < 2) return pts.map(roundPt);
+    const step = Math.ceil(pts.length / 500), out = [];
+    for (let i = 0; i < pts.length; i += step) out.push(roundPt(pts[i]));
+    if ((pts.length - 1) % step) out.push(roundPt(pts[pts.length - 1]));
+    return out;
+  }
+  function roundPt(p) { return [Math.round(p[0] * 1e5) / 1e5, Math.round(p[1] * 1e5) / 1e5, p[2] == null ? null : Math.round(p[2]), p[3] == null ? null : p[3]]; }
+
+  // ---------- Records ----------
+  const REC = {
+    dist: { l: 'Plus longue sortie', f: v => nf2.format(v / 1000) + ' km', big: v => nf2.format(v / 1000) + ' km' },
+    time: { l: 'Plus longue durée', f: v => fmtClock(v), big: v => fmtClock(v) },
+    km: { l: 'Kilomètre le plus rapide', f: v => fmtClock(v * 1000) + ' /km', big: v => fmtClock(v * 1000) },
+    k5: { l: 'Meilleur 5 km', f: v => fmtClock(v * 1000), big: v => fmtClock(v * 1000) },
+    steps: { l: 'Plus de pas en une sortie', f: v => nf0.format(v) + ' pas', big: v => nf0.format(v) },
+    dplus: { l: 'Plus grande montée', f: v => nf0.format(v) + ' m', big: v => nf0.format(v) + ' m' },
+    velo: { l: 'Vélo : meilleure moyenne', f: v => nf1.format(v) + ' km/h', big: v => nf1.format(v) }
+  };
+  function computeRecords(hist) {
+    const r = {};
+    const upd = (k, v, h, more) => { if (v == null || !isFinite(v) || v <= 0) return; if (!r[k] || (more ? v > r[k].v : v < r[k].v)) r[k] = { v, date: h.date }; };
+    hist.forEach(h => {
+      upd('dist', h.distanceM, h, true); upd('time', h.durationMs, h, true); upd('dplus', h.dplus, h, true);
+      if (h.activity !== 'velo') upd('steps', h.steps, h, true);
+      if (h.activity !== 'velo' && h.splits && h.splits.length) {
+        upd('km', Math.min(...h.splits), h, false);
+        for (let i = 0; i + 5 <= h.splits.length; i++) upd('k5', h.splits.slice(i, i + 5).reduce((a, b) => a + b, 0), h, false);
+      }
+      if (h.activity === 'velo' && h.distanceM >= 1000) upd('velo', h.avgKmh, h, true);
+    });
+    return r;
+  }
+  function showMedal(keys, recs) {
+    const k = keys[0];
+    $('medalVal').textContent = REC[k].big(recs[k].v);
+    $('medalTitle').textContent = keys.length > 1 ? keys.length + ' nouveaux records' : 'Nouveau record';
+    $('medalText').textContent = keys.map(x => REC[x].l + ' : ' + REC[x].f(recs[x].v)).join('. ');
+    const m = $('medal'); m.classList.remove('hidden');
+    const c = m.querySelector('.coin'); c.style.animation = 'none'; void c.offsetWidth; c.style.animation = '';
+    speak((keys.length > 1 ? keys.length + ' nouveaux records ! ' : 'Nouveau record ! ') + REC[k].l + '.');
+    try { navigator.vibrate && navigator.vibrate([80, 60, 160]); } catch (e) {}
+    clearTimeout(showMedal.t); showMedal.t = setTimeout(() => m.classList.add('hidden'), 4500);
+  }
+  $('medal').addEventListener('click', () => $('medal').classList.add('hidden'));
+
+  // ---------- Écran Progrès ----------
+  let statMode = 'week';
+  function thumbSvg(track, w, h, cls) {
+    w = w || 66; h = h || 66;
+    const open = '<svg class="' + (cls || 'thumb') + '" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true">';
+    if (!track || track.length < 2) return open + '<rect x="' + (w / 2 - 12) + '" y="' + (h / 2 - 8) + '" width="24" height="8" fill="#f4f6fb"/><rect x="' + (w / 2 - 12) + '" y="' + (h / 2) + '" width="24" height="8" fill="#e5322d"/></svg>';
+    let a = 90, b = -90, c = 180, d = -180;
+    track.forEach(p => { a = Math.min(a, p[0]); b = Math.max(b, p[0]); c = Math.min(c, p[1]); d = Math.max(d, p[1]); });
+    const k = Math.cos(rad((a + b) / 2)), ww = Math.max((d - c) * k, 1e-6), hh = Math.max(b - a, 1e-6);
+    const pad0 = Math.min(w, h) * 0.12, s = Math.min((w - 2 * pad0) / ww, (h - 2 * pad0) / hh), ox = (w - ww * s) / 2, oy = (h - hh * s) / 2;
+    const pts = track.map(p => ((p[1] - c) * k * s + ox).toFixed(1) + ',' + ((b - p[0]) * s + oy).toFixed(1)).join(' ');
+    const sw = Math.max(4, w / 14);
+    const first = pts.split(' ')[0].split(','), lastP = pts.split(' ').pop().split(',');
+    return open + '<polyline points="' + pts + '" fill="none" stroke="#f4f6fb" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+      '<polyline points="' + pts + '" fill="none" stroke="#e5322d" stroke-width="' + (sw * 0.48) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+      (w > 100 ? '<circle cx="' + first[0] + '" cy="' + first[1] + '" r="' + sw * 0.9 + '" fill="#f4f6fb"/><circle cx="' + lastP[0] + '" cy="' + lastP[1] + '" r="' + sw * 0.9 + '" fill="#e5322d" stroke="#f4f6fb" stroke-width="3"/>' : '') + '</svg>';
+  }
+  const df = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const dfLong = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+  function goalsHtml(hist) {
+    const now = Date.now(), today = dayKey(now), ws = weekStart(now);
+    let stepsToday = 0, mWeek = 0;
+    hist.forEach(h => { if (dayKey(h.date) === today) stepsToday += h.steps || 0; if (h.date >= ws) mWeek += h.distanceM || 0; });
+    if (S.status !== 'idle') { if (dayKey(S.startTime) === today && S.activity !== 'velo') stepsToday += steps(); if (S.startTime >= ws) mWeek += S.distance; }
+    const days = new Set(hist.map(h => dayKey(h.date)));
+    if (S.status !== 'idle') days.add(dayKey(S.startTime));
+    let streak = 0; const d = new Date(); d.setHours(12, 0, 0, 0);
+    if (!days.has(dayKey(d.getTime()))) d.setDate(d.getDate() - 1);
+    while (days.has(dayKey(d.getTime()))) { streak++; d.setDate(d.getDate() - 1); }
+    const gS = settings.goalSteps || 10000, gK = settings.goalKm || 20;
+    const pS = Math.min(1, stepsToday / gS), pK = Math.min(1, mWeek / 1000 / gK);
+    return '<div class="block"><div class="bh">Objectifs</div>' +
+      '<div class="goal' + (pS >= 1 ? ' done' : '') + '"><div class="goal-top"><span>Pas aujourd\'hui</span><b>' + nf0.format(stepsToday) + ' / ' + nf0.format(gS) + '</b></div><div class="goal-bar"><i style="width:' + (pS * 100).toFixed(1) + '%"></i></div></div>' +
+      '<div class="goal' + (pK >= 1 ? ' done' : '') + '"><div class="goal-top"><span>Kilomètres cette semaine</span><b>' + nf1.format(mWeek / 1000) + ' / ' + nf0.format(gK) + '</b></div><div class="goal-bar"><i style="width:' + (pK * 100).toFixed(1) + '%"></i></div></div>' +
+      '<p class="streak">' + (streak ? 'Série en cours : <b>' + streak + ' jour' + (streak > 1 ? 's' : '') + ' d\'affilée</b> avec au moins une sortie.' : 'Fais une sortie aujourd\'hui pour lancer une série de jours d\'affilée.') + '</p></div>';
+  }
+  function recordsHtml(hist) {
+    const r = computeRecords(hist), keys = Object.keys(REC).filter(k => r[k]);
+    if (!keys.length) return '';
+    const dShort = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+    return '<div class="block"><div class="bh">Records</div>' + keys.map(k =>
+      '<div class="rec"><div>' + REC[k].l + '<small>' + dShort.format(new Date(r[k].date)) + '</small></div><div class="v">' + REC[k].f(r[k].v) + '</div></div>').join('') + '</div>';
+  }
+  function statsHtml(hist) {
+    const now = new Date(), buckets = [];
+    if (statMode === 'week') {
+      const ws = weekStart(now.getTime()), dfw = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short' });
+      for (let i = 7; i >= 0; i--) { const s = ws - i * 7 * 86400000; buckets.push({ s, e: s + 7 * 86400000 + 3600000, l: i === 0 ? 'Cette sem.' : dfw.format(new Date(s)) }); }
+      // correction des changements d'heure : on recale chaque début de semaine
+      buckets.forEach(b => { b.s = weekStart(b.s + 3 * 86400000); b.e = weekStart(b.s + 10 * 86400000); });
+    } else {
+      const dfm = new Intl.DateTimeFormat('fr-FR', { month: 'short' });
+      for (let i = 5; i >= 0; i--) { const s = new Date(now.getFullYear(), now.getMonth() - i, 1).getTime(), e = new Date(now.getFullYear(), now.getMonth() - i + 1, 1).getTime(); buckets.push({ s, e, l: dfm.format(new Date(s)) }); }
+    }
+    buckets.forEach(b => { b.m = 0; b.n = 0; b.k = 0; b.up = 0; hist.forEach(h => { if (h.date >= b.s && h.date < b.e) { b.m += h.distanceM || 0; b.n++; b.k += h.kcal || 0; b.up += h.dplus || 0; } }); });
+    const W = 340, H = 150, top = 18, base = 122, n = buckets.length, gap = 8, bw = (W - gap * (n - 1)) / n;
+    const max = Math.max(1, ...buckets.map(b => b.m));
+    let svg = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Kilomètres par ' + (statMode === 'week' ? 'semaine' : 'mois') + '">';
+    buckets.forEach((b, i) => {
+      const x = i * (bw + gap), h = (b.m / max) * (base - top), y = base - h, cur = i === n - 1;
+      svg += '<rect x="' + x.toFixed(1) + '" y="' + (base - 2) + '" width="' + bw.toFixed(1) + '" height="2" fill="rgba(157,183,217,.25)"/>';
+      if (b.m > 0) {
+        svg += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" fill="' + (cur ? '#e5322d' : '#5f7fa8') + '"/>';
+        svg += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.min(5, h).toFixed(1) + '" fill="#f4f6fb"/>';
+        svg += '<text class="lbl-v" x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 5).toFixed(1) + '" text-anchor="middle">' + nf1.format(b.m / 1000) + '</text>';
+      }
+      svg += '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - 10) + '" text-anchor="middle">' + b.l + '</text>';
+    });
+    svg += '</svg>';
+    const c = buckets[n - 1];
+    return '<div class="block"><div class="bh">Statistiques<span class="seg" role="group" aria-label="Période"><button type="button" data-mode="week" aria-pressed="' + (statMode === 'week') + '">Semaines</button><button type="button" data-mode="month" aria-pressed="' + (statMode === 'month') + '">Mois</button></span></div>' +
+      svg + '<div class="period"><span>' + (statMode === 'week' ? 'Cette semaine' : 'Ce mois-ci') + ' :</span><span><b>' + nf1.format(c.m / 1000) + '</b> km</span><span><b>' + c.n + '</b> sortie' + (c.n > 1 ? 's' : '') + '</span><span><b>' + nf0.format(c.k) + '</b> kcal</span><span><b>' + nf0.format(c.up) + '</b> m de montée</span></div></div>';
+  }
+  function renderProgress(highlightFirst) {
+    const hist = store.get(K_HIST, []), box = $('progress');
+    let html = goalsHtml(hist);
+    if (!hist.length) {
+      box.innerHTML = html + '<div class="block"><div class="bh">Tes sorties</div><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton rouge, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>';
+      return;
+    }
+    let totalM = 0, totalKcal = 0;
+    hist.forEach(h => { totalM += h.distanceM || 0; totalKcal += h.kcal || 0; });
+    html += recordsHtml(hist) + statsHtml(hist);
+    html += '<div class="total"><div class="po"><div class="plate"><div class="back"></div><div class="face">' +
+      '<span class="lbl">' + hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + '<br>' + nf0.format(totalKcal) + ' kcal</span>' +
+      '<span class="val num">' + nf2.format(totalM / 1000) + '<small>km</small></span></div></div></div></div><ul class="runs">';
+    hist.forEach((h, i) => {
+      const act = ACT_LABEL[h.activity] || 'Sortie';
+      html += '<li><button type="button" class="run' + (highlightFirst && i === 0 ? ' new' : '') + '" data-i="' + i + '">' + thumbSvg(h.track) +
+        '<div><div class="run-date">' + act + ', ' + df.format(new Date(h.date)) + '</div>' +
+        '<div class="run-dist num">' + nf2.format((h.distanceM || 0) / 1000) + '<small>km</small></div>' +
+        '<div class="run-meta"><span>' + fmtDurWords(h.durationMs || 0) + '</span>' +
+        (h.activity === 'velo' ? '<span>' + nf1.format(h.avgKmh || 0) + ' km/h</span>' : '<span>' + nf0.format(h.steps || 0) + (h.stepsEstimated ? ' pas estimés' : ' pas') + '</span>') +
+        (h.kcal != null ? '<span>' + nf0.format(h.kcal) + ' kcal</span>' : '') + (h.dplus ? '<span>+' + nf0.format(h.dplus) + ' m</span>' : '') + '</div></div></button></li>';
+    });
+    box.innerHTML = html + '</ul>';
+  }
+  $('progress').addEventListener('click', e => {
+    const mode = e.target.closest('[data-mode]');
+    if (mode) { statMode = mode.dataset.mode; renderProgress(); return; }
+    const run = e.target.closest('.run');
+    if (run) openDetail(+run.dataset.i);
+  });
+
+  // ---------- Fiche d'une sortie ----------
+  let detailIdx = -1, deleteArmed = false;
+  function altSvg(track) {
+    const pts = (track || []).filter(p => p[2] != null);
+    if (pts.length < 3) return '';
+    let cum = 0; const xs = [0];
+    for (let i = 1; i < pts.length; i++) { cum += distPts(pts[i - 1], pts[i]); xs.push(cum); }
+    if (cum < 50) return '';
+    const alts = pts.map(p => p[2]), lo = Math.min(...alts), hi = Math.max(...alts), span = Math.max(10, hi - lo);
+    const W = 340, H = 120, t = 12, b = 96;
+    const line = pts.map((p, i) => (xs[i] / cum * W).toFixed(1) + ',' + (b - (p[2] - lo) / span * (b - t)).toFixed(1)).join(' ');
+    return '<div class="d-sub">Profil d\'altitude</div><svg class="alt" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Altitude de ' + Math.round(lo) + ' à ' + Math.round(hi) + ' mètres">' +
+      '<polygon points="0,' + b + ' ' + line + ' ' + W + ',' + b + '" fill="rgba(95,127,168,.35)"/><polyline points="' + line + '" fill="none" stroke="#9db7d9" stroke-width="2"/>' +
+      '<text x="0" y="' + (H - 6) + '">0 km</text><text x="' + W + '" y="' + (H - 6) + '" text-anchor="end">' + nf1.format(cum / 1000) + ' km</text>' +
+      '<text x="' + W + '" y="10" text-anchor="end">' + Math.round(hi) + ' m</text><text x="' + W + '" y="' + (b - 3) + '" text-anchor="end">' + Math.round(lo) + ' m</text></svg>';
+  }
+  function splitsHtml(h) {
+    if (!h.splits || !h.splits.length) return '';
+    const best = Math.min(...h.splits), worst = Math.max(...h.splits);
+    return '<div class="d-sub">Temps par kilomètre</div><table class="splits"><tbody>' + h.splits.map((s, i) =>
+      '<tr class="' + (s === best && h.splits.length > 1 ? 'best' : '') + '"><td>' + (i + 1) + ' km</td><td><div class="bar" style="width:' + (Math.max(0.25, best / s) * 100).toFixed(0) + '%"></div></td><td>' + fmtClock(s * 1000) + '</td></tr>').join('') + '</tbody></table>';
+  }
+  function openDetail(i) {
+    const hist = store.get(K_HIST, []), h = hist[i];
+    if (!h) return;
+    detailIdx = i; deleteArmed = false; $('dDelete').textContent = 'Supprimer la sortie';
+    const velo = h.activity === 'velo';
+    $('dTitle').textContent = (ACT_LABEL[h.activity] || 'Sortie') + ', ' + dfLong.format(new Date(h.date));
+    let g = cell('Distance', nf2.format((h.distanceM || 0) / 1000) + ' km') + cell('Durée', fmtClock(h.durationMs || 0));
+    g += velo ? cell('Vitesse moyenne', nf1.format(h.avgKmh || 0) + ' km/h') + cell('Vitesse max', nf1.format(h.maxKmh || 0) + ' km/h')
+              : cell('Allure moyenne', fmtPace(h.durationMs || 0, h.distanceM || 0) + ' /km') + cell(h.stepsEstimated ? 'Pas estimés' : 'Pas', nf0.format(h.steps || 0));
+    g += cell('Calories', nf0.format(h.kcal || 0) + ' kcal') + cell('Montée', nf0.format(h.dplus || 0) + ' m');
+    if (!velo && h.stepCm) g += cell('Longueur de pas', h.stepCm + ' cm') + cell('Vitesse moyenne', nf1.format(h.avgKmh || 0) + ' km/h');
+    $('dBody').innerHTML = thumbSvg(h.track, 340, 200, 'd-route') + '<div class="sum">' + g + '</div>' + altSvg(h.track) + splitsHtml(h) + '<div style="height:14px"></div>';
+    const ok = h.track && h.track.length >= 2;
+    $('dReplay').disabled = !ok; $('dGpx').disabled = !ok;
+    $('dReplay').style.opacity = ok ? '' : '.4'; $('dGpx').style.opacity = ok ? '' : '.4';
+    $('detail').classList.remove('hidden');
+  }
+  const closeDetail = () => $('detail').classList.add('hidden');
+  $('dClose').addEventListener('click', closeDetail);
+  $('dDelete').addEventListener('click', () => {
+    if (!deleteArmed) { deleteArmed = true; $('dDelete').textContent = 'Touche encore pour supprimer'; return; }
+    const hist = store.get(K_HIST, []); hist.splice(detailIdx, 1); store.set(K_HIST, hist);
+    closeDetail(); renderProgress(); toast('Sortie supprimée');
+  });
+  $('dReplay').addEventListener('click', () => { const h = store.get(K_HIST, [])[detailIdx]; if (h) startReplay(h); });
+  $('dGpx').addEventListener('click', () => { const h = store.get(K_HIST, [])[detailIdx]; if (h) exportGpx(h); });
+  $('dShare').addEventListener('click', () => { const h = store.get(K_HIST, [])[detailIdx]; if (h) openShare(h); });
+
+  // ---------- Fichiers : GPX et image ----------
+  function blobToBase64(blob) {
+    return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(blob); });
+  }
+  async function saveFile(blob, name, title, preferShare) {
+    if (isNative) {
+      const fs = plugin('Filesystem'), sh = plugin('Share');
+      if (fs && sh) {
+        try {
+          const r = await fs.writeFile({ path: name, data: await blobToBase64(blob), directory: 'CACHE' });
+          await sh.share({ title, url: r.uri, dialogTitle: title });
+          return;
+        } catch (e) { if (!/cancel/i.test(String(e && e.message))) toast("Le fichier n'a pas pu être partagé."); return; }
+      }
+    }
+    if (preferShare) {
+      try {
+        const file = new File([blob], name, { type: blob.type });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title }); return; }
+      } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast('Fichier enregistré : ' + name);
+  }
+  const fileStamp = t => { const d = new Date(t); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '-' + pad(d.getHours()) + pad(d.getMinutes()); };
+  const xmlEsc = s => String(s).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+  function exportGpx(h) {
+    const type = { marche: 'walking', course: 'running', velo: 'cycling' }[h.activity] || 'walking';
+    const name = (ACT_LABEL[h.activity] || 'Sortie') + ' du ' + dfLong.format(new Date(h.date));
+    let x = '<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="Parcours" xmlns="http://www.topografix.com/GPX/1/1">\n' +
+      '<metadata><name>' + xmlEsc(name) + '</name><time>' + new Date(h.date).toISOString() + '</time></metadata>\n<trk><name>' + xmlEsc(name) + '</name><type>' + type + '</type><trkseg>\n';
+    (h.track || []).forEach(p => {
+      x += '<trkpt lat="' + p[0] + '" lon="' + p[1] + '">' + (p[2] != null ? '<ele>' + p[2] + '</ele>' : '') + (p[3] != null ? '<time>' + new Date(h.date + p[3] * 1000).toISOString() + '</time>' : '') + '</trkpt>\n';
+    });
+    x += '</trkseg></trk>\n</gpx>\n';
+    saveFile(new Blob([x], { type: 'application/gpx+xml' }), 'parcours-' + fileStamp(h.date) + '.gpx', name, true);
+  }
+  let shareBlob = null, shareName = '', shareUrl = '';
+  async function openShare(h) {
+    toast("Préparation de l'image…");
+    try { shareBlob = await makeShareImage(h); } catch (e) { toast("L'image n'a pas pu être créée."); return; }
+    shareName = 'parcours-' + fileStamp(h.date) + '.png';
+    if (shareUrl) URL.revokeObjectURL(shareUrl);
+    shareUrl = URL.createObjectURL(shareBlob);
+    $('shareImg').src = shareUrl;
+    let canShareFiles = isNative;
+    try { canShareFiles = canShareFiles || !!(navigator.canShare && navigator.canShare({ files: [new File([shareBlob], shareName, { type: 'image/png' })] })); } catch (e) {}
+    $('sShare').classList.toggle('hidden', !canShareFiles);
+    $('sharebox').classList.remove('hidden');
+  }
+  $('sClose').addEventListener('click', () => $('sharebox').classList.add('hidden'));
+  $('sShare').addEventListener('click', () => shareBlob && saveFile(shareBlob, shareName, 'Ma sortie Parcours', true));
+  $('sSave').addEventListener('click', () => shareBlob && saveFile(shareBlob, shareName, 'Ma sortie Parcours', false));
+  function setFont(x, w, size, cond) {
+    x.font = w + ' ' + size + 'px Archivo, system-ui, sans-serif';
+    if ('fontStretch' in x) { try { x.fontStretch = cond ? 'condensed' : 'normal'; } catch (e) {} }
+  }
+  async function makeShareImage(h) {
+    try { await Promise.all([document.fonts.load('800 120px Archivo'), document.fonts.load('600 40px Archivo')]); } catch (e) {}
+    const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const x = cv.getContext('2d');
+    const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#111a2c'); g.addColorStop(1, '#1e2f4f');
+    x.fillStyle = g; x.fillRect(0, 0, W, H);
+    // courbes de niveau
+    for (let k = 0; k < 28; k++) {
+      x.strokeStyle = k % 5 === 0 ? 'rgba(157,183,217,.28)' : 'rgba(95,127,168,.18)'; x.lineWidth = k % 5 === 0 ? 3 : 2;
+      x.beginPath();
+      for (let a = 0; a <= Math.PI * 2 + 0.06; a += 0.05) {
+        const r = 40 + k * 40 + Math.sin(a * 3 + k * 0.45) * 22 + Math.sin(a * 5 - k * 0.3) * 12;
+        const px = 780 + Math.cos(a) * r * 1.3, py = 430 + Math.sin(a) * r;
+        a === 0 ? x.moveTo(px, py) : x.lineTo(px, py);
+      }
+      x.stroke();
+    }
+    // titre
+    x.fillStyle = '#f4f6fb'; x.fillRect(80, 82, 58, 20); x.fillStyle = '#e5322d'; x.fillRect(80, 102, 58, 20);
+    setFont(x, 800, 58, true); x.fillStyle = '#f4f6fb'; x.textBaseline = 'middle'; x.fillText('Parcours', 160, 104);
+    // tracé
+    const tr = h.track || [];
+    if (tr.length >= 2) {
+      let a = 90, b = -90, c = 180, d = -180;
+      tr.forEach(p => { a = Math.min(a, p[0]); b = Math.max(b, p[0]); c = Math.min(c, p[1]); d = Math.max(d, p[1]); });
+      const k = Math.cos(rad((a + b) / 2)), ww = Math.max((d - c) * k, 1e-6), hh = Math.max(b - a, 1e-6);
+      const bx = 110, by = 190, bw = 860, bh = 600, s = Math.min(bw / ww, bh / hh), ox = bx + (bw - ww * s) / 2, oy = by + (bh - hh * s) / 2;
+      const P = p => [(p[1] - c) * k * s + ox, (b - p[0]) * s + oy];
+      x.lineJoin = 'round'; x.lineCap = 'round';
+      [['#f4f6fb', 28], ['#e5322d', 13]].forEach(([col, lw]) => {
+        x.strokeStyle = col; x.lineWidth = lw; x.beginPath();
+        tr.forEach((p, i) => { const q = P(p); i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); }); x.stroke();
+      });
+      const s0 = P(tr[0]), s1 = P(tr[tr.length - 1]);
+      x.fillStyle = '#f4f6fb'; x.beginPath(); x.arc(s0[0], s0[1], 20, 0, 7); x.fill();
+      x.fillStyle = '#e5322d'; x.strokeStyle = '#f4f6fb'; x.lineWidth = 7; x.beginPath(); x.arc(s1[0], s1[1], 20, 0, 7); x.fill(); x.stroke();
+    }
+    // date + activité
+    x.textBaseline = 'alphabetic';
+    setFont(x, 600, 38, false); x.fillStyle = '#a9b6c9';
+    x.fillText(cap(dfLong.format(new Date(h.date))) + ' — ' + (ACT_LABEL[h.activity] || 'Sortie'), 80, 890);
+    // distance
+    setFont(x, 800, 210, true); x.fillStyle = '#f4f6fb';
+    const dTxt = nf2.format((h.distanceM || 0) / 1000); x.fillText(dTxt, 70, 1085);
+    const dw = x.measureText(dTxt).width; setFont(x, 700, 60, true); x.fillStyle = '#a9b6c9'; x.fillText('km', 70 + dw + 20, 1085);
+    x.fillStyle = '#f4f6fb'; x.fillRect(80, 1138, 300, 10); x.fillStyle = '#e5322d'; x.fillRect(80, 1148, 300, 10);
+    // stats
+    const velo = h.activity === 'velo';
+    const stats = [['Durée', fmtClock(h.durationMs || 0)], velo ? ['Vitesse', nf1.format(h.avgKmh || 0) + ' km/h'] : ['Allure', fmtPace(h.durationMs || 0, h.distanceM || 0) + ' /km'],
+      ['Calories', nf0.format(h.kcal || 0)], velo || !h.steps ? ['Montée', nf0.format(h.dplus || 0) + ' m'] : ['Pas', nf0.format(h.steps || 0)]];
+    stats.forEach(([l, v], i) => {
+      const cx = 80 + i * 245;
+      setFont(x, 600, 32, false); x.fillStyle = '#a9b6c9'; x.fillText(l, cx, 1222);
+      let fs = 58; setFont(x, 800, fs, true);
+      while (x.measureText(v).width > 222 && fs > 30) { fs -= 2; setFont(x, 800, fs, true); } // la valeur doit tenir dans sa colonne
+      x.fillStyle = '#f4f6fb'; x.fillText(v, cx, 1284);
+    });
+    return new Promise((res, rej) => cv.toBlob(bl => bl ? res(bl) : rej(new Error('toBlob')), 'image/png'));
+  }
+
+  // ---------- Navigation en cube 3D ----------
+  const VIEWS = ['v-sortie', 'v-carte', 'v-progres', 'v-reglages'];
+  let switching = false;
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => go(+t.dataset.view)));
+  function go(i) {
+    if (i === currentView || switching) return;
+    closeDetail(); $('sharebox').classList.add('hidden');
+    if (currentView === 1 && replayState) stopReplay();
+    const from = $(VIEWS[currentView]), to = $(VIEWS[i]), dir = i > currentView ? 1 : -1;
+    document.querySelectorAll('.tab').forEach(t => { if (+t.dataset.view === i) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); });
+    currentView = i;
+    if (i === 3 && $('banner').dataset.tag === 'profile') $('banner').classList.add('hidden');
+    if (i === 2) renderProgress();
+    to.classList.add('is-active'); to.inert = false;
+    document.body.classList.toggle('on-map', i === 1);
+    document.body.classList.toggle('dim', i >= 2);
+    if (i === 1) ensureMap();
+    const done = () => {
+      from.classList.remove('is-active'); from.inert = true;
+      from.style.transform = ''; to.style.transform = ''; switching = false;
+      afterShow(i);
+    };
+    if (!anim() || !to.animate) { done(); return; }
+    switching = true;
+    const half = innerWidth / 2, ease = 'cubic-bezier(.62,.04,.3,1)', dur = 620;
+    const tf = a => 'translateZ(' + (-half) + 'px) rotateY(' + a + 'deg) translateZ(' + half + 'px)';
+    from.animate([{ transform: tf(0) }, { transform: tf(-90 * dir) }], { duration: dur, easing: ease, fill: 'forwards' });
+    const a2 = to.animate([{ transform: tf(90 * dir) }, { transform: tf(0) }], { duration: dur, easing: ease, fill: 'forwards' });
+    a2.onfinish = () => { from.getAnimations().forEach(a => a.cancel()); a2.cancel(); done(); };
+  }
+  function afterShow(i) {
+    if (i === 1) { relief.stop(); if (map) { map.resize(); flushRoute(); mapOnFix(true); } }
+    else relief.resume();
+  }
+
+  // ---------- Carte 3D (MapLibre + OpenFreeMap) ----------
+  let map = null, mapLoading = false, styleLoaded = false, styleFellBack = false, meMarker = null, mapFollow = true, mapRouteDirty = true, lastRouteFlush = 0;
+  function mapMsg(t) { const m = $('mapMsg'); m.textContent = t; m.classList.toggle('hidden', !t); }
+  function loadScript(src) {
+    return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+  }
+  function routeData() {
+    return { type: 'Feature', properties: {}, geometry: { type: 'MultiLineString',
+      coordinates: S.track.filter(s => s.length > 1).map(seg => seg.map(p => [p[1], p[0]])) } };
+  }
+  function lastTrackPoint() {
+    for (let i = S.track.length - 1; i >= 0; i--) if (S.track[i].length) { const p = S.track[i][S.track[i].length - 1]; return [p[1], p[0]]; }
+    return null;
+  }
+  async function ensureMap() {
+    if (map || mapLoading) return;
+    mapLoading = true;
+    if (typeof maplibregl === 'undefined') {
+      try { await loadScript(MAPLIBRE_URL); }
+      catch (e) { mapLoading = false; mapMsg("La carte n'a pas pu se charger (pas de connexion ?). Le GPS, la vitesse et les pas continuent de fonctionner."); return; }
+    }
+    const here = lastFix ? [lastFix.lon, lastFix.lat] : lastTrackPoint();
+    try {
+      map = new maplibregl.Map({ container: 'map', style: STYLE_URL, center: here || [2.4, 46.6], zoom: here ? 16.5 : 5,
+        pitch: settings.map3d ? 60 : 0, maxPitch: 70, attributionControl: false });
+    } catch (e) { mapLoading = false; mapMsg("La carte 3D n'est pas prise en charge par ce navigateur. Le suivi continue quand même."); return; }
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'top-right');
+    map.on('error', () => { if (!styleLoaded && !styleFellBack) { styleFellBack = true; map.setStyle(RASTER_STYLE); } });
+    map.on('style.load', addMapLayers);
+    map.on('dragstart', () => { if (!replayState) setFollow(false); });
+    mapLoading = false;
+    $('btn3d').textContent = settings.map3d ? 'Vue 2D' : 'Vue 3D';
+  }
+  function addMapLayers() {
+    styleLoaded = true;
+    const st = map.getStyle();
+    const hasExtrusion = st.layers.some(l => l.type === 'fill-extrusion');
+    const vec = Object.keys(st.sources).find(k => st.sources[k].type === 'vector');
+    if (!hasExtrusion && vec) {
+      try {
+        map.addLayer({ id: 'p-batiments', type: 'fill-extrusion', source: vec, 'source-layer': 'building', minzoom: 14,
+          paint: { 'fill-extrusion-color': '#d5dbe6', 'fill-extrusion-opacity': 0.85,
+                   'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 6],
+                   'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0] } });
+      } catch (e) {}
+    }
+    const lw = (a, b) => ['interpolate', ['linear'], ['zoom'], 12, a, 18, b];
+    const empty = { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [] } };
+    if (!map.getSource('route')) map.addSource('route', { type: 'geojson', data: routeData() });
+    if (!map.getSource('replay')) map.addSource('replay', { type: 'geojson', data: empty });
+    map.addLayer({ id: 'route-bord', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#f4f6fb', 'line-width': lw(5, 14) } });
+    map.addLayer({ id: 'route-coeur', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#e5322d', 'line-width': lw(2.2, 7) } });
+    map.addLayer({ id: 'replay-bord', type: 'line', source: 'replay', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#f4f6fb', 'line-width': lw(6, 16) } });
+    map.addLayer({ id: 'replay-coeur', type: 'line', source: 'replay', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#e5322d', 'line-width': lw(2.8, 8) } });
+    mapRouteDirty = true; flushRoute(); mapOnFix(true);
+  }
+  function flushRoute() {
+    if (!map || !mapRouteDirty) return;
+    const src = map.getSource && map.getSource('route');
+    if (!src) return;
+    src.setData(routeData()); mapRouteDirty = false; lastRouteFlush = Date.now();
+  }
+  function setFollow(on) { mapFollow = on; $('recenter').classList.toggle('hidden', on); }
+  function mapOnFix(trackChanged) {
+    if (trackChanged) mapRouteDirty = true;
+    if (!map || !lastFix || replayState) return;
+    const ll = [lastFix.lon, lastFix.lat];
+    if (!meMarker) {
+      const el = document.createElement('div'); el.className = 'me';
+      meMarker = new maplibregl.Marker({ element: el, pitchAlignment: 'map', rotationAlignment: 'map' }).setLngLat(ll).addTo(map);
+    } else meMarker.setLngLat(ll);
+    if (currentView !== 1) return;
+    if (mapRouteDirty && Date.now() - lastRouteFlush > 1000) flushRoute();
+    if (!mapFollow) return;
+    const o = { center: ll, duration: 900, essential: true };
+    if (map.getZoom() < 15) o.zoom = 16.5;
+    if (settings.map3d) { o.pitch = 60; if (lastFix.heading !== null && curKmh > 3) o.bearing = lastFix.heading; }
+    map.easeTo(o);
+  }
+  $('recenter').addEventListener('click', () => { setFollow(true); mapOnFix(false); });
+  $('btn3d').addEventListener('click', () => {
+    settings.map3d = !settings.map3d; saveSettings();
+    $('btn3d').textContent = settings.map3d ? 'Vue 2D' : 'Vue 3D';
+    if (map) map.easeTo(settings.map3d ? { pitch: 60, duration: 900 } : { pitch: 0, bearing: 0, duration: 900 });
+  });
+
+  // ---------- Rejouer une sortie en 3D ----------
+  let replayState = null;
+  function whenMapReady(timeout) {
+    return new Promise((res, rej) => {
+      const t0 = Date.now();
+      const check = () => { if (map && styleLoaded && map.getSource('replay')) res(); else if (Date.now() - t0 > (timeout || 15000)) rej(new Error('map')); else setTimeout(check, 150); };
+      check();
+    });
+  }
+  async function startReplay(h) {
+    const pts = (h.track || []).filter(p => p && p.length >= 2);
+    if (pts.length < 2) { toast('Pas assez de points pour rejouer cette sortie.'); return; }
+    closeDetail();
+    if (currentView !== 1) go(1);
+    await ensureMap();
+    try { await whenMapReady(); } catch (e) { toast("La carte n'est pas disponible pour le moment."); return; }
+    if (replayState) stopReplay();
+    const cum = [0];
+    for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + distPts(pts[i - 1], pts[i]));
+    const total = cum[cum.length - 1];
+    if (total < 10) { toast('Sortie trop courte pour être rejouée.'); return; }
+    ['route-bord', 'route-coeur'].forEach(id => map.setLayoutProperty(id, 'visibility', 'none'));
+    if (meMarker) meMarker.getElement().style.display = 'none';
+    $('hud').classList.add('hidden'); $('mapBtns').classList.add('hidden'); $('replayBar').classList.remove('hidden');
+    $('rpStop').textContent = 'Arrêter';
+    const dur = clamp(total / 55, 12, 32) * 1000;
+    replayState = { pts, cum, total, dur, t0: performance.now(), br: null, raf: 0, i: 0, frame: 0 };
+    const at = dist => {
+      let i = replayState.i;
+      while (i < cum.length - 2 && cum[i + 1] < dist) i++;
+      while (i > 0 && cum[i] > dist) i--;
+      const f = clamp((dist - cum[i]) / Math.max(1e-6, cum[i + 1] - cum[i]), 0, 1);
+      const p = pts[i], q = pts[i + 1];
+      return { i, f, lat: p[0] + (q[0] - p[0]) * f, lon: p[1] + (q[1] - p[1]) * f,
+               t: (p[3] != null && q[3] != null) ? p[3] + (q[3] - p[3]) * f : null };
+    };
+    const step = now => {
+      const st = replayState; if (!st) return;
+      const k = Math.min(1, (now - st.t0) / st.dur);
+      const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      const d = e * total, here = at(d); st.i = here.i;
+      const ahead = at(Math.min(total, d + 45));
+      const br = (ahead.lat !== here.lat || ahead.lon !== here.lon) ? bearing([here.lat, here.lon], [ahead.lat, ahead.lon]) : (st.br || 0);
+      st.br = st.br == null ? br : lerpAngle(st.br, br, 0.06);
+      if (st.frame++ % 2 === 0) {
+        const coords = pts.slice(0, here.i + 1).map(p => [p[1], p[0]]); coords.push([here.lon, here.lat]);
+        map.getSource('replay').setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: coords } });
+      }
+      map.jumpTo({ center: [here.lon, here.lat], bearing: st.br, pitch: 62, zoom: 16.4 });
+      $('rpDist').textContent = nf2.format(d / 1000) + ' km';
+      $('rpTime').textContent = here.t != null ? fmtClock(here.t * 1000) : '';
+      $('rpFill').style.width = (k * 100).toFixed(1) + '%';
+      if (k < 1) st.raf = requestAnimationFrame(step);
+      else {
+        map.getSource('replay').setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: pts.map(p => [p[1], p[0]]) } });
+        const bounds = pts.reduce((bb, p) => bb.extend([p[1], p[0]]), new maplibregl.LngLatBounds([pts[0][1], pts[0][0]], [pts[0][1], pts[0][0]]));
+        map.fitBounds(bounds, { padding: 70, pitch: 45, bearing: st.br, duration: 2200 });
+        $('rpStop').textContent = 'Fermer';
+      }
+    };
+    replayState.raf = requestAnimationFrame(step);
+  }
+  function stopReplay() {
+    if (!replayState) return;
+    cancelAnimationFrame(replayState.raf); replayState = null;
+    if (map && map.getSource('replay')) {
+      map.getSource('replay').setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [] } });
+      ['route-bord', 'route-coeur'].forEach(id => map.setLayoutProperty(id, 'visibility', 'visible'));
+    }
+    if (meMarker) meMarker.getElement().style.display = '';
+    $('hud').classList.remove('hidden'); $('mapBtns').classList.remove('hidden'); $('replayBar').classList.add('hidden');
+    setFollow(true); mapOnFix(true);
+  }
+  $('rpStop').addEventListener('click', stopReplay);
+
+  // ---------- Relief 3D (Three.js) ----------
+  const relief = {
+    ready: false, running: false, raf: 0, tx: 0, ty: 0, speed: 0.35, travel: 0, t0: 0, lastT: 0, rise: 0,
+    stop() { this.running = false; cancelAnimationFrame(this.raf); },
+    resume() {
+      if (!this.ready || this.running || !anim() || currentView === 1 || document.hidden) return;
+      this.running = true; this.lastT = performance.now(); this.raf = requestAnimationFrame(this.frame);
+    }
+  };
+  const trailX = z => Math.sin(z * 0.07) * 2.6 + Math.sin(z * 0.023 + 1.3) * 1.8;
+  const VERT = `
+    uniform float uTravel; uniform float uRise;
+    varying float vH; varying vec2 vW; varying float vDepth;
+    vec3 permute(vec3 x){ return mod(((x*34.0)+1.0)*x, 289.0); }
+    float snoise(vec2 v){
+      const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+      vec2 i = floor(v + dot(v, C.yy)); vec2 x0 = v - i + dot(i, C.xx);
+      vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+      vec4 x12 = x0.xyxy + C.xxzz; x12.xy -= i1; i = mod(i, 289.0);
+      vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+      vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0); m = m*m; m = m*m;
+      vec3 x = 2.0 * fract(p * C.www) - 1.0; vec3 h = abs(x) - 0.5; vec3 ox = floor(x + 0.5); vec3 a0 = x - ox;
+      m *= 1.79284291400159 - 0.85373472095314 * (a0*a0 + h*h);
+      vec3 g; g.x = a0.x * x0.x + h.x * x0.y; g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+      return 130.0 * dot(m, g);
+    }
+    float trailX(float z){ return sin(z*0.07)*2.6 + sin(z*0.023+1.3)*1.8; }
+    void main(){
+      vec3 pos = position;
+      vec2 w = vec2(pos.x, pos.z - uTravel);
+      float n = snoise(w*0.085)*1.0 + snoise(w*0.2+7.3)*0.45 + snoise(w*0.5-3.1)*0.14;
+      float valley = smoothstep(0.5, 6.5, abs(w.x - trailX(w.y)));
+      float h = (n*0.85 + 0.95) * (0.12 + 0.88*valley) * 1.9 * uRise;
+      pos.y = h; vH = h; vW = w;
+      vec4 mv = modelViewMatrix * vec4(pos, 1.0);
+      vDepth = -mv.z;
+      gl_Position = projectionMatrix * mv;
+    }`;
+  const FRAG = `
+    uniform vec3 uFog; uniform float uRise;
+    varying float vH; varying vec2 vW; varying float vDepth;
+    float trailX(float z){ return sin(z*0.07)*2.6 + sin(z*0.023+1.3)*1.8; }
+    void main(){
+      float c = vH * 4.0;
+      float fw = max(fwidth(c), 1e-4);
+      float dd = abs(fract(c + 0.5) - 0.5) / fw;
+      float idx = 1.0 - step(0.5, mod(floor(c + 0.5), 5.0));
+      float lineThin = 1.0 - smoothstep(0.35, 1.15, dd);
+      float lineIdx = 1.0 - smoothstep(0.9, 1.9, dd);
+      float l = mix(lineThin * 0.55, lineIdx * 0.95, idx) * (1.0 - smoothstep(22.0, 46.0, vDepth)) * (1.0 - smoothstep(0.3, 0.8, fw));
+      vec3 base = mix(vec3(0.090, 0.137, 0.224), vec3(0.149, 0.216, 0.333), clamp(vH / 3.2, 0.0, 1.0));
+      vec3 lineCol = mix(vec3(0.373, 0.498, 0.659), vec3(0.616, 0.718, 0.851), idx);
+      vec3 col = mix(base, lineCol, l);
+      float tx = abs(vW.x - trailX(vW.y));
+      float tfw = fwidth(vW.x) * 1.2;
+      float edge = 1.0 - smoothstep(0.17 - tfw, 0.17 + tfw, tx);
+      float core = 1.0 - smoothstep(0.085 - tfw, 0.085 + tfw, tx);
+      col = mix(col, vec3(0.957, 0.965, 0.984), edge * 0.92 * uRise);
+      col = mix(col, vec3(0.898, 0.196, 0.176), core * uRise);
+      col = mix(col, uFog, smoothstep(12.0, 52.0, vDepth));
+      gl_FragColor = vec4(col, 1.0);
+    }`;
+  async function initRelief() {
+    if (relief.ready || relief.loading) { relief.resume(); return; }
+    relief.loading = true;
+    let THREE;
+    try { THREE = await import(THREE_URL); } catch (e) { relief.loading = false; document.body.classList.add('no-relief'); return; }
+    const canvas = $('relief');
+    let renderer;
+    try { renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false, powerPreference: 'low-power' }); }
+    catch (e) { relief.loading = false; document.body.classList.add('no-relief'); return; }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setClearColor(0x000000, 0);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 90);
+    const geo = new THREE.PlaneGeometry(38, 66, 150, 260);
+    geo.rotateX(-Math.PI / 2); geo.translate(0, 0, -25);
+    const uniforms = { uTravel: { value: 0 }, uRise: { value: 0 }, uFog: { value: new THREE.Color('#1b2a46') } };
+    const mesh = new THREE.Mesh(geo, new THREE.ShaderMaterial({ uniforms, vertexShader: VERT, fragmentShader: FRAG }));
+    mesh.frustumCulled = false;
+    scene.add(mesh);
+    function resize() {
+      renderer.setSize(innerWidth, innerHeight, false);
+      camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+    }
+    resize(); addEventListener('resize', resize);
+    let lastRender = 0, slowAvg = 0.033, frames = 0, quality = 2;
+    relief.t0 = performance.now();
+    relief.frame = (t) => {
+      if (!relief.running) return;
+      relief.raf = requestAnimationFrame(relief.frame);
+      if (t - lastRender < 31) return; // ~30 images/s pour la batterie
+      const dt = Math.min(0.1, (t - relief.lastT) / 1000); relief.lastT = t; lastRender = t;
+      slowAvg = slowAvg * 0.95 + dt * 0.05;
+      if (++frames > 90 && slowAvg > 0.05 && quality > 0) {
+        quality--; frames = 0; slowAvg = 0.033;
+        renderer.setPixelRatio(quality === 1 ? 1 : 0.7); resize();
+      }
+      const target = 0.35 + (S.status === 'running' ? curKmh : 0) * (actNow() === 'velo' ? 0.06 : 0.13);
+      relief.speed += (target - relief.speed) * Math.min(1, dt * 1.5);
+      relief.travel += relief.speed * dt;
+      const p = Math.min(1, (t - relief.t0) / 1900);
+      relief.rise = 1 - Math.pow(1 - p, 3);
+      uniforms.uTravel.value = relief.travel; uniforms.uRise.value = relief.rise;
+      const cx = trailX(3 - relief.travel), lx = trailX(-13 - relief.travel);
+      camera.position.set(cx + relief.tx * 0.9, 2.05 - relief.ty * 0.35, 6);
+      camera.lookAt(lx + relief.tx * 0.4, 0.55, -13);
+      renderer.render(scene, camera);
+    };
+    relief.ready = true; relief.loading = false;
+    canvas.classList.add('on');
+    relief.resume();
+  }
+
+  // ---------- Réglages ----------
+  $('height').value = settings.height || ''; $('weight').value = settings.weight || '';
+  $('goalSteps').value = settings.goalSteps; $('goalKm').value = settings.goalKm;
+  $('voice').checked = !!settings.voice; $('voiceEvery').value = String(settings.voiceEvery);
+  $('sens').value = settings.sens; $('maxAcc').value = String(settings.maxAcc); $('anim3d').checked = !!settings.anim3d;
+  function updateStepInfo() {
+    const w = Math.round(stepWalkM() * 100), r = Math.round(stepRunM(10) * 100);
+    let t = w + ' cm en marchant, ' + r + ' cm en courant à 10 km/h. ';
+    if (settings.measuredStep) t += 'La valeur de marche vient de tes pas mesurés pendant une sortie.';
+    else if (settings.height) t += 'Calculée depuis ta taille (0,414 × taille en marchant).';
+    else t += 'Ajoute ta taille pour un calcul exact : 170 cm est utilisé en attendant.';
+    $('stepInfo').textContent = t;
+  }
+  function numInput(id, key, min, max, nullable, after) {
+    $(id).addEventListener('change', e => {
+      const raw = e.target.value.trim();
+      if (raw === '' && nullable) settings[key] = null;
+      else {
+        const v = parseInt(raw, 10);
+        if (!(v >= min && v <= max)) { e.target.value = settings[key] == null ? '' : settings[key]; return; }
+        settings[key] = v;
+      }
+      if (after) after();
+      saveSettings(); updateStepInfo(); queueRender();
+    });
+  }
+  numInput('height', 'height', 100, 230, true, () => { settings.measuredStep = null; });
+  numInput('weight', 'weight', 30, 250, true);
+  numInput('goalSteps', 'goalSteps', 500, 60000, false);
+  numInput('goalKm', 'goalKm', 1, 500, false);
+  updateStepInfo();
+  $('voice').addEventListener('change', e => { settings.voice = e.target.checked; saveSettings(); if (settings.voice) speak('Annonces vocales activées.'); });
+  $('voiceEvery').addEventListener('change', e => { settings.voiceEvery = parseInt(e.target.value, 10) || 1000; saveSettings(); });
+  $('voiceTest').addEventListener('click', () => {
+    if (!plugin('TextToSpeech') && !('speechSynthesis' in window)) { toast("Ce navigateur ne sait pas parler."); return; }
+    speak('2 kilomètres. Temps : 12 minutes 30 secondes. Allure moyenne : 6 minutes 15 par kilomètre.', true);
+  });
+  $('sens').addEventListener('change', e => { settings.sens = e.target.value; saveSettings(); });
+  $('maxAcc').addEventListener('change', e => { settings.maxAcc = parseInt(e.target.value, 10) || 30; saveSettings(); });
+  $('anim3d').addEventListener('change', e => { settings.anim3d = e.target.checked; saveSettings(); applyAnim(); });
+  function applyAnim() {
+    document.body.classList.toggle('anim-off', !anim());
+    if (anim()) { document.body.classList.remove('no-relief'); initRelief(); }
+    else { relief.stop(); document.body.classList.add('no-relief'); $('post').style.setProperty('--tilt', '0deg'); }
+  }
+  let clearArmed = false;
+  $('clearHist').addEventListener('click', e => {
+    const b = e.currentTarget;
+    if (!store.get(K_HIST, []).length) { b.textContent = 'Historique déjà vide'; setTimeout(() => b.textContent = "Effacer l'historique", 2000); return; }
+    if (!clearArmed) { clearArmed = true; b.textContent = 'Touche encore pour tout effacer'; setTimeout(() => { clearArmed = false; b.textContent = "Effacer l'historique"; }, 3000); return; }
+    clearArmed = false; store.del(K_HIST); renderProgress(); b.textContent = 'Historique effacé';
+    setTimeout(() => b.textContent = "Effacer l'historique", 2000);
+  });
+  if (isNative) $('about').textContent += " Dans l'appli Android, le suivi continue quand l'écran est verrouillé : une notification reste affichée pendant la sortie.";
+
+  // ---------- Installation (PWA) et mode hors-ligne ----------
+  let installEvt = null;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; $('installBox').hidden = false; });
+  $('installBtn').addEventListener('click', async () => {
+    if (!installEvt) return;
+    installEvt.prompt();
+    try { await installEvt.userChoice; } catch (e) {}
+    installEvt = null; $('installBox').hidden = true;
+  });
+  if (!isNative && /Android/i.test(navigator.userAgent)) $('apkBox').hidden = false;
+  if (!isNative && 'serviceWorker' in navigator && location.protocol === 'https:') {
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  }
+
+  // ---------- Horloge ----------
+  setInterval(() => {
+    if (S.status !== 'running') return;
+    if (lastFixAt && Date.now() - lastFixAt > 10000) { curKmh = 0; setGps('weak', 'Signal GPS perdu'); }
+    accrueKcal(); render(); save();
+    if (currentView === 1 && mapRouteDirty) flushRoute();
+    // objectif de pas atteint aujourd'hui : on le dit une fois
+    const today = dayKey(Date.now());
+    if (settings.goalSaidDay !== today && S.activity !== 'velo') {
+      const hist = store.get(K_HIST, []);
+      const tot = hist.filter(h => dayKey(h.date) === today).reduce((a, h) => a + (h.steps || 0), 0) + steps();
+      if (tot >= (settings.goalSteps || 10000)) {
+        settings.goalSaidDay = today; saveSettings();
+        speak('Bravo, objectif de ' + nf0.format(settings.goalSteps) + ' pas atteint aujourd\'hui.'); toast('Objectif de pas atteint aujourd\'hui');
+      }
+    }
+    if (currentView === 2 && Date.now() % 5000 < 1000) renderProgress();
+  }, 1000);
+
+  // ---------- Démarrage ----------
+  const saved = store.get(K_CUR, null);
+  if (saved && saved.status && saved.status !== 'idle' && Array.isArray(saved.track)) {
+    S = Object.assign(fresh(), saved);
+    if (S.status === 'running') { S.activeMs += Math.max(0, (S.savedAt || Date.now()) - S.resumedAt); S.status = 'paused'; }
+    banner('Ta sortie en cours a été récupérée. Touche le bouton rouge pour la reprendre, ou « Terminer la sortie » pour l\'enregistrer.', 'info', 'OK');
+  } else if (!window.isSecureContext && !isNative) banner(INSECURE, 'err');
+
+  const post = $('post');
+  if (anim()) {
+    const plates = post.querySelectorAll('.po');
+    plates[plates.length - 1].addEventListener('animationend', () => post.classList.remove('intro'), { once: true });
+    setTimeout(() => post.classList.remove('intro'), 2600);
+  } else post.classList.remove('intro');
+  applyAnim();
+  renderProgress();
+  render();
+  window.__parcours = { get state() { return S; }, get kmh() { return curKmh; }, get relief() { return relief; }, get map() { return map; },
+    go, stepLenM, stepWalkM, stepRunM, kcalPerMin, bikeMet, cadence, settings, computeRecords, makeShareImage, exportGpx, startReplay, openDetail,
+    get replaying() { return !!replayState; },
+    feed(lat, lon, alt, speed, acc) { onPos({ timestamp: Date.now(), coords: { latitude: lat, longitude: lon, accuracy: acc || 5, altitude: alt, altitudeAccuracy: alt == null ? null : 5, speed: speed == null ? null : speed, heading: null } }); } };
+})();
+</script>
+</body>
+</html>
