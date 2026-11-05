@@ -61,7 +61,8 @@
     box-shadow:0 10px 30px rgba(0,0,0,.35)}
   .banner.err{background:#2e1518;border-color:#77262b;color:#ffc7c7}
   .banner.info{background:#15233d;border-color:#2c4c80;color:#d3e2ff}
-  .banner button{display:block;margin-top:6px;background:none;border:0;padding:0;font-weight:700;text-decoration:underline;color:inherit;cursor:pointer}
+  .banner-actions{display:flex;gap:18px;margin-top:6px}
+  .banner button{background:none;border:0;padding:2px 0;font-weight:700;text-decoration:underline;color:inherit;cursor:pointer}
 
   /* ---------- Scène et écrans (transition en cube) ---------- */
   .stage{position:fixed;inset:0;z-index:10;perspective:1100px;perspective-origin:50% 45%;overflow:hidden}
@@ -81,11 +82,11 @@
   .speed-meta{display:flex;gap:22px;font-size:15px;color:var(--gris)}
   .speed-meta b{color:var(--blanc);font-weight:700;font-variant-numeric:tabular-nums}
 
-  .post{position:relative;flex:1;margin-top:24px;padding-left:34px;perspective:900px;--tilt:0deg;min-height:0}
+  .post{position:relative;flex:1;margin-top:20px;padding-left:34px;perspective:900px;--tilt:0deg;min-height:0}
   .pole{position:absolute;left:34px;top:-14px;bottom:calc(-1 * var(--bottom) - 20px);width:11px;margin-left:-6px;border-radius:3px;
     background:linear-gradient(90deg,#5d6b84,#bcc7d8 45%,#56637a)}
   .pole::before{content:"";position:absolute;top:0;left:-3px;right:-3px;height:8px;border-radius:3px;background:#cfd8e6}
-  .po{position:relative;height:62px;margin-bottom:12px;transform-style:preserve-3d;transform-origin:0 50%;
+  .po{position:relative;height:58px;margin-bottom:10px;transform-style:preserve-3d;transform-origin:0 50%;
     transform:rotateY(calc(var(--ry) + var(--tilt)));width:calc(100% - 6px)}
   .plate{position:absolute;inset:0;transform-style:preserve-3d}
   .face,.back{position:absolute;inset:0;clip-path:polygon(0 0,calc(100% - 26px) 0,100% 50%,calc(100% - 26px) 100%,0 100%)}
@@ -140,6 +141,9 @@
   .row label,.row .rl{flex:1;font-weight:600}
   .row small{display:block;font-weight:400;color:var(--gris);font-size:13px;margin-top:2px}
   input[type=number],select{background:var(--nuit);color:var(--blanc);border:1px solid rgba(157,183,217,.3);border-radius:10px;padding:8px 10px;font:inherit;font-size:16px;width:124px}
+  .unitfield{display:flex;align-items:center;gap:6px;color:var(--gris);font-weight:600}
+  .unitfield input{width:84px}
+  .sum{grid-template-columns:1fr 1fr}
   .switch{position:relative;width:52px;height:30px;flex:none}
   .switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
   .switch span{position:absolute;inset:0;border-radius:999px;background:#3a4864;transition:background .2s;pointer-events:none}
@@ -190,7 +194,7 @@
 
   @media (max-height:700px){
     .speed-num{font-size:clamp(70px,24vw,110px)}
-    .po{height:52px;margin-bottom:9px} .face .val{font-size:28px} .post{margin-top:14px}
+    .po{height:50px;margin-bottom:8px} .face .val{font-size:27px} .post{margin-top:12px} .hint{display:none}
   }
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
@@ -222,6 +226,7 @@
       <div class="po" style="--ry:9deg;--i:1"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Durée</span><span class="val num" id="time">0:00</span></div></div></div>
       <div class="po" style="--ry:-5deg;--i:2"><div class="plate"><div class="back"></div><div class="face"><span class="lbl" id="stepsLbl">Pas</span><span class="val num" id="steps">0</span></div></div></div>
       <div class="po" style="--ry:15deg;--i:3"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Allure</span><span class="val num"><span id="pace">–</span><small>min/km</small></span></div></div></div>
+      <div class="po" style="--ry:-9deg;--i:4"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Calories</span><span class="val num"><span id="kcal">0</span><small>kcal</small></span></div></div></div>
     </div>
     <p class="hint" id="hint">Appuie sur le bouton rouge pour démarrer ta sortie.</p>
   </section>
@@ -247,16 +252,20 @@
   <section class="view" id="v-reglages" aria-label="Réglages" inert>
     <h2 class="h-title">Réglages</h2>
     <div class="set">
+      <div class="row"><label for="height">Ta taille<small>Sert à calculer la longueur de tes pas</small></label><span class="unitfield"><input id="height" type="number" min="100" max="230" step="1" inputmode="numeric" placeholder="170"> cm</span></div>
+      <div class="row"><label for="weight">Ton poids<small>Sert à calculer les calories dépensées</small></label><span class="unitfield"><input id="weight" type="number" min="30" max="250" step="1" inputmode="numeric" placeholder="70"> kg</span></div>
+      <div class="row"><div class="rl">Longueur d'un pas<small id="stepInfo"></small></div></div>
+    </div>
+    <div class="set">
       <div class="row"><label for="anim3d">Animations 3D<small>Relief animé et transitions. Coupe-les pour économiser la batterie.</small></label>
         <span class="switch"><input id="anim3d" type="checkbox" role="switch"><span></span></span></div>
-      <div class="row"><label for="stride">Longueur d'un pas<small>Sert à estimer les pas si le capteur ne répond pas</small></label><input id="stride" type="number" min="30" max="150" step="1" inputmode="numeric"></div>
       <div class="row"><label for="sens">Sensibilité du podomètre<small>Augmente-la si des pas sont oubliés</small></label>
         <select id="sens"><option value="faible">Faible</option><option value="moyenne">Moyenne</option><option value="forte">Forte</option></select></div>
       <div class="row"><label for="maxAcc">Précision GPS minimale<small>Les points moins précis sont ignorés</small></label>
         <select id="maxAcc"><option value="20">20 m</option><option value="30">30 m</option><option value="50">50 m</option></select></div>
     </div>
     <div class="set"><button id="clearHist" class="danger-btn" type="button">Effacer l'historique</button></div>
-    <p class="about">Tes sorties restent enregistrées dans ce navigateur, sur ton téléphone. Rien n'est envoyé sur internet. Garde l'écran allumé pendant une sortie : quand le téléphone se verrouille, le navigateur coupe le GPS.</p>
+    <p class="about">Les calories sont une estimation calculée avec ton poids et ta vitesse (formules de l'ACSM pour la marche et la course, terrain plat). Ta taille, ton poids et tes sorties restent enregistrés dans ce navigateur, sur ton téléphone. Rien n'est envoyé sur internet. Garde l'écran allumé pendant une sortie : quand le téléphone se verrouille, le navigateur coupe le GPS.</p>
   </section>
 </main>
 
@@ -305,18 +314,24 @@
     del(k) { try { localStorage.removeItem(k); } catch (e) {} }
   };
   const K_SET = 'parcours.settings', K_CUR = 'parcours.current', K_HIST = 'parcours.history';
-  const settings = Object.assign({ stride: 70, sens: 'moyenne', maxAcc: 30, anim3d: !reduceMotion, map3d: true }, store.get(K_SET, {}));
+  const settings = Object.assign({ height: null, weight: null, measuredStep: null, sens: 'moyenne', maxAcc: 30, anim3d: !reduceMotion, map3d: true }, store.get(K_SET, {}));
   const saveSettings = () => store.set(K_SET, settings);
   const anim = () => !!settings.anim3d;
   const SENS = { faible: {hi: 1.9, lo: 0.4}, moyenne: {hi: 1.3, lo: 0.25}, forte: {hi: 0.85, lo: 0.15} };
 
   // ---------- État ----------
   const fresh = () => ({ status: 'idle', activeMs: 0, resumedAt: 0, startTime: 0, distance: 0, lastKm: 0,
-                         sensorSteps: 0, motionOk: false, maxKmh: 0, track: [], savedAt: 0 });
+                         sensorSteps: 0, estSteps: 0, kcal: 0, motionOk: false, maxKmh: 0, track: [], savedAt: 0 });
   let S = fresh();
   let watchId = null, last = null, curKmh = 0, lastMoveTs = 0, lastFix = null, lastFixAt = 0;
   let wakeLock = null, motionSeen = false, renderQueued = false, lastSave = 0, wasRunningBeforeModal = false;
-  let currentView = 0;
+  let currentView = 0, lastKcalAt = 0, profileAsked = false;
+  function accrueKcal() {
+    if (S.status !== 'running' || !lastKcalAt) return;
+    const now = Date.now(), dt = Math.min(5, (now - lastKcalAt) / 1000);
+    lastKcalAt = now;
+    S.kcal = (S.kcal || 0) + kcalPerMin(curKmh) * dt / 60;
+  }
 
   // ---------- Utilitaires ----------
   const R = 6371008.8, rad = d => d * Math.PI / 180;
@@ -346,17 +361,65 @@
   }
   const elapsed = () => S.activeMs + (S.status === 'running' ? Date.now() - S.resumedAt : 0);
   const avgKmh = () => { const h = elapsed() / 3600000; return h > 0.0014 ? (S.distance / 1000) / h : 0; };
-  const steps = () => S.motionOk ? S.sensorSteps : Math.round(S.distance / (Math.max(30, settings.stride) / 100));
+  const steps = () => S.motionOk ? S.sensorSteps : Math.round(S.estSteps || 0);
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  const heightM = () => (settings.height || 170) / 100;
+  const weightKg = () => settings.weight || 70;
+  const hasProfile = () => !!(settings.height && settings.weight);
 
-  function banner(msg, kind, action) {
+  // Longueur d'UN pas (en mètres) selon la taille et la vitesse.
+  // Marche : 0,414 × taille (ou la valeur mesurée pendant tes sorties).
+  // Course : ~0,57 × taille à 10 km/h, un peu plus quand on va plus vite.
+  function stepLenM(kmh) {
+    const h = heightM();
+    const ms = settings.measuredStep;
+    const walk = (ms && ms > 0.3 && ms < 1.2) ? ms : 0.414 * h;
+    const run = clamp(0.57 + 0.025 * (kmh - 10), 0.5, 0.75) * h;
+    const t = clamp((kmh - 6.5) / 3.5, 0, 1);
+    return walk * (1 - t) + run * t;
+  }
+  // Cadence (pas par minute) sur les 10 dernières secondes, si le capteur compte les pas
+  function cadence() {
+    if (!S.motionOk || !M.times.length) return 0;
+    const now = performance.now();
+    while (M.times.length && now - M.times[0] > 10000) M.times.shift();
+    if (!M.times.length || now - M.times[M.times.length - 1] > 3000) return 0;
+    return now - M.cadStart >= 10000 ? M.times.length * 6 : 0;
+  }
+  // Part de course (0 = marche, 1 = course) : d'après la cadence si dispo, sinon d'après la vitesse
+  function runShare(kmh) {
+    const c = cadence();
+    if (c >= 60) return clamp((c - 135) / 20, 0, 1);
+    return clamp((kmh - 6.5) / 1.5, 0, 1);
+  }
+  // Calories par minute — équations métaboliques de l'ACSM (terrain plat) :
+  // marche VO2 = 0,1 × v + 3,5 ; course VO2 = 0,2 × v + 3,5 (v en m/min, VO2 en ml/kg/min) ; 1 L d'O2 ≈ 5 kcal
+  function kcalPerMin(kmh) {
+    let vo2 = 3.5; // au repos (arrêt) ou en véhicule (> 25 km/h)
+    if (kmh >= 1 && kmh <= 25) {
+      const v = Math.min(kmh, 20) * 1000 / 60, r = runShare(kmh);
+      vo2 = (0.1 * v + 3.5) * (1 - r) + (0.2 * v + 3.5) * r;
+    }
+    return vo2 * weightKg() / 1000 * 5;
+  }
+
+  function banner(msg, kind, closeLabel, extra) {
     const b = $('banner');
     if (!msg) { b.classList.add('hidden'); return; }
     b.className = 'banner ' + (kind || '');
+    b.dataset.tag = (extra && extra.tag) || '';
     b.textContent = msg;
+    const row = document.createElement('div'); row.className = 'banner-actions';
+    if (extra) {
+      const a = document.createElement('button'); a.type = 'button'; a.textContent = extra.label;
+      a.addEventListener('click', () => { b.classList.add('hidden'); extra.fn(); });
+      row.appendChild(a);
+    }
     const close = document.createElement('button');
-    close.type = 'button'; close.textContent = action || 'Fermer';
+    close.type = 'button'; close.textContent = closeLabel || 'Fermer';
     close.addEventListener('click', () => b.classList.add('hidden'));
-    b.appendChild(close);
+    row.appendChild(close);
+    b.appendChild(row);
   }
   function setGps(cls, text) { $('gps').className = 'gps ' + cls; $('gpsText').textContent = text; }
 
@@ -376,6 +439,7 @@
     $('steps').textContent = nf0.format(steps());
     $('stepsLbl').textContent = (S.status !== 'idle' && !S.motionOk) ? 'Pas estimés' : 'Pas';
     $('pace').textContent = fmtPace(ms, S.distance);
+    $('kcal').textContent = nf0.format(S.kcal || 0);
     $('hudSpeed').textContent = nf1.format(live);
     $('hudDist').textContent = nf2.format(S.distance / 1000);
     $('hint').textContent = {
@@ -459,7 +523,9 @@
     let moved = false;
     if (d >= threshold) {
       S.distance += d; seg.push([r6(p.lat), r6(p.lon)]);
-      setSpeed(gpsKmh !== null ? gpsKmh : v * 3.6);
+      const segKmh = gpsKmh !== null ? gpsKmh : v * 3.6;
+      S.estSteps = (S.estSteps || 0) + d / stepLenM(segKmh);
+      setSpeed(segKmh);
       last = p; lastMoveTs = ts; moved = true;
       const km = Math.floor(S.distance / 1000);
       if (km > S.lastKm) {
@@ -474,7 +540,7 @@
   }
 
   // ---------- Capteur de mouvement : pas + inclinaison 3D ----------
-  const M = { g: null, f: 0, above: false, lastStep: 0, lastT: 0 };
+  const M = { g: null, f: 0, above: false, lastStep: 0, lastT: 0, times: [], cadStart: 0 };
   const T = { bx: null, by: null, tx: 0, ty: 0, queued: false };
   function onMotion(e) {
     const a = e.accelerationIncludingGravity;
@@ -501,7 +567,12 @@
     const th = SENS[settings.sens] || SENS.moyenne;
     if (!M.above && M.f > th.hi) {
       M.above = true;
-      if (now - M.lastStep > 280) { S.sensorSteps++; M.lastStep = now; queueRender(); }
+      if (now - M.lastStep > 280) {
+        S.sensorSteps++; M.lastStep = now;
+        if (!M.cadStart) M.cadStart = now;
+        M.times.push(now); if (M.times.length > 60) M.times.shift();
+        queueRender();
+      }
     } else if (M.above && M.f < th.lo) M.above = false;
   }
   window.addEventListener('devicemotion', onMotion);
@@ -544,15 +615,21 @@
     if (!('geolocation' in navigator)) { banner("Ce navigateur ne permet pas d'accéder au GPS.", 'err'); return; }
     if (!window.isSecureContext) banner(INSECURE, 'err'); else banner('');
     if (S.status === 'idle') { S = fresh(); S.startTime = Date.now(); M.g = null; M.f = 0; M.above = false; M.lastT = 0; mapRouteDirty = true; }
-    S.status = 'running'; S.resumedAt = Date.now();
+    S.status = 'running'; S.resumedAt = Date.now(); lastKcalAt = Date.now();
+    M.times = []; M.cadStart = 0;
     S.track.push([]); last = null; curKmh = 0; lastMoveTs = Date.now();
+    if (window.isSecureContext && !hasProfile() && !profileAsked) {
+      profileAsked = true;
+      banner('Ajoute ta taille et ton poids dans Réglages : ils servent à calculer la longueur de tes pas et tes calories. En attendant, l\'appli utilise 170 cm et 70 kg.', 'info', 'Plus tard', { label: 'Ouvrir les réglages', fn: () => go(3), tag: 'profile' });
+    }
     startGeo(); requestWake();
     save(true); render();
   }
   function pause() {
     if (S.status !== 'running') return;
     S.activeMs += Date.now() - S.resumedAt;
-    S.status = 'paused'; curKmh = 0; last = null;
+    accrueKcal();
+    S.status = 'paused'; curKmh = 0; last = null; lastKcalAt = 0;
     stopGeo(); releaseWake(); save(true); render();
   }
   function reset() {
@@ -568,22 +645,34 @@
       '<div><span>Distance</span><b>' + nf2.format(S.distance / 1000) + ' km</b></div>' +
       '<div><span>Durée</span><b>' + fmtClock(S.activeMs) + '</b></div>' +
       '<div><span>' + (S.motionOk ? 'Pas' : 'Pas estimés') + '</span><b>' + nf0.format(steps()) + '</b></div>' +
-      '<div><span>Vitesse moyenne</span><b>' + nf1.format(avgKmh()) + ' km/h</b></div>';
+      '<div><span>Vitesse moyenne</span><b>' + nf1.format(avgKmh()) + ' km/h</b></div>' +
+      '<div><span>Calories</span><b>' + nf0.format(S.kcal || 0) + ' kcal</b></div>' +
+      '<div><span>' + (measuredStepM() ? 'Longueur de pas mesurée' : 'Longueur de pas estimée') + '</span><b>' + Math.round((measuredStepM() || stepLenM(avgKmh())) * 100) + ' cm</b></div>';
     $('mCancel').textContent = wasRunningBeforeModal ? 'Continuer la sortie' : 'Fermer';
     $('modal').classList.remove('hidden');
     $('mSave').focus();
   }
   const closeModal = () => $('modal').classList.add('hidden');
+  // Longueur de pas réelle = distance GPS / pas comptés par le capteur
+  function measuredStepM() {
+    if (!S.motionOk || S.sensorSteps < 20 || S.distance < 15) return 0;
+    const m = S.distance / S.sensorSteps;
+    return (m > 0.3 && m < 2) ? m : 0;
+  }
   $('btnEnd').addEventListener('click', openModal);
   $('mCancel').addEventListener('click', () => { closeModal(); if (wasRunningBeforeModal) startOrResume(); });
   $('mDiscard').addEventListener('click', () => { closeModal(); reset(); });
   $('mSave').addEventListener('click', () => {
     const hist = store.get(K_HIST, []);
     hist.unshift({
-      date: S.startTime || Date.now(), durationMs: S.activeMs, distanceM: Math.round(S.distance),
+      date: S.startTime || Date.now(), durationMs: S.activeMs, distanceM: Math.round(S.distance * 10) / 10,
       steps: steps(), stepsEstimated: !S.motionOk, avgKmh: Math.round(avgKmh() * 10) / 10,
-      maxKmh: Math.round(S.maxKmh * 10) / 10, track: simplifyTrack(S.track)
+      maxKmh: Math.round(S.maxKmh * 10) / 10, track: simplifyTrack(S.track),
+      kcal: Math.round(S.kcal || 0), stepCm: Math.round((measuredStepM() || stepLenM(avgKmh())) * 100)
     });
+    // Calibrage : une sortie à pied avec assez de pas mesurés remplace l'estimation de la marche
+    const msr = measuredStepM();
+    if (msr && S.sensorSteps >= 50 && avgKmh() < 6.5 && msr < 1.2) { settings.measuredStep = Math.round(msr * 100) / 100; saveSettings(); updateStepInfo(); }
     store.set(K_HIST, hist.slice(0, 100));
     closeModal(); reset();
     renderHistory(true);
@@ -620,17 +709,17 @@
     }
     const df = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
     const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
-    let totalM = 0, totalSteps = 0;
-    hist.forEach(h => { totalM += h.distanceM || 0; totalSteps += h.steps || 0; });
+    let totalM = 0, totalKcal = 0;
+    hist.forEach(h => { totalM += h.distanceM || 0; totalKcal += h.kcal || 0; });
     let html = '<div class="total"><div class="po"><div class="plate"><div class="back"></div><div class="face">' +
-      '<span class="lbl">' + hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + '<br>' + nf0.format(totalSteps) + ' pas</span>' +
+      '<span class="lbl">' + hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + '<br>' + nf0.format(totalKcal) + ' kcal</span>' +
       '<span class="val num">' + nf2.format(totalM / 1000) + '<small>km</small></span></div></div></div></div><ul class="runs">';
     hist.forEach((h, i) => {
       html += '<li class="run' + (highlightFirst && i === 0 ? ' new' : '') + '">' + thumbSvg(h.track) +
         '<div><div class="run-date">' + cap(df.format(new Date(h.date))) + '</div>' +
         '<div class="run-dist num">' + nf2.format((h.distanceM || 0) / 1000) + '<small>km</small></div>' +
         '<div class="run-meta"><span>' + fmtDurWords(h.durationMs || 0) + '</span><span>' + nf0.format(h.steps || 0) + (h.stepsEstimated ? ' pas estimés' : ' pas') + '</span>' +
-        '<span>' + nf1.format(h.avgKmh || 0) + ' km/h en moyenne</span></div></div></li>';
+        '<span>' + nf1.format(h.avgKmh || 0) + ' km/h en moyenne</span>' + (h.kcal != null ? '<span>' + nf0.format(h.kcal) + ' kcal</span>' : '') + '</div></div></li>';
     });
     box.innerHTML = html + '</ul>';
   }
@@ -652,6 +741,7 @@
     document.querySelectorAll('.tab').forEach(t => t.toggleAttribute('aria-current', +t.dataset.view === i));
     document.querySelectorAll('.tab[aria-current]').forEach(t => t.setAttribute('aria-current', 'page'));
     const prev = currentView; currentView = i;
+    if (i === 3 && $('banner').dataset.tag === 'profile') $('banner').classList.add('hidden');
     to.classList.add('is-active'); to.inert = false;
     document.body.classList.toggle('on-map', i === 1);
     document.body.classList.toggle('dim', i >= 2);
@@ -878,8 +968,32 @@
   }
 
   // ---------- Réglages ----------
-  $('stride').value = settings.stride; $('sens').value = settings.sens; $('maxAcc').value = String(settings.maxAcc); $('anim3d').checked = !!settings.anim3d;
-  $('stride').addEventListener('change', e => { const v = parseInt(e.target.value, 10); if (v >= 30 && v <= 150) { settings.stride = v; saveSettings(); queueRender(); } else e.target.value = settings.stride; });
+  $('height').value = settings.height || ''; $('weight').value = settings.weight || '';
+  function updateStepInfo() {
+    const w = Math.round(stepLenM(4) * 100), r = Math.round(stepLenM(10) * 100);
+    let t = w + ' cm en marchant, ' + r + ' cm en courant à 10 km/h. ';
+    if (settings.measuredStep) t += 'La valeur de marche vient de tes pas mesurés pendant une sortie.';
+    else if (settings.height) t += 'Calculée depuis ta taille (0,414 × taille en marchant).';
+    else t += 'Ajoute ta taille pour un calcul exact : 170 cm est utilisé en attendant.';
+    $('stepInfo').textContent = t;
+  }
+  function profileInput(id, key, min, max) {
+    $(id).addEventListener('change', e => {
+      const raw = e.target.value.trim();
+      if (raw === '') { settings[key] = null; }
+      else {
+        const v = parseInt(raw, 10);
+        if (!(v >= min && v <= max)) { e.target.value = settings[key] || ''; return; }
+        settings[key] = v;
+      }
+      if (key === 'height') settings.measuredStep = null; // nouvelle taille : on recalcule
+      saveSettings(); updateStepInfo(); queueRender();
+    });
+  }
+  profileInput('height', 'height', 100, 230);
+  profileInput('weight', 'weight', 30, 250);
+  updateStepInfo();
+  $('sens').value = settings.sens; $('maxAcc').value = String(settings.maxAcc); $('anim3d').checked = !!settings.anim3d;
   $('sens').addEventListener('change', e => { settings.sens = e.target.value; saveSettings(); });
   $('maxAcc').addEventListener('change', e => { settings.maxAcc = parseInt(e.target.value, 10) || 30; saveSettings(); });
   $('anim3d').addEventListener('change', e => { settings.anim3d = e.target.checked; saveSettings(); applyAnim(); });
@@ -893,7 +1007,7 @@
   setInterval(() => {
     if (S.status !== 'running') return;
     if (lastFixAt && Date.now() - lastFixAt > 10000) { curKmh = 0; setGps('weak', 'Signal GPS perdu'); }
-    render(); save();
+    accrueKcal(); render(); save();
     if (currentView === 1 && mapRouteDirty) flushRoute();
   }, 1000);
 
@@ -914,7 +1028,7 @@
   applyAnim();
   renderHistory();
   render();
-  window.__parcours = { get state() { return S; }, get kmh() { return curKmh; }, get relief() { return relief; }, get map() { return map; }, go };
+  window.__parcours = { get state() { return S; }, get kmh() { return curKmh; }, get relief() { return relief; }, get map() { return map; }, go, stepLenM, kcalPerMin, cadence, settings };
 })();
 </script>
 </body>
