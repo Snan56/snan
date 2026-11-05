@@ -23,7 +23,7 @@
     --rouge:#e5322d; --rouge-fonce:#a51f1b;
     --blanc:#f4f6fb; --jaune:#ffd23f; --jaune-fonce:#b98f10;
     --encre:#14213a; --gris:#a9b6c9;
-    --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+    --safe-t:var(--safe-area-inset-top,env(safe-area-inset-top,0px)); --safe-b:var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px));
     --top:calc(var(--safe-t) + 58px); --bottom:calc(var(--safe-b) + 78px); --tilt:0deg;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -357,6 +357,8 @@
       <div class="row"><label for="maxAcc">Précision GPS minimale<small>Les points moins précis sont ignorés</small></label>
         <select id="maxAcc"><option value="20">20 m</option><option value="30">30 m</option><option value="50">50 m</option></select></div>
     </div>
+    <div class="set" id="apkBox" hidden><div class="row"><div class="rl">Appli Android<small>Avec l'appli, le suivi continue quand l'écran est verrouillé.</small></div></div>
+      <a class="linkbtn" href="parcours.apk" download style="display:block;text-decoration:none">Télécharger l'appli Android</a></div>
     <div class="set" id="installBox" hidden><button id="installBtn" class="linkbtn" type="button">Installer l'appli sur l'écran d'accueil</button></div>
     <div class="set"><button id="clearHist" class="danger-btn" type="button">Effacer l'historique</button></div>
     <p class="about" id="about">Les calories sont une estimation calculée avec ton poids, ta vitesse et la pente : équations de l'ACSM pour la marche et la course, valeurs du Compendium des activités physiques pour le vélo. Ta taille, ton poids et tes sorties restent enregistrés sur ton téléphone. Rien n'est envoyé sur internet.</p>
@@ -611,6 +613,7 @@
     return m + (m > 1 ? ' minutes' : ' minute') + (s ? ' ' + s : '') + ' par kilomètre';
   }
   function sayKm(m) {
+    if (m < 1000) { const r = Math.round(m); return r + (r >= 2 ? ' mètres' : ' mètre'); }
     const km = m / 1000;
     return (Number.isInteger(km) ? String(km) : nf1.format(km)) + (km >= 2 ? ' kilomètres' : ' kilomètre');
   }
@@ -1648,6 +1651,7 @@
     try { await installEvt.userChoice; } catch (e) {}
     installEvt = null; $('installBox').hidden = true;
   });
+  if (!isNative && /Android/i.test(navigator.userAgent)) $('apkBox').hidden = false;
   if (!isNative && 'serviceWorker' in navigator && location.protocol === 'https:') {
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
   }
