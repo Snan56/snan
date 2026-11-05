@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1014">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mon Parcours">
+<title>Mon Parcours – GPS, vitesse et pas</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%234f8cff'/%3E%3Cpath d='M32 12c-8 0-14 6-14 14 0 10 14 26 14 26s14-16 14-26c0-8-6-14-14-14zm0 19a5 5 0 1 1 0-10 5 5 0 0 1 0 10z' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+  :root{
+    --bg:#0e1014; --card:#181b22; --card2:#1f232c; --line:#2a2f3a;
+    --txt:#f2f4f8; --mute:#9aa3b2; --accent:#4f8cff; --ok:#33d17a; --warn:#f5c211; --bad:#ff5c5c;
+    --safe-t: env(safe-area-inset-top, 0px); --safe-b: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  body{padding:calc(var(--safe-t) + 12px) 14px calc(var(--safe-b) + 96px);max-width:560px;margin:0 auto}
+  .num{font-variant-numeric:tabular-nums}
+  header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+  h1{font-size:20px;margin:0;font-weight:700;letter-spacing:-.2px}
+  .gps{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 11px;font-size:13px;color:var(--mute);white-space:nowrap}
+  .dot{width:9px;height:9px;border-radius:50%;background:#5b6270;flex:none}
+  .gps.wait .dot{background:var(--warn);animation:pulse 1s infinite}
+  .gps.good .dot{background:var(--ok)} .gps.ok .dot{background:var(--warn)} .gps.weak .dot{background:var(--bad)}
+  @keyframes pulse{50%{opacity:.25}}
+  .banner{border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.4;margin-bottom:10px;background:#2a2412;border:1px solid #5a4a12;color:#ffe9a3}
+  .banner.err{background:#2c1517;border-color:#6a2228;color:#ffc2c2}
+  .banner.info{background:#13213a;border-color:#24406e;color:#cfe0ff}
+  .hidden{display:none!important}
+  .speed{background:linear-gradient(160deg,#1b2333,#161a22);border:1px solid var(--line);border-radius:20px;padding:18px 16px 14px;text-align:center;margin-bottom:10px}
+  .speed .lbl{font-size:12px;text-transform:uppercase;letter-spacing:1.2px;color:var(--mute)}
+  .speed-val{font-size:76px;font-weight:800;line-height:1;letter-spacing:-2px;margin:6px 0 4px}
+  .speed-val small{font-size:20px;font-weight:600;color:var(--mute);letter-spacing:0;margin-left:6px}
+  .speed-sub{font-size:14px;color:var(--mute)} .speed-sub b{color:var(--txt);font-weight:600}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+  .card .lbl{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.8px}
+  .card .val{font-size:30px;font-weight:700;margin-top:4px;letter-spacing:-.5px}
+  .card .val small{font-size:14px;color:var(--mute);font-weight:600;letter-spacing:0}
+  .card .hint{font-size:11px;color:var(--mute);margin-top:2px;min-height:14px}
+  .map-wrap{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line);height:42vh;min-height:240px;background:#1a1e26;margin-bottom:8px}
+  #map{position:absolute;inset:0}
+  .chip{position:absolute;right:10px;bottom:10px;z-index:500;border:0;border-radius:999px;padding:9px 13px;background:#fff;color:#111;font-weight:600;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,.35);display:none}
+  .chip.show{display:block}
+  .map-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;color:var(--mute);font-size:14px}
+  .coords{font-size:12px;color:var(--mute);text-align:center;margin-bottom:12px}
+  .controls{position:fixed;left:0;right:0;bottom:0;z-index:1000;padding:12px 14px calc(var(--safe-b) + 12px);background:linear-gradient(to top,var(--bg) 70%,rgba(14,16,20,0));display:flex;gap:10px;max-width:560px;margin:0 auto}
+  .btn{flex:1;border:0;border-radius:16px;padding:17px 10px;font-size:18px;font-weight:700;color:#fff;background:var(--card2);cursor:pointer}
+  .btn:active{transform:scale(.98)}
+  .btn.primary{background:var(--accent)} .btn.go{background:var(--ok);color:#06210f} .btn.pause{background:var(--warn);color:#2a2200}
+  .btn.danger{background:#3a1d21;color:#ff9b9b;flex:.6}
+  .btn:disabled{opacity:.35}
+  details.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:0 14px;margin-bottom:10px}
+  details.panel summary{padding:14px 0;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between}
+  details.panel summary::-webkit-details-marker{display:none}
+  details.panel summary::after{content:"▾";color:var(--mute)} details[open].panel summary::after{content:"▴"}
+  .hist-item{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+  .hist-item .d{color:var(--mute);font-size:12px} .hist-item .big{font-weight:700;font-size:16px;text-align:right}
+  .hist-item .sub{grid-column:1/-1;color:var(--mute);font-size:13px}
+  .empty{color:var(--mute);font-size:14px;padding:0 0 14px}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line);font-size:15px}
+  .row label{flex:1} .row small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
+  input[type=number],select{background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:16px;width:110px}
+  .linkbtn{background:none;border:0;color:var(--bad);font-size:14px;padding:12px 0;cursor:pointer}
+  .tip{font-size:13px;color:var(--mute);line-height:1.5;margin:4px 2px 10px}
+  .modal{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.6);display:flex;align-items:flex-end;justify-content:center;padding:14px 14px calc(var(--safe-b) + 14px)}
+  .sheet{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;width:100%;max-width:520px}
+  .sheet h2{margin:0 0 10px;font-size:19px}
+  .sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .sum div{background:var(--card2);border-radius:12px;padding:10px}
+  .sum span{display:block;font-size:12px;color:var(--mute)} .sum b{font-size:20px}
+  .sheet .btns{display:flex;flex-direction:column;gap:8px}
+  .sheet .btn{padding:14px;font-size:16px}
+  .leaflet-container{background:#1a1e26;font:inherit}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Mon Parcours</h1>
+  <div id="gps" class="gps"><span class="dot"></span><span id="gpsText">GPS inactif</span></div>
+</header>
+
+<div id="banner" class="banner hidden"></div>
+
+<section class="speed">
+  <div class="lbl">Vitesse actuelle</div>
+  <div class="speed-val num"><span id="speed">0,0</span><small>km/h</small></div>
+  <div class="speed-sub num">Max <b id="maxSpeed">0,0</b> · Moyenne <b id="avgSpeed">0,0</b> km/h</div>
+</section>
+
+<section class="grid">
+  <div class="card"><div class="lbl">Distance</div><div class="val num"><span id="dist">0,00</span> <small>km</small></div><div class="hint" id="distHint"></div></div>
+  <div class="card"><div class="lbl">Durée</div><div class="val num" id="time">00:00:00</div><div class="hint" id="statusHint">Prêt</div></div>
+  <div class="card"><div class="lbl">Pas</div><div class="val num" id="steps">0</div><div class="hint" id="stepsHint"></div></div>
+  <div class="card"><div class="lbl">Allure</div><div class="val num"><span id="pace">–</span> <small>min/km</small></div><div class="hint"></div></div>
+</section>
+
+<section class="map-wrap">
+  <div id="map"></div>
+  <div id="mapMsg" class="map-msg hidden"></div>
+  <button id="recenter" class="chip" type="button">◎ Recentrer</button>
+</section>
+<div class="coords num" id="coords">Position : —</div>
+
+<details class="panel" id="histPanel">
+  <summary>Historique des sorties</summary>
+  <div id="history"></div>
+</details>
+
+<details class="panel">
+  <summary>Réglages</summary>
+  <div class="row"><label for="stride">Longueur d'un pas<small>Pour estimer les pas si le capteur n'est pas dispo</small></label><input id="stride" type="number" min="30" max="150" step="1" inputmode="numeric"> cm</div>
+  <div class="row"><label for="sens">Sensibilité du podomètre<small>Augmente-la si des pas sont oubliés</small></label>
+    <select id="sens"><option value="faible">Faible</option><option value="moyenne">Moyenne</option><option value="forte">Forte</option></select></div>
+  <div class="row"><label for="maxAcc">Précision GPS minimale<small>Les points moins précis sont ignorés</small></label>
+    <select id="maxAcc"><option value="20">20 m</option><option value="30">30 m</option><option value="50">50 m</option></select></div>
+</details>
+
+<p class="tip">💡 Garde l'écran allumé et l'appli ouverte pendant ta sortie : quand le téléphone se verrouille, le navigateur coupe le GPS et le podomètre. L'appli essaie d'empêcher la mise en veille automatiquement. Pour l'avoir comme une vraie appli : menu du navigateur → « Ajouter à l'écran d'accueil ».</p>
+
+<nav class="controls">
+  <button id="btnMain" class="btn primary" type="button">Démarrer</button>
+  <button id="btnStop" class="btn danger" type="button" disabled>Terminer</button>
+</nav>
+
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="sheet">
+    <h2 id="modalTitle">Terminer la sortie ?</h2>
+    <div class="sum num" id="modalSum"></div>
+    <div class="btns">
+      <button id="mSave" class="btn primary" type="button">Enregistrer la sortie</button>
+      <button id="mDiscard" class="btn danger" type="button" style="flex:none">Supprimer sans enregistrer</button>
+      <button id="mCancel" class="btn" type="button">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const nf1 = new Intl.NumberFormat('fr-FR', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+  const nf2 = new Intl.NumberFormat('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const nf0 = new Intl.NumberFormat('fr-FR', {maximumFractionDigits: 0});
+
+  // ---------- Stockage local (protégé) ----------
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+    del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  };
+  const K_SET = 'parcours.settings', K_CUR = 'parcours.current', K_HIST = 'parcours.history';
+
+  const settings = Object.assign({stride: 70, sens: 'moyenne', maxAcc: 30}, store.get(K_SET, {}));
+  const SENS = { faible: {hi: 1.9, lo: 0.4}, moyenne: {hi: 1.3, lo: 0.25}, forte: {hi: 0.85, lo: 0.15} };
+
+  // ---------- État de la sortie ----------
+  const fresh = () => ({ status: 'idle', activeMs: 0, resumedAt: 0, startTime: 0, distance: 0,
+                         sensorSteps: 0, motionOk: false, maxKmh: 0, track: [], savedAt: 0 });
+  let S = fresh();
+
+  let watchId = null, last = null, curKmh = 0, lastMoveTs = 0, lastFix = null, lastFixAt = 0;
+  let wakeLock = null, motionOn = false, firstFix = true, follow = true;
+  let renderQueued = false, lastSave = 0, wasRunningBeforeModal = false;
+
+  // ---------- Utilitaires ----------
+  const R = 6371008.8;
+  const rad = d => d * Math.PI / 180;
+  function haversine(a, b) {
+    const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+  }
+  const r6 = x => Math.round(x * 1e6) / 1e6;
+  const pad = n => String(n).padStart(2, '0');
+  function fmtDur(ms) {
+    const s = Math.max(0, Math.floor(ms / 1000));
+    return pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60);
+  }
+  function fmtPace(ms, m) {
+    if (m < 20) return '–';
+    const secPerKm = (ms / 1000) / (m / 1000);
+    if (!isFinite(secPerKm) || secPerKm > 5999) return '–';
+    const mm = Math.floor(secPerKm / 60), ss = Math.round(secPerKm % 60);
+    return ss === 60 ? (mm + 1) + ':00' : mm + ':' + pad(ss);
+  }
+  const elapsed = () => S.activeMs + (S.status === 'running' ? Date.now() - S.resumedAt : 0);
+  const avgKmh = () => { const h = elapsed() / 3600000; return h > 0.0014 ? (S.distance / 1000) / h : 0; };
+  const steps = () => S.motionOk ? S.sensorSteps : Math.round(S.distance / (Math.max(30, settings.stride) / 100));
+
+  function banner(msg, kind) {
+    const b = $('banner');
+    if (!msg) { b.classList.add('hidden'); return; }
+    b.className = 'banner ' + (kind || '');
+    b.textContent = msg;
+  }
+  function setGps(cls, text) { $('gps').className = 'gps ' + cls; $('gpsText').textContent = text; }
+
+  // ---------- Affichage ----------
+  function render() {
+    renderQueued = false;
+    const ms = elapsed();
+    $('speed').textContent = nf1.format(S.status === 'running' ? curKmh : 0);
+    $('maxSpeed').textContent = nf1.format(S.maxKmh);
+    $('avgSpeed').textContent = nf1.format(avgKmh());
+    $('dist').textContent = nf2.format(S.distance / 1000);
+    $('distHint').textContent = S.distance > 0 && S.distance < 1000 ? nf0.format(S.distance) + ' m' : '';
+    $('time').textContent = fmtDur(ms);
+    $('steps').textContent = nf0.format(steps());
+    $('stepsHint').textContent = S.status === 'idle' ? '' : (S.motionOk ? 'Capteur de mouvement' : 'Estimés depuis la distance');
+    $('pace').textContent = fmtPace(ms, S.distance);
+    $('statusHint').textContent = { idle: 'Prêt', running: 'En cours', paused: 'En pause' }[S.status];
+
+    const bm = $('btnMain');
+    if (S.status === 'running') { bm.textContent = 'Pause'; bm.className = 'btn pause'; }
+    else if (S.status === 'paused') { bm.textContent = 'Reprendre'; bm.className = 'btn go'; }
+    else { bm.textContent = 'Démarrer'; bm.className = 'btn primary'; }
+    $('btnStop').disabled = S.status === 'idle';
+  }
+  const queueRender = () => { if (!renderQueued) { renderQueued = true; requestAnimationFrame(render); } };
+
+  function save(force) {
+    const now = Date.now();
+    if (!force && now - lastSave < 3000) return;
+    lastSave = now;
+    if (S.status === 'idle') { store.del(K_CUR); return; }
+    S.savedAt = now;
+    store.set(K_CUR, S);
+  }
+
+  // ---------- Carte ----------
+  let map = null, trackLine = null, marker = null, accCircle = null;
+  function initMap() {
+    if (typeof L === 'undefined') {
+      const m = $('mapMsg'); m.textContent = 'Carte indisponible (pas de connexion internet). Le suivi GPS, la vitesse et les pas fonctionnent quand même.';
+      m.classList.remove('hidden');
+      return;
+    }
+    map = L.map('map', { zoomControl: false, attributionControl: true }).setView([46.6, 2.4], 5);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '© OpenStreetMap'
+    }).addTo(map);
+    trackLine = L.polyline(S.track, { color: '#4f8cff', weight: 5, opacity: 0.95, lineJoin: 'round' }).addTo(map);
+    map.on('dragstart', () => { follow = false; $('recenter').classList.add('show'); });
+    if (S.track.some(s => s.length > 1)) map.fitBounds(trackLine.getBounds(), { padding: [30, 30] });
+  }
+  function redrawTrack() { if (trackLine) trackLine.setLatLngs(S.track); }
+  function updateMarker(lat, lon, acc) {
+    if (!map) return;
+    const ll = [lat, lon];
+    if (!marker) {
+      accCircle = L.circle(ll, { radius: acc, color: '#4f8cff', weight: 1, opacity: 0.4, fillOpacity: 0.12 }).addTo(map);
+      marker = L.circleMarker(ll, { radius: 8, color: '#fff', weight: 3, fillColor: '#4f8cff', fillOpacity: 1 }).addTo(map);
+    } else { marker.setLatLng(ll); accCircle.setLatLng(ll); accCircle.setRadius(acc); }
+    if (follow) {
+      if (firstFix) { map.setView(ll, 17); firstFix = false; }
+      else map.panTo(ll, { animate: true, duration: 0.5 });
+    }
+  }
+  $('recenter').addEventListener('click', () => {
+    follow = true; $('recenter').classList.remove('show');
+    if (map && lastFix) map.setView([lastFix.lat, lastFix.lon], Math.max(map.getZoom(), 16));
+  });
+
+  // ---------- GPS ----------
+  function startGeo() {
+    if (watchId !== null) return;
+    setGps('wait', 'Recherche GPS…');
+    try {
+      watchId = navigator.geolocation.watchPosition(onPos, onGeoErr, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+    } catch (e) { onGeoErr({ code: 1 }); }
+  }
+  function stopGeo() {
+    if (watchId !== null) { try { navigator.geolocation.clearWatch(watchId); } catch (e) {} watchId = null; }
+    setGps('', 'GPS en pause');
+  }
+  function onGeoErr(err) {
+    if (err.code === 1) {
+      banner("Accès à la position refusé. Autorise la localisation pour ce site dans les réglages du navigateur (iPhone : Réglages → Confidentialité → Service de localisation → Safari ; Android : icône 🔒 à côté de l'adresse → Autorisations), puis recharge la page.", 'err');
+      setGps('weak', 'Position refusée');
+      if (S.status === 'running') pause();
+    } else {
+      setGps('weak', err.code === 3 ? 'GPS lent…' : 'Signal GPS perdu');
+    }
+  }
+  function setSpeed(kmh) {
+    if (!isFinite(kmh) || kmh < 0) return;
+    curKmh = curKmh * 0.45 + kmh * 0.55;
+    if (curKmh < 0.8) curKmh = 0;
+  }
+  function onPos(pos) {
+    const c = pos.coords, ts = pos.timestamp || Date.now();
+    lastFix = { lat: c.latitude, lon: c.longitude, acc: c.accuracy, ts };
+    lastFixAt = Date.now();
+    const acc = Math.round(c.accuracy);
+    setGps(acc <= 15 ? 'good' : acc <= settings.maxAcc ? 'ok' : 'weak', 'GPS ±' + acc + ' m');
+    $('coords').textContent = 'Position : ' + c.latitude.toFixed(5) + ', ' + c.longitude.toFixed(5) + ' (±' + acc + ' m)';
+    updateMarker(c.latitude, c.longitude, c.accuracy);
+    if (S.status !== 'running') return;
+    if (c.accuracy > settings.maxAcc) return; // point trop imprécis : ignoré
+
+    const gpsKmh = (typeof c.speed === 'number' && c.speed >= 0 && isFinite(c.speed)) ? c.speed * 3.6 : null;
+    const p = { lat: c.latitude, lon: c.longitude, acc: c.accuracy, ts };
+    const seg = S.track[S.track.length - 1];
+
+    if (!last) {
+      last = p; lastMoveTs = ts;
+      seg.push([r6(p.lat), r6(p.lon)]); redrawTrack();
+      if (gpsKmh !== null) setSpeed(gpsKmh);
+      queueRender(); return;
+    }
+    const dt = (ts - last.ts) / 1000;
+    if (dt <= 0) return;
+    const d = haversine(last, p);
+    const v = d / dt;
+    if (v > 70) return; // saut aberrant (> 250 km/h) : ignoré
+
+    const threshold = Math.max(4, (last.acc + p.acc) / 4); // anti-tremblement GPS
+    if (d >= threshold) {
+      S.distance += d;
+      seg.push([r6(p.lat), r6(p.lon)]); redrawTrack();
+      setSpeed(gpsKmh !== null ? gpsKmh : v * 3.6);
+      last = p; lastMoveTs = ts;
+    } else if (gpsKmh !== null) {
+      setSpeed(gpsKmh);
+    } else if (ts - lastMoveTs > 6000) {
+      setSpeed(0); curKmh = 0;
+    }
+    if (p.acc <= 25 && curKmh > S.maxKmh) S.maxKmh = curKmh;
+    save(); queueRender();
+  }
+
+  // ---------- Podomètre (accéléromètre) ----------
+  const M = { g: null, f: 0, above: false, lastStep: 0 };
+  function onMotion(e) {
+    const a = e.accelerationIncludingGravity;
+    if (!a || a.x == null || a.y == null || a.z == null) return;
+    if (!S.motionOk && S.status !== 'idle') {
+      // Le capteur répond : on bascule sur le vrai comptage
+      const est = steps(); S.motionOk = true; S.sensorSteps = est; queueRender();
+    }
+    if (S.status !== 'running') return;
+    const m = Math.sqrt(a.x * a.x + a.y * a.y + a.z * a.z);
+    if (M.g === null) M.g = m;
+    M.g += (m - M.g) * 0.02;          // gravité / ligne de base lente
+    M.f += ((m - M.g) - M.f) * 0.35;  // lissage du signal
+    const th = SENS[settings.sens] || SENS.moyenne;
+    const now = e.timeStamp || performance.now();
+    if (!M.above && M.f > th.hi) {
+      M.above = true;
+      if (now - M.lastStep > 280) { S.sensorSteps++; M.lastStep = now; queueRender(); }
+    } else if (M.above && M.f < th.lo) {
+      M.above = false;
+    }
+  }
+  function startMotion() {
+    if (motionOn || typeof window.DeviceMotionEvent === 'undefined') return;
+    window.addEventListener('devicemotion', onMotion);
+    motionOn = true;
+  }
+
+  // ---------- Écran allumé ----------
+  async function requestWake() {
+    try {
+      if ('wakeLock' in navigator && !wakeLock) {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', () => { wakeLock = null; });
+      }
+    } catch (e) {}
+  }
+  function releaseWake() { try { if (wakeLock) wakeLock.release(); } catch (e) {} wakeLock = null; }
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && S.status === 'running') requestWake();
+    if (document.visibilityState === 'hidden') save(true);
+  });
+
+  // ---------- Actions ----------
+  function startOrResume() {
+    // iPhone : la permission du capteur de mouvement doit être demandée directement au clic
+    let motionPerm = null;
+    if (typeof window.DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      try { motionPerm = DeviceMotionEvent.requestPermission().catch(() => 'denied'); } catch (e) { motionPerm = Promise.resolve('denied'); }
+    }
+    if (!('geolocation' in navigator)) { banner("Ce navigateur ne permet pas d'accéder au GPS.", 'err'); return; }
+    if (!window.isSecureContext) {
+      banner("⚠️ Le GPS ne fonctionne que si la page est ouverte depuis une adresse sécurisée (https://…). Mets le fichier en ligne puis ouvre le lien sur ton téléphone.", 'err');
+    } else banner('');
+
+    if (S.status === 'idle') {
+      S = fresh(); S.startTime = Date.now(); redrawTrack();
+      M.g = null; M.f = 0; M.above = false;
+    }
+    S.status = 'running'; S.resumedAt = Date.now();
+    S.track.push([]); last = null; curKmh = 0; lastMoveTs = Date.now();
+    startGeo();
+    // On écoute dans tous les cas : si le capteur ne répond pas, les pas sont estimés depuis la distance
+    if (motionPerm) motionPerm.then(startMotion, startMotion);
+    else startMotion();
+    requestWake();
+    save(true); render();
+  }
+  function pause() {
+    if (S.status !== 'running') return;
+    S.activeMs += Date.now() - S.resumedAt;
+    S.status = 'paused'; curKmh = 0; last = null;
+    stopGeo(); releaseWake(); save(true); render();
+  }
+  function reset() {
+    stopGeo(); releaseWake(); setGps('', 'GPS inactif');
+    S = fresh(); curKmh = 0; last = null; store.del(K_CUR); redrawTrack(); render();
+  }
+
+  $('btnMain').addEventListener('click', () => {
+    if (S.status === 'running') pause(); else startOrResume();
+  });
+
+  // Fenêtre de fin
+  function openModal() {
+    wasRunningBeforeModal = S.status === 'running';
+    pause();
+    const ms = S.activeMs;
+    $('modalSum').innerHTML =
+      '<div><span>Distance</span><b>' + nf2.format(S.distance / 1000) + ' km</b></div>' +
+      '<div><span>Durée</span><b>' + fmtDur(ms) + '</b></div>' +
+      '<div><span>Pas</span><b>' + nf0.format(steps()) + '</b></div>' +
+      '<div><span>Vitesse moyenne</span><b>' + nf1.format(avgKmh()) + ' km/h</b></div>';
+    $('modal').classList.remove('hidden');
+  }
+  const closeModal = () => $('modal').classList.add('hidden');
+  $('btnStop').addEventListener('click', openModal);
+  $('mCancel').addEventListener('click', () => { closeModal(); if (wasRunningBeforeModal) startOrResume(); });
+  $('mDiscard').addEventListener('click', () => { closeModal(); reset(); });
+  $('mSave').addEventListener('click', () => {
+    const hist = store.get(K_HIST, []);
+    hist.unshift({
+      date: S.startTime || Date.now(), durationMs: S.activeMs, distanceM: Math.round(S.distance),
+      steps: steps(), stepsEstimated: !S.motionOk, avgKmh: Math.round(avgKmh() * 10) / 10, maxKmh: Math.round(S.maxKmh * 10) / 10
+    });
+    store.set(K_HIST, hist.slice(0, 100));
+    closeModal(); reset(); renderHistory();
+    $('histPanel').open = true;
+  });
+
+  // ---------- Historique ----------
+  let clearArmed = false;
+  function renderHistory() {
+    const hist = store.get(K_HIST, []);
+    const box = $('history');
+    if (!hist.length) { box.innerHTML = '<div class="empty">Aucune sortie enregistrée pour l\'instant.</div>'; return; }
+    const df = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    let html = '';
+    let totalM = 0, totalSteps = 0;
+    hist.forEach(h => {
+      totalM += h.distanceM || 0; totalSteps += h.steps || 0;
+      html += '<div class="hist-item"><div><div>' + df.format(new Date(h.date)) + '</div><div class="d">' + fmtDur(h.durationMs) + '</div></div>' +
+              '<div class="big num">' + nf2.format((h.distanceM || 0) / 1000) + ' km</div>' +
+              '<div class="sub num">' + nf0.format(h.steps || 0) + ' pas' + (h.stepsEstimated ? ' (estimés)' : '') +
+              ' · moy. ' + nf1.format(h.avgKmh || 0) + ' km/h · max ' + nf1.format(h.maxKmh || 0) + ' km/h</div></div>';
+    });
+    html += '<div class="hist-item"><div><b>Total</b><div class="d">' + hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + '</div></div>' +
+            '<div class="big num">' + nf2.format(totalM / 1000) + ' km</div><div class="sub num">' + nf0.format(totalSteps) + ' pas au total</div></div>';
+    html += '<button class="linkbtn" id="clearHist" type="button">Effacer l\'historique</button>';
+    box.innerHTML = html;
+    $('clearHist').addEventListener('click', e => {
+      if (!clearArmed) { clearArmed = true; e.target.textContent = 'Appuie encore pour confirmer'; setTimeout(() => { clearArmed = false; if (e.target.isConnected) e.target.textContent = 'Effacer l\'historique'; }, 3000); return; }
+      clearArmed = false; store.del(K_HIST); renderHistory();
+    });
+  }
+
+  // ---------- Réglages ----------
+  $('stride').value = settings.stride; $('sens').value = settings.sens; $('maxAcc').value = String(settings.maxAcc);
+  $('stride').addEventListener('change', e => { const v = parseInt(e.target.value, 10); if (v >= 30 && v <= 150) { settings.stride = v; store.set(K_SET, settings); queueRender(); } else e.target.value = settings.stride; });
+  $('sens').addEventListener('change', e => { settings.sens = e.target.value; store.set(K_SET, settings); });
+  $('maxAcc').addEventListener('change', e => { settings.maxAcc = parseInt(e.target.value, 10) || 30; store.set(K_SET, settings); });
+
+  // ---------- Horloge ----------
+  setInterval(() => {
+    if (S.status === 'running') {
+      if (lastFixAt && Date.now() - lastFixAt > 10000) { curKmh = 0; setGps('weak', 'Signal GPS perdu'); }
+      render();
+      save();
+    }
+  }, 1000);
+
+  // ---------- Démarrage ----------
+  const saved = store.get(K_CUR, null);
+  if (saved && saved.status && saved.status !== 'idle' && Array.isArray(saved.track)) {
+    S = Object.assign(fresh(), saved);
+    if (S.status === 'running') { S.activeMs += Math.max(0, (S.savedAt || Date.now()) - S.resumedAt); S.status = 'paused'; }
+    banner('Ta sortie en cours a été récupérée. Appuie sur « Reprendre » pour continuer, ou « Terminer » pour l\'enregistrer.', 'info');
+  } else if (!window.isSecureContext) {
+    banner("⚠️ Le GPS ne fonctionne que si la page est ouverte depuis une adresse sécurisée (https://…). Mets le fichier en ligne puis ouvre le lien sur ton téléphone.", 'err');
+  }
+  initMap();
+  renderHistory();
+  render();
+  // Exposé pour les tests
+  window.__parcours = { get state() { return S; }, get kmh() { return curKmh; } };
+})();
+</script>
+</body>
+</html>
