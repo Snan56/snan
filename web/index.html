@@ -49,6 +49,8 @@
     display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none;transition:background .3s}
   .top>*{pointer-events:auto}
   body.on-map .top{background:linear-gradient(to bottom,rgba(22,32,51,.92),rgba(22,32,51,0))}
+  body.dim .top{background:linear-gradient(to bottom,rgba(20,30,49,.97) 0,rgba(20,30,49,.97) 78%,rgba(20,30,49,0) 100%)}
+  .set select{width:150px}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-stretch:78%;font-size:23px;letter-spacing:-.01em}
   .blaze{width:24px;height:16px;display:inline-grid;grid-template-rows:1fr 1fr;flex:none}
   .blaze::before{content:"";background:var(--blanc)} .blaze::after{content:"";background:var(--rouge)}
@@ -338,6 +340,41 @@
   @media (max-height:700px){
     .ring3d{width:min(54vw,210px)} .pl-name{font-size:28px} .pl-next{margin:8px 0 4px;height:48px} .pl-ctrl{margin-top:10px}
   }
+
+  /* ---------- Test navette ---------- */
+  .navplate .face{background:linear-gradient(180deg,#ffffff 0%,#eef1f7 60%,#dfe5ef 100%)}
+  .navplate .back{background:#8e9ab0}
+  .navplate .val{color:var(--rouge)}
+  .nv-intro{font-size:15px;line-height:1.5;margin:0 0 12px}
+  .nv-note{font-size:13px;color:var(--gris);margin:10px 0 14px;line-height:1.45}
+  .nplayer{justify-content:flex-start}
+  .nv-head{display:flex;align-items:flex-end;justify-content:center;gap:28px;margin-top:6px}
+  .nv-head.flip{animation:cardin .7s cubic-bezier(.2,1.3,.4,1)}
+  .nv-big{font-size:clamp(54px,16vw,82px);line-height:.9;font-stretch:66%;text-align:left}
+  .nv-big small{display:block;font-size:14px;font-weight:600;color:var(--gris);font-stretch:100%;margin-bottom:4px}
+  .nv-big em{font-style:normal;font-size:18px;font-weight:700;color:var(--gris);margin-left:4px;font-stretch:90%}
+  .lane3d{position:relative;width:100%;max-width:420px;height:min(34vh,290px);perspective:520px;perspective-origin:50% 0%;margin:12px 0 4px;display:flex;justify-content:center;flex:none}
+  .lane{position:relative;width:min(44vw,170px);height:100%;transform:rotateX(52deg);transform-origin:50% 100%;transform-style:preserve-3d;
+    background:linear-gradient(90deg,rgba(244,246,251,.9) 0 3px,transparent 3px calc(100% - 3px),rgba(244,246,251,.9) calc(100% - 3px)),
+      repeating-linear-gradient(to top,rgba(95,127,168,.34) 0 22px,rgba(95,127,168,.16) 22px 44px)}
+  .ln{position:absolute;left:-16px;right:-16px;height:16px;background:linear-gradient(var(--blanc) 0 50%,var(--rouge) 50% 100%)}
+  .ln-a{bottom:0} .ln-b{top:0}
+  .ln span{position:absolute;left:-34px;top:50%;transform:translateY(-50%) rotateX(-52deg);font-weight:800;font-size:24px}
+  .runner{position:absolute;left:50%;bottom:calc(var(--p, 0) * (100% - 16px) + 8px);width:34px;height:34px;margin-left:-17px;transform-origin:50% 100%;
+    transform:rotateX(-52deg)}
+  .runner::before{content:"";position:absolute;inset:0;border-radius:50%;background:var(--rouge);border:5px solid var(--blanc);box-shadow:0 8px 14px rgba(0,0,0,.45)}
+  .nv-count{position:absolute;inset:0;display:grid;place-items:center;font-size:120px;font-weight:800;font-stretch:66%;color:var(--jaune);text-shadow:0 10px 30px rgba(0,0,0,.55)}
+  .nv-info{display:flex;justify-content:space-between;gap:10px;width:min(100%,420px);font-size:15px;color:var(--gris);font-variant-numeric:tabular-nums}
+  .nv-info b{color:var(--blanc)}
+  .nv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(100%,420px);margin-top:12px}
+  .nv-stats div{background:rgba(29,43,69,.9);border-radius:14px;padding:8px 10px;text-align:left}
+  .nv-stats span{display:block;font-size:12px;color:var(--gris)}
+  .nv-stats b{font-size:22px;font-stretch:70%;font-weight:800;font-variant-numeric:tabular-nums}
+  .stopbtn{margin-top:auto;width:min(100%,420px);border:0;border-radius:18px;padding:18px;font-size:20px;font-weight:800;background:var(--rouge);color:#fff;
+    box-shadow:0 6px 0 var(--rouge-fonce),0 14px 26px rgba(0,0,0,.4);cursor:pointer}
+  .stopbtn:active{transform:translateY(5px);box-shadow:0 1px 0 var(--rouge-fonce)}
+  #voiceSel{width:170px}
+  @media (max-height:700px){ .lane3d{height:min(28vh,200px)} .nv-big{font-size:48px} .nv-stats b{font-size:19px} }
   @media (max-height:700px){
     .speed-num{font-size:clamp(64px,22vw,100px)}
     .po{height:48px;margin-bottom:8px} .face .val{font-size:26px} .post{margin-top:10px} .hint{display:none}
@@ -346,7 +383,7 @@
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   }
-  body.anim-off .post.intro .po,body.anim-off .plate.flip,body.anim-off .run.new,body.anim-off .sheet,body.anim-off .coin,body.anim-off .ring.spin,body.anim-off .wcard.flip .pl-name{animation:none}
+  body.anim-off .post.intro .po,body.anim-off .plate.flip,body.anim-off .run.new,body.anim-off .sheet,body.anim-off .coin,body.anim-off .ring.spin,body.anim-off .wcard.flip .pl-name,body.anim-off .nv-head.flip{animation:none}
 </style>
 </head>
 <body>
@@ -419,6 +456,7 @@
     <div class="set">
       <div class="row"><label for="height">Ta taille<small>Sert à calculer la longueur de tes pas</small></label><span class="unitfield"><input id="height" type="number" min="100" max="230" step="1" inputmode="numeric" placeholder="170"> cm</span></div>
       <div class="row"><label for="weight">Ton poids<small>Sert à calculer les calories dépensées</small></label><span class="unitfield"><input id="weight" type="number" min="30" max="250" step="1" inputmode="numeric" placeholder="70"> kg</span></div>
+      <div class="row"><label for="age">Ton âge (facultatif)<small>Sert à estimer ta VO2max au test navette si tu as moins de 18 ans</small></label><span class="unitfield"><input id="age" type="number" min="6" max="99" step="1" inputmode="numeric"> ans</span></div>
       <div class="row"><div class="rl">Longueur d'un pas<small id="stepInfo"></small></div></div>
     </div>
     <div class="set-title">Objectifs</div>
@@ -432,9 +470,15 @@
         <span class="switch"><input id="voice" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="voiceEvery">Fréquence</label>
         <select id="voiceEvery"><option value="500">Tous les 500 m</option><option value="1000">Tous les km</option><option value="2000">Tous les 2 km</option><option value="5000">Tous les 5 km</option></select></div>
+      <div class="row"><label for="voiceSel">Voix<small>Les voix proposées dépendent de ton téléphone</small></label><select id="voiceSel"><option value="">Voix par défaut</option></select></div>
+      <div class="row"><label for="voiceRate">Débit de la voix</label><select id="voiceRate"><option value="0.8">Lent</option><option value="1">Normal</option><option value="1.2">Rapide</option><option value="1.4">Très rapide</option></select></div>
+      <div class="row"><label for="voicePitch">Hauteur de la voix</label><select id="voicePitch"><option value="0.8">Grave</option><option value="1">Normale</option><option value="1.25">Aiguë</option></select></div>
+      <div class="row"><label for="voiceVol">Volume de la voix</label><select id="voiceVol"><option value="0.5">Faible</option><option value="0.8">Moyen</option><option value="1">Fort</option></select></div>
       <div class="row"><label for="beeps">Bips du minuteur<small>3, 2, 1 avant chaque changement pendant les séances</small></label>
         <span class="switch"><input id="beeps" type="checkbox" role="switch"><span></span></span></div>
-      <div class="row"><button id="voiceTest" class="linkbtn" type="button">Écouter un exemple</button></div>
+      <div class="row"><label for="beepSound">Son des bips<small>Pour les séances et le test navette</small></label><select id="beepSound"><option value="classique">Classique</option><option value="sifflet">Sifflet</option><option value="electronique">Électronique</option><option value="cloche">Cloche</option></select></div>
+      <div class="row"><button id="beepTest" class="linkbtn" type="button">Écouter les bips</button></div>
+      <div class="row"><button id="voiceTest" class="linkbtn" type="button">Écouter la voix</button></div>
     </div>
     <div class="set-title">Affichage et capteurs</div>
     <div class="set">
@@ -571,6 +615,54 @@
   </div>
 </div>
 
+<!-- Test navette : réglages -->
+<div id="nsheet" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="nsTitle">
+  <div class="sheet ed">
+    <div class="d-head"><h2 id="nsTitle">Test navette (Luc Léger)</h2><button id="nsClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
+    <div id="nsBody"></div>
+    <div class="ed-grid">
+      <div><label for="nvDistSel">Distance entre A et B</label><select id="nvDistSel"><option value="10">10 m</option><option value="15">15 m</option><option value="20">20 m</option><option value="25">25 m</option><option value="30">30 m</option></select></div>
+      <div><label for="nvV0Sel">Vitesse de départ</label><select id="nvV0Sel"><option value="6">6 km/h</option><option value="7">7 km/h</option><option value="8">8 km/h</option><option value="8.5">8,5 km/h</option><option value="9">9 km/h</option><option value="10">10 km/h</option><option value="12">12 km/h</option></select></div>
+      <div><label for="nvIncSel">Hausse à chaque palier</label><select id="nvIncSel"><option value="0.5">+0,5 km/h</option><option value="1">+1 km/h</option></select></div>
+      <div><label for="nvStageSel">Durée d'un palier</label><select id="nvStageSel"><option value="30">30 s</option><option value="60">1 min</option><option value="120">2 min</option></select></div>
+    </div>
+    <p class="nv-note" id="nvNote"></p>
+    <div class="btns">
+      <button id="nsStart" class="sbtn save" type="button">Lancer le test</button>
+      <button id="nsReset" class="sbtn cancel" type="button">Revenir au test officiel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Test navette : en cours -->
+<div id="nplayer" class="player nplayer ph-work hidden" role="dialog" aria-modal="true" aria-labelledby="nvTitle">
+  <div class="pl-top"><button id="nvClose" class="xbtn" type="button" aria-label="Arrêter le test">×</button><div class="pl-pos"><b id="nvTitle">Test navette</b><span id="nvCfg"></span></div></div>
+  <div class="nv-head" id="nvHead">
+    <div class="nv-big num"><small>Palier</small><span id="nvStage">1</span></div>
+    <div class="nv-big num"><small>Vitesse</small><span id="nvSpeed">8,5</span><em>km/h</em></div>
+  </div>
+  <div class="lane3d" aria-hidden="true">
+    <div class="lane"><div class="ln ln-b"><span>B</span></div><div class="ln ln-a"><span>A</span></div><div class="runner" id="nvRunner"></div></div>
+    <div class="nv-count hidden" id="nvCount">5</div>
+  </div>
+  <div class="nv-info"><span id="nvLap"></span><span id="nvBeep"></span></div>
+  <div class="nv-stats"><div><span>Distance</span><b id="nvDist">0 m</b></div><div><span>Temps</span><b id="nvTime">0:00</b></div><div><span>VO2max estimée</span><b id="nvVo2">–</b></div></div>
+  <button id="nvStop" class="stopbtn" type="button">J'arrête</button>
+</div>
+
+<!-- Test navette : résultat -->
+<div id="nsum" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="nsumTitle">
+  <div class="sheet">
+    <h2 id="nsumTitle">Résultat du test</h2>
+    <div class="sum" id="nsumBody"></div>
+    <p class="nv-note" id="nsumNote"></p>
+    <div class="btns">
+      <button id="nsumSave" class="sbtn save" type="button">Enregistrer le résultat</button>
+      <button id="nsumDrop" class="sbtn del" type="button">Ne pas enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <div id="medal" class="medal hidden" role="dialog" aria-modal="true" aria-labelledby="medalTitle">
   <div class="coin"><div class="edge"></div><div class="cf"><b id="medalVal"></b></div><div class="cb"></div></div>
   <h3 id="medalTitle">Nouveau record</h3>
@@ -607,7 +699,8 @@
   const K_SET = 'parcours.settings', K_CUR = 'parcours.current', K_HIST = 'parcours.history';
   const settings = Object.assign({
     height: null, weight: null, measuredStep: null, activity: 'marche',
-    goalSteps: 10000, goalKm: 20, voice: true, voiceEvery: 1000, beeps: true, goalSaidDay: '',
+    goalSteps: 10000, goalKm: 20, voice: true, voiceEvery: 1000, beeps: true, goalSaidDay: '', age: null,
+    vURI: '', vIdx: -1, vRate: 1, vPitch: 1, vVol: 1, beepSound: 'classique', nav: null,
     sens: 'moyenne', maxAcc: 30, anim3d: !reduceMotion, map3d: true
   }, store.get(K_SET, {}));
   const saveSettings = () => store.set(K_SET, settings);
@@ -743,21 +836,49 @@
   function setGps(cls, text) { $('gps').className = 'gps ' + cls; $('gpsText').textContent = text; }
 
   // ---------- Voix ----------
-  let frVoice = null;
+  let frVoice = null, webVoices = [], nativeVoices = [];
   function pickVoice() {
-    try { const v = speechSynthesis.getVoices(); frVoice = v.find(x => /^fr(-|_)FR/i.test(x.lang)) || v.find(x => /^fr/i.test(x.lang)) || null; } catch (e) {}
+    try { webVoices = speechSynthesis.getVoices() || []; frVoice = webVoices.find(x => /^fr(-|_)FR/i.test(x.lang)) || webVoices.find(x => /^fr/i.test(x.lang)) || null; } catch (e) {}
+    setTimeout(fillVoiceSelect, 0);
+  }
+  const escv = str => String(str).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function voiceList() {
+    if (plugin('TextToSpeech')) return nativeVoices;
+    return webVoices.map(v => ({ id: v.voiceURI || v.name, label: v.name, lang: v.lang || '' }));
+  }
+  // Liste des voix du téléphone : les voix françaises d'abord
+  function fillVoiceSelect() {
+    const sel = document.getElementById('voiceSel'); if (!sel) return;
+    const native = !!plugin('TextToSpeech'), cur = native ? (settings.vIdx >= 0 ? String(settings.vIdx) : '') : (settings.vURI || '');
+    const list = voiceList(), fr = list.filter(v => /^fr/i.test(v.lang)), other = list.filter(v => !/^fr/i.test(v.lang));
+    const opt = v => '<option value="' + escv(v.id) + '">' + escv(v.label) + (v.lang ? ' (' + escv(v.lang) + ')' : '') + '</option>';
+    let h = '<option value="">Voix par défaut</option>';
+    if (fr.length) h += '<optgroup label="Français">' + fr.map(opt).join('') + '</optgroup>';
+    if (other.length) h += '<optgroup label="Autres langues">' + other.slice(0, 60).map(opt).join('') + '</optgroup>';
+    sel.innerHTML = h;
+    sel.value = list.some(v => v.id === cur) ? cur : '';
   }
   if ('speechSynthesis' in window) { pickVoice(); try { speechSynthesis.addEventListener('voiceschanged', pickVoice); } catch (e) {} }
   function speak(text, force) {
     if (!settings.voice && !force) return;
     const tts = plugin('TextToSpeech');
-    if (tts) { tts.speak({ text, lang: 'fr-FR', rate: 1.0 }).catch(() => {}); return; }
+    const rate = +settings.vRate || 1, pitch = +settings.vPitch || 1, volume = settings.vVol == null ? 1 : +settings.vVol;
+    if (tts) {
+      const o = { text, lang: 'fr-FR', rate, pitch, volume };
+      const nv = settings.vIdx >= 0 ? nativeVoices.find(v => v.id === String(settings.vIdx)) : null;
+      if (nv) { o.voice = settings.vIdx; o.lang = nv.lang || 'fr-FR'; }
+      tts.speak(o).catch(() => {}); return;
+    }
     if (!('speechSynthesis' in window)) return;
     try {
-      const u = new SpeechSynthesisUtterance(text); u.lang = 'fr-FR'; if (frVoice) u.voice = frVoice; u.rate = 1;
+      const u = new SpeechSynthesisUtterance(text);
+      const chosen = settings.vURI ? webVoices.find(v => (v.voiceURI || v.name) === settings.vURI) : null, voice = chosen || frVoice;
+      u.lang = (voice && voice.lang) || 'fr-FR'; if (voice) u.voice = voice;
+      u.rate = rate; u.pitch = pitch; u.volume = volume;
       speechSynthesis.cancel(); speechSynthesis.speak(u);
     } catch (e) {}
   }
+  const sayNum = v => Number.isInteger(v) ? String(v) : nf1.format(v);
   function sayDur(sec) {
     sec = Math.round(sec); const h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60, s = sec % 60, out = [];
     if (h) out.push(h + (h > 1 ? ' heures' : ' heure'));
@@ -1484,8 +1605,10 @@
   function renderSeances() {
     const ws = allWorkouts(), log = store.get(K_WLOG, []);
     let h = '<button class="newbtn" id="wNew" type="button">Créer une séance</button><div class="post wpost"><div class="pole" aria-hidden="true"></div>';
+    h += '<button class="po wplate navplate" type="button" data-nav="1" style="--ry:-10deg"><span class="plate"><span class="back"></span><span class="face">' +
+      '<span class="lbl"><b>Test navette</b><small>Luc Léger, de plus en plus vite</small></span><span class="val num">' + navCfg().dist + ' m</span></span></span></button>';
     ws.forEach((w, i) => {
-      h += '<button class="po wplate" type="button" data-w="' + esc(w.id) + '" style="--ry:' + RYS[i % RYS.length] + 'deg"><span class="plate"><span class="back"></span><span class="face">' +
+      h += '<button class="po wplate" type="button" data-w="' + esc(w.id) + '" style="--ry:' + RYS[(i + 1) % RYS.length] + 'deg"><span class="plate"><span class="back"></span><span class="face">' +
         '<span class="lbl"><b>' + esc(w.name) + '</b><small>' + plural(w.exercises.length, 'exercice') + ', ' + plural(w.rounds, 'tour') + '</small></span>' +
         '<span class="val num">' + fmtMin(totalSec(w)) + '</span></span></span></button>';
     });
@@ -1495,6 +1618,11 @@
       const n = log.filter(l => l.date >= weekStart(Date.now())).length;
       h += '<p class="streak">Cette semaine : <b>' + plural(n, 'séance') + '</b></p>';
       log.slice(0, 12).forEach(l => {
+        if (l.kind === 'navette') {
+          h += '<div class="wlog"><div>Test navette<small>' + cap(df.format(new Date(l.date))) + ', ' + navScore(l) + ', ' + nf1.format(l.speed) + ' km/h</small></div>' +
+               '<b>' + (l.vo2 ? nf1.format(l.vo2) + '<small>VO2max</small>' : nf0.format(l.distanceM) + ' m<small>' + fmtClock(l.durationMs) + '</small>') + '</b></div>';
+          return;
+        }
         h += '<div class="wlog"><div>' + esc(l.name) + '<small>' + cap(df.format(new Date(l.date))) + ', ' + l.done + ' exercice' + (l.done > 1 ? 's' : '') + ' sur ' + l.total + '</small></div>' +
              '<b>' + fmtClock(l.durationMs) + '<small>' + nf0.format(l.kcal) + ' kcal</small></b></div>';
       });
@@ -1503,6 +1631,7 @@
   }
   $('seances').addEventListener('click', e => {
     if (e.target.closest('#wNew')) { openEditor(null); return; }
+    if (e.target.closest('[data-nav]')) { openNav(); return; }
     const p = e.target.closest('[data-w]'); if (p) openWorkout(p.dataset.w);
   });
 
@@ -1591,15 +1720,27 @@
   // Sons : petits bips générés (pas de fichier audio)
   let actx = null;
   function audioUnlock() { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {} }
-  function beep(freq, ms, vol) {
-    if (!actx || settings.beeps === false) return;
+  // 4 sons : classique (sinus), sifflet (aigu qui monte, avec trémolo), électronique (carré), cloche (deux harmoniques qui résonnent)
+  function beep(freq, ms, vol, force) {
+    if (!actx || (settings.beeps === false && !force)) return;
     try {
-      const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
-      o.type = 'sine'; o.frequency.value = freq;
-      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.35, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + ms / 1000);
-      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + ms / 1000 + 0.03);
+      const style = settings.beepSound || 'classique', t = actx.currentTime, g = actx.createGain();
+      const dur = (style === 'cloche' ? ms * 2.6 : ms) / 1000, V = (vol || 0.35) * (style === 'electronique' ? 0.4 : 1);
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(V, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      g.connect(actx.destination);
+      const osc = (type, f, dest) => { const o = actx.createOscillator(); o.type = type; o.frequency.value = f; o.connect(dest || g); o.start(t); o.stop(t + dur + 0.03); return o; };
+      if (style === 'electronique') osc('square', freq);
+      else if (style === 'sifflet') {
+        const o = osc('sine', freq * 2);
+        o.frequency.setValueAtTime(freq * 1.8, t); o.frequency.linearRampToValueAtTime(freq * 2.2, t + dur * 0.35);
+        const lfo = actx.createOscillator(), lg = actx.createGain(); lfo.frequency.value = 26; lg.gain.value = freq * 0.07;
+        lfo.connect(lg); lg.connect(o.frequency); lfo.start(t); lfo.stop(t + dur + 0.03);
+      } else if (style === 'cloche') {
+        osc('sine', freq); const g2 = actx.createGain(); g2.gain.value = 0.35; g2.connect(g); osc('sine', freq * 2.76, g2);
+      } else osc('sine', freq);
     } catch (e) {}
   }
+  function beepDemo() { audioUnlock(); [[660, 130], [660, 130], [660, 130], [990, 380]].forEach(([f, d], i) => setTimeout(() => beep(f, d, 0.4, true), i * 450)); }
 
   // Minuteur
   const WK = { w: null, steps: [], i: 0, end: 0, rem: 0, paused: false, lastTick: 0, beepSec: -1, said10: false, kcal: 0, activeMs: 0, workMs: 0, done: 0, startedAt: 0, timer: 0 };
@@ -1733,6 +1874,157 @@
     wkPause(false);
   });
 
+  // ---------- Test navette (Luc Léger) ----------
+  // Protocole de 1988 : 20 m, départ à 8,5 km/h, +0,5 km/h chaque minute.
+  const NAV_OFFICIAL = { dist: 20, v0: 8.5, inc: 0.5, stageSec: 60 };
+  const navCfg = () => Object.assign({}, NAV_OFFICIAL, settings.nav || {});
+  const isOfficial = c => c.dist === 20 && c.v0 === 8.5 && c.inc === 0.5 && c.stageSec === 60;
+  function navSchedule(c) {
+    const laps = []; let t = 0;
+    for (let st = 1; st <= 40; st++) {
+      const v = c.v0 + (st - 1) * c.inc; if (v > 24) break;
+      const lap = c.dist / (v / 3.6), n = Math.max(1, Math.round(c.stageSec / lap));
+      for (let k = 1; k <= n; k++) { laps.push({ stage: st, v, k, n, start: t, lap, end: t + lap }); t += lap; }
+    }
+    return laps;
+  }
+  // VO2max (Léger et al., 1988) : 31,025 + 3,238·V − 3,248·A + 0,1536·A·V
+  // V = vitesse du dernier palier annoncé (km/h), A = âge (18 pour les adultes)
+  function navVo2(v) { const A = settings.age && settings.age < 18 ? Math.max(6, settings.age) : 18; return 31.025 + 3.238 * v - 3.248 * A + 0.1536 * A * v; }
+  const navScore = r => 'palier ' + r.stage + (r.lapInStage ? ', navette ' + r.lapInStage : '');
+  const NV = { on: false, cfg: null, laps: [], t0: 0, idx: 0, stage: 0, timer: 0, raf: 0, ended: false, kcal: 0, lastT: 0, cdLast: -1, res: null };
+  const dShortNav = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  function navBest() {
+    return store.get(K_WLOG, []).filter(l => l.kind === 'navette' && l.official).reduce((b, l) => (!b || l.laps > b.laps) ? l : b, null);
+  }
+  function navNote() {
+    const c = readNavForm(), first = navSchedule(c)[0];
+    $('nvNote').textContent = (isOfficial(c) ? 'Réglages du test officiel : l\'appli estime ta VO2max à la fin.' : 'Test modifié : pratique pour s\'entraîner, mais la VO2max n\'est calculée qu\'avec les réglages officiels (20 m, 8,5 km/h, +0,5 km/h par minute).') +
+      ' Palier 1 : ' + first.n + ' navettes de ' + nf1.format(first.lap) + ' s.';
+  }
+  function readNavForm() {
+    return { dist: +$('nvDistSel').value || 20, v0: +$('nvV0Sel').value || 8.5, inc: +$('nvIncSel').value || 0.5, stageSec: +$('nvStageSel').value || 60 };
+  }
+  function openNav() {
+    const c = navCfg(), best = navBest();
+    $('nsBody').innerHTML = '<p class="nv-intro">Place deux repères à ' + c.dist + ' m l\'un de l\'autre. Cours de la ligne A à la ligne B pour arriver à chaque bip, puis repars dans l\'autre sens. ' +
+      'À chaque nouveau palier, un triple bip retentit : les bips se rapprochent et tu dois aller plus vite. Quand tu ne peux plus suivre, touche « J\'arrête ».</p>' +
+      (best ? '<p class="streak">Ton meilleur résultat : <b>' + navScore(best) + '</b> à ' + nf1.format(best.speed) + ' km/h, le ' + dShortNav.format(new Date(best.date)) + '.</p>' : '');
+    $('nvDistSel').value = String(c.dist); $('nvV0Sel').value = String(c.v0); $('nvIncSel').value = String(c.inc); $('nvStageSel').value = String(c.stageSec);
+    navNote();
+    $('nsheet').classList.remove('hidden');
+  }
+  ['nvDistSel', 'nvV0Sel', 'nvIncSel', 'nvStageSel'].forEach(id => $(id).addEventListener('change', () => { settings.nav = readNavForm(); saveSettings(); navNote(); }));
+  $('nsReset').addEventListener('click', () => { settings.nav = null; saveSettings(); openNav(); });
+  $('nsClose').addEventListener('click', () => $('nsheet').classList.add('hidden'));
+  $('nsStart').addEventListener('click', () => { settings.nav = readNavForm(); saveSettings(); navStart(); });
+
+  function navStart() {
+    const c = navCfg();
+    audioUnlock();
+    $('nsheet').classList.add('hidden');
+    Object.assign(NV, { on: true, cfg: c, laps: navSchedule(c), idx: 0, stage: 0, ended: false, kcal: 0, cdLast: -1, res: null });
+    NV.t0 = Date.now() + 5000; NV.lastT = NV.t0;
+    $('nvCfg').textContent = c.dist + ' m, ' + (isOfficial(c) ? 'test officiel' : 'test modifié');
+    $('nplayer').classList.remove('hidden');
+    requestWake();
+    speak('Test navette. Place-toi sur la ligne A. Départ dans 5 secondes, premier palier à ' + sayNum(c.v0) + ' kilomètres heure.');
+    clearInterval(NV.timer); NV.timer = setInterval(navTick, 50);
+    cancelAnimationFrame(NV.raf); NV.raf = requestAnimationFrame(navFrame);
+    navTick();
+  }
+  function navTick() {
+    if (!NV.on || NV.ended) return;
+    const now = Date.now(), el = (now - NV.t0) / 1000;
+    if (el < 0) { // compte à rebours avant le départ
+      const sec = Math.ceil(-el);
+      if (sec !== NV.cdLast) { NV.cdLast = sec; if (sec <= 3) beep(660, 150, 0.4); }
+      $('nvCount').textContent = sec; $('nvCount').classList.remove('hidden');
+      renderNav(el); return;
+    }
+    if (NV.cdLast !== 0) { NV.cdLast = 0; NV.stage = 1; $('nvCount').classList.add('hidden'); beep(990, 520, 0.45); speak('Partez !'); try { navigator.vibrate && navigator.vibrate(300); } catch (e) {} }
+    const dt = Math.min(5, (now - NV.lastT) / 1000); NV.lastT = now;
+    const cur = NV.laps[Math.min(NV.idx, NV.laps.length - 1)];
+    NV.kcal += (0.2 * (cur.v * 1000 / 60) + 3.5) * weightKg() / 1000 * 5 * dt / 60; // course (ACSM)
+    while (NV.idx < NV.laps.length && el >= NV.laps[NV.idx].end) {
+      NV.idx++;
+      const nx = NV.laps[NV.idx];
+      if (!nx) { navFinish(); return; }
+      if (nx.stage !== NV.stage) { // nouveau palier : triple bip + annonce
+        NV.stage = nx.stage;
+        [0, 190, 380].forEach((d, i) => setTimeout(() => beep(1100, i === 2 ? 280 : 140, 0.45), d));
+        speak('Palier ' + nx.stage + ', ' + sayNum(nx.v) + ' kilomètres heure.');
+        if (anim()) { const h = $('nvHead'); h.classList.remove('flip'); void h.offsetWidth; h.classList.add('flip'); }
+        try { navigator.vibrate && navigator.vibrate([120, 80, 120, 80, 120]); } catch (e) {}
+      } else { beep(880, 260, 0.4); try { navigator.vibrate && navigator.vibrate(80); } catch (e) {} }
+    }
+    renderNav(el);
+  }
+  function navFrame() {
+    if (!NV.on) return;
+    NV.raf = requestAnimationFrame(navFrame);
+    const el = (Date.now() - NV.t0) / 1000;
+    let pos = 0;
+    if (el >= 0 && NV.laps.length) {
+      const i = Math.min(NV.idx, NV.laps.length - 1), l = NV.laps[i], p = clamp((el - l.start) / l.lap, 0, 1);
+      pos = i % 2 === 0 ? p : 1 - p; // allers vers B, retours vers A
+    }
+    $('nvRunner').style.setProperty('--p', pos.toFixed(4));
+  }
+  function renderNav(el) {
+    const c = NV.cfg, l = NV.laps[Math.min(NV.idx, NV.laps.length - 1)], first = NV.laps[0];
+    const before = el < 0;
+    $('nvStage').textContent = before ? 1 : l.stage;
+    $('nvSpeed').textContent = nf1.format(before ? c.v0 : l.v);
+    $('nvLap').innerHTML = 'Navette <b>' + (before ? 1 : l.k) + '</b> sur ' + (before ? first.n : l.n);
+    $('nvBeep').textContent = before ? 'Départ dans ' + Math.ceil(-el) + ' s' : 'Prochain bip dans ' + nf1.format(Math.max(0, l.end - el)) + ' s';
+    $('nvDist').textContent = nf0.format(NV.idx * c.dist) + ' m';
+    $('nvTime').textContent = fmtClock(Math.max(0, el) * 1000);
+    $('nvVo2').textContent = isOfficial(c) && !before ? nf1.format(navVo2(l.v)) : '–';
+  }
+  function navFinish() {
+    if (!NV.on || NV.ended) return;
+    NV.ended = true; clearInterval(NV.timer);
+    const c = NV.cfg, el = (Date.now() - NV.t0) / 1000;
+    if (el <= 0) { navClose(); return; } // arrêté pendant le compte à rebours
+    const l = NV.laps[Math.min(NV.idx, NV.laps.length - 1)];
+    const lapInStage = NV.laps.slice(0, NV.idx).filter(x => x.stage === l.stage).length;
+    const official = isOfficial(c), vo2 = official ? Math.round(navVo2(l.v) * 10) / 10 : null;
+    NV.res = { kind: 'navette', date: NV.t0, id: 'navette', name: 'Test navette', stage: l.stage, lapInStage, laps: NV.idx, distanceM: NV.idx * c.dist, speed: l.v,
+      durationMs: Math.round(el * 1000), official, cfg: c, vo2, kcal: Math.round(NV.kcal), done: NV.idx, total: NV.idx };
+    beep(880, 220, 0.4, true); setTimeout(() => beep(660, 480, 0.4, true), 240);
+    speak('Test terminé. Palier ' + l.stage + (lapInStage ? ', navette ' + lapInStage : '') + '.' + (vo2 ? ' VO2 max estimée : ' + nf0.format(vo2) + '.' : ''));
+    $('nsumBody').innerHTML = cell('Palier atteint', l.stage + (lapInStage ? ' <small style="font-size:15px;font-weight:700">navette ' + lapInStage + '</small>' : '')) + cell('Vitesse du palier', nf1.format(l.v) + ' km/h') +
+      cell('Distance', nf0.format(NV.idx * c.dist) + ' m') + cell('Durée', fmtClock(el * 1000)) +
+      cell('VO2max (ml/kg/min)', vo2 ? nf1.format(vo2) : '–') + cell('Calories', nf0.format(NV.kcal) + ' kcal');
+    const best = navBest();
+    $('nsumNote').textContent = !official ? 'Test modifié : la VO2max n\'est pas calculée.'
+      : (best ? (NV.idx > best.laps ? 'Nouveau record : tu fais mieux que ton ancien meilleur résultat (' + navScore(best) + ').' : 'Ton meilleur résultat reste : ' + navScore(best) + '.') : 'C\'est ton premier test enregistré : il servira de référence.') +
+        (official ? ' Estimation selon la formule de Léger (1988)' + (settings.age && settings.age < 18 ? ', avec ton âge.' : ', pour un adulte.') : '');
+    $('nsum').classList.remove('hidden');
+  }
+  function navClose() {
+    NV.on = false; clearInterval(NV.timer); cancelAnimationFrame(NV.raf);
+    $('nplayer').classList.add('hidden'); $('nsum').classList.add('hidden'); $('nvCount').classList.add('hidden');
+    if (S.status !== 'running' && !WK.w) releaseWake();
+  }
+  $('nvStop').addEventListener('click', () => { if (NV.on && !NV.ended && (Date.now() - NV.t0) <= 0) { navClose(); speak('Test annulé.'); return; } navFinish(); });
+  $('nvClose').addEventListener('click', () => { if (NV.ended) return; if ((Date.now() - NV.t0) <= 0) { navClose(); return; } navFinish(); });
+  $('nsumDrop').addEventListener('click', () => { navClose(); renderSeances(); });
+  $('nsumSave').addEventListener('click', () => {
+    const r = NV.res; if (!r) { navClose(); return; }
+    const best = navBest(), isRecord = r.official && best && r.laps > best.laps;
+    const log = store.get(K_WLOG, []); log.unshift(r); store.set(K_WLOG, log.slice(0, 300));
+    navClose(); renderSeances(); toast('Résultat enregistré');
+    if (isRecord) {
+      $('medalVal').textContent = 'Palier ' + r.stage; $('medalTitle').textContent = 'Nouveau record';
+      $('medalText').textContent = 'Test navette : ' + navScore(r) + ', à ' + nf1.format(r.speed) + ' km/h.';
+      const m = $('medal'); m.classList.remove('hidden'); const cn = m.querySelector('.coin'); cn.style.animation = 'none'; void cn.offsetWidth; cn.style.animation = '';
+      speak('Nouveau record au test navette !');
+      clearTimeout(showMedal.t); showMedal.t = setTimeout(() => m.classList.add('hidden'), 4500);
+    }
+  });
+
   // ---------- Navigation en cube 3D ----------
   const VIEWS = ['v-sortie', 'v-carte', 'v-seances', 'v-progres', 'v-reglages'];
   let switching = false;
@@ -1740,7 +2032,7 @@
   $('gear').addEventListener('click', () => go(4));
   function go(i) {
     if (i === currentView || switching) return;
-    closeDetail(); $('sharebox').classList.add('hidden'); ['wsheet', 'weditor'].forEach(id => $(id).classList.add('hidden'));
+    closeDetail(); $('sharebox').classList.add('hidden'); ['wsheet', 'weditor', 'nsheet'].forEach(id => $(id).classList.add('hidden'));
     if (currentView === 1 && replayState) stopReplay();
     const from = $(VIEWS[currentView]), to = $(VIEWS[i]), dir = i > currentView ? 1 : -1;
     document.querySelectorAll('.tab').forEach(t => { if (+t.dataset.view === i) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); });
@@ -2050,7 +2342,19 @@
   // ---------- Réglages ----------
   $('height').value = settings.height || ''; $('weight').value = settings.weight || '';
   $('goalSteps').value = settings.goalSteps; $('goalKm').value = settings.goalKm;
-  $('beeps').checked = settings.beeps !== false; $('voice').checked = !!settings.voice; $('voiceEvery').value = String(settings.voiceEvery);
+  $('beeps').checked = settings.beeps !== false; $('voice').checked = !!settings.voice;
+  $('age').value = settings.age || '';
+  $('voiceRate').value = String(+settings.vRate || 1); $('voicePitch').value = String(+settings.vPitch || 1);
+  $('voiceVol').value = String(settings.vVol == null ? 1 : +settings.vVol); $('beepSound').value = settings.beepSound || 'classique';
+  $('voiceSel').addEventListener('change', e => {
+    if (plugin('TextToSpeech')) settings.vIdx = e.target.value === '' ? -1 : +e.target.value; else settings.vURI = e.target.value;
+    saveSettings(); speak('Bonjour, voici ma voix pour tes annonces.', true);
+  });
+  [['voiceRate', 'vRate'], ['voicePitch', 'vPitch'], ['voiceVol', 'vVol']].forEach(([id, key]) => $(id).addEventListener('change', e => {
+    settings[key] = +e.target.value; saveSettings(); speak('Palier 3, 9 kilomètres heure.', true);
+  }));
+  $('beepSound').addEventListener('change', e => { settings.beepSound = e.target.value; saveSettings(); beepDemo(); });
+  $('beepTest').addEventListener('click', beepDemo); $('voiceEvery').value = String(settings.voiceEvery);
   $('sens').value = settings.sens; $('maxAcc').value = String(settings.maxAcc); $('anim3d').checked = !!settings.anim3d;
   function updateStepInfo() {
     const w = Math.round(stepWalkM() * 100), r = Math.round(stepRunM(10) * 100);
@@ -2075,6 +2379,7 @@
   }
   numInput('height', 'height', 100, 230, true, () => { settings.measuredStep = null; });
   numInput('weight', 'weight', 30, 250, true);
+  numInput('age', 'age', 6, 99, true);
   numInput('goalSteps', 'goalSteps', 500, 60000, false);
   numInput('goalKm', 'goalKm', 1, 500, false);
   updateStepInfo();
@@ -2154,9 +2459,16 @@
   renderProgress();
   renderSeances();
   render();
+  fillVoiceSelect();
+  if (plugin('TextToSpeech') && plugin('TextToSpeech').getSupportedVoices) {
+    plugin('TextToSpeech').getSupportedVoices().then(r => {
+      nativeVoices = ((r && r.voices) || []).map((v, i) => ({ id: String(i), label: v.name || v.voiceURI || ('Voix ' + (i + 1)), lang: v.lang || '' }));
+      fillVoiceSelect();
+    }).catch(() => {});
+  }
   window.__parcours = { get state() { return S; }, get kmh() { return curKmh; }, get relief() { return relief; }, get map() { return map; },
     go, stepLenM, stepWalkM, stepRunM, kcalPerMin, bikeMet, cadence, settings, computeRecords, makeShareImage, exportGpx, startReplay, openDetail,
-    get replaying() { return !!replayState; }, wk: WK, startWorkout, expand, allWorkouts, totalSec, estKcal,
+    get replaying() { return !!replayState; }, wk: WK, startWorkout, expand, allWorkouts, totalSec, estKcal, nv: NV, navSchedule, navVo2, navStart, beep, speak, voiceList,
     feed(lat, lon, alt, speed, acc) { onPos({ timestamp: Date.now(), coords: { latitude: lat, longitude: lon, accuracy: acc || 5, altitude: alt, altitudeAccuracy: alt == null ? null : 5, speed: speed == null ? null : speed, heading: null } }); } };
 })();
 </script>
