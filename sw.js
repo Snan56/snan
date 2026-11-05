@@ -1,5 +1,5 @@
 // Parcours — mode hors-ligne : garde l'appli, ses librairies et les morceaux de carte déjà vus.
-const VERSION = 'parcours-v5';
+const VERSION = 'parcours-v6';
 const TILES = 'parcours-tuiles';
 const MAX_TILES = 600;
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];

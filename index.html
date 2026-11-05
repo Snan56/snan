@@ -258,6 +258,86 @@
   .medal h3{margin:0;font-size:30px;font-weight:800;font-stretch:74%}
   .medal p{margin:-12px 0 0;color:var(--gris);font-size:16px;max-width:30ch}
 
+
+  /* ---------- En-tête : bouton Réglages ---------- */
+  .top-right{display:flex;align-items:center;gap:8px}
+  .gear{width:38px;height:38px;border-radius:50%;border:1px solid rgba(157,183,217,.22);background:rgba(17,26,44,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    display:grid;place-items:center;cursor:pointer;color:var(--gris);padding:0}
+  .gear svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .gear[aria-current="page"]{color:var(--blanc);border-color:var(--blanc)}
+
+  /* ---------- Écran Séances ---------- */
+  .newbtn{display:block;width:100%;border:0;border-radius:16px;padding:14px;background:var(--blanc);color:var(--encre);font-weight:700;font-size:16px;cursor:pointer;
+    box-shadow:0 4px 0 #aeb9cc;margin-bottom:24px}
+  .newbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #aeb9cc}
+  .wpost{flex:none;margin-top:0;padding-bottom:4px}
+  .wpost .pole{bottom:-6px}
+  button.po{display:block;border:0;padding:0;background:none;text-align:left;cursor:pointer;height:64px;font:inherit;color:inherit}
+  .wplate .face{padding:0 44px 0 18px}
+  .wplate .lbl{min-width:0}
+  .wplate .lbl b{display:block;font-size:18px;font-weight:800;font-stretch:80%;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .wplate .lbl small{display:block;font-size:13px;font-weight:600;opacity:.75}
+  .wplate .val{font-size:27px}
+  .wplog{margin-top:18px}
+  .wlog{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid rgba(157,183,217,.14);font-size:15px}
+  .wlog:first-of-type{border-top:0}
+  .wlog small{display:block;color:var(--gris);font-size:13px;font-weight:400}
+  .wlog b{white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+  .exlist{list-style:none;margin:0 0 14px;padding:0}
+  .exlist li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid rgba(157,183,217,.12);font-size:15px}
+  .exlist li b{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .wmeta{color:var(--gris);font-size:14px;margin:-6px 0 12px}
+  .ed label{display:block;font-size:13px;color:var(--gris);font-weight:600;margin:12px 0 4px}
+  .ed input[type=text],.ed input[type=number],.ed select{width:100%}
+  .ed-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;align-items:end}
+  .exrow{display:grid;grid-template-columns:1fr 70px 34px 34px 34px;gap:6px;align-items:center;margin-bottom:8px}
+  .exrow input[type=number]{width:70px;padding:8px 6px}
+  .ibtn{width:34px;height:38px;border-radius:10px;border:0;background:var(--nuit-3);color:var(--blanc);cursor:pointer;font-size:16px;padding:0}
+  .ibtn:disabled{opacity:.3;cursor:default}
+  .ed-total{font-size:15px;margin:8px 0 14px;color:var(--gris)} .ed-total b{color:var(--blanc)}
+  .addex{background:none;border:1px dashed rgba(157,183,217,.45);color:var(--blanc);border-radius:12px;padding:10px;width:100%;font-weight:700;cursor:pointer;margin:2px 0 4px}
+  input[type=text]{background:var(--nuit);color:var(--blanc);border:1px solid rgba(157,183,217,.3);border-radius:10px;padding:9px 10px;font:inherit;font-size:16px}
+
+  /* ---------- Minuteur de séance ---------- */
+  .player{position:fixed;inset:0;z-index:55;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-t) + 12px) 20px calc(var(--safe-b) + 22px);
+    background:rgba(15,23,39,.93);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);--ph:var(--rouge);--ph2:var(--blanc);text-align:center}
+  .player.ph-rest{--ph:var(--relief-clair);--ph2:var(--relief)}
+  .player.ph-prep{--ph:var(--jaune);--ph2:var(--blanc)}
+  .pl-top{width:100%;max-width:520px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .pl-pos{display:flex;flex-direction:column;align-items:flex-end;font-size:14px;color:var(--gris);font-variant-numeric:tabular-nums;text-align:right}
+  .pl-pos b{color:var(--blanc);font-weight:700}
+  .pl-phase{margin-top:4px;font-size:22px;font-weight:800;font-stretch:78%;color:var(--ph)}
+  .ring3d{position:relative;width:min(68vw,290px);aspect-ratio:1/1;margin:6px 0 4px;perspective:700px;flex:none}
+  .ring3d .disc{position:absolute;inset:7%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#26385c,#111a2c 72%);transform:rotateX(16deg) translateZ(-26px);
+    box-shadow:0 26px 40px rgba(0,0,0,.45)}
+  .ring{position:absolute;inset:0;width:100%;height:100%;transform:rotateX(16deg);overflow:visible}
+  .ring circle{fill:none;transform:rotate(-90deg);transform-box:fill-box;transform-origin:50% 50%;transition:stroke .4s}
+  .ring .r-track{stroke:rgba(157,183,217,.16);stroke-width:18}
+  .ring .r-a{stroke:var(--ph2);stroke-width:8}
+  .ring .r-b{stroke:var(--ph);stroke-width:8}
+  .ring.spin{animation:ringspin .85s cubic-bezier(.3,1.25,.5,1)}
+  @keyframes ringspin{from{transform:rotateX(16deg) rotateY(-180deg) scale(.8)}to{transform:rotateX(16deg) rotateY(0) scale(1)}}
+  .pl-time{position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(62px,19vw,96px);letter-spacing:-.02em;font-stretch:66%}
+  .wcard{perspective:700px;min-height:2.3em;display:flex;align-items:center;justify-content:center;max-width:520px;padding:0 10px}
+  .pl-name{font-size:clamp(30px,9vw,44px);font-weight:800;font-stretch:72%;line-height:1.05}
+  .wcard.flip .pl-name{animation:cardin .7s cubic-bezier(.2,1.3,.4,1)}
+  @keyframes cardin{from{transform:rotateX(-95deg);opacity:0}}
+  .pl-next{position:relative;height:54px;width:min(100%,360px);margin:12px 0 6px;filter:drop-shadow(0 8px 16px rgba(0,0,0,.35));flex:none;text-align:left}
+  .pl-next .face{padding:0 40px 0 16px}
+  .pl-next .val{font-size:18px;font-weight:800;font-stretch:80%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pl-total{width:min(100%,420px);margin-top:auto}
+  .pl-tot-txt{display:flex;justify-content:space-between;font-size:14px;color:var(--gris);margin-top:6px;font-variant-numeric:tabular-nums}
+  .pl-ctrl{display:flex;align-items:center;gap:26px;margin-top:16px}
+  .pbtn{width:56px;height:56px;border-radius:50%;border:1px solid rgba(157,183,217,.35);background:rgba(17,26,44,.8);color:var(--blanc);display:grid;place-items:center;cursor:pointer;padding:0}
+  .pbtn svg,.pfab svg{width:26px;height:26px;fill:currentColor}
+  .pfab{width:82px;height:82px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;background:var(--blanc);color:var(--rouge);padding:0;
+    box-shadow:0 6px 0 #aeb9cc,0 14px 26px rgba(0,0,0,.4)}
+  .pfab:active{transform:translateY(5px);box-shadow:0 1px 0 #aeb9cc}
+  .pfab.paused{background:var(--rouge);color:#fff;box-shadow:0 6px 0 var(--rouge-fonce),0 14px 26px rgba(0,0,0,.4)}
+
+  @media (max-height:700px){
+    .ring3d{width:min(54vw,210px)} .pl-name{font-size:28px} .pl-next{margin:8px 0 4px;height:48px} .pl-ctrl{margin-top:10px}
+  }
   @media (max-height:700px){
     .speed-num{font-size:clamp(64px,22vw,100px)}
     .po{height:48px;margin-bottom:8px} .face .val{font-size:26px} .post{margin-top:10px} .hint{display:none}
@@ -266,7 +346,7 @@
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   }
-  body.anim-off .post.intro .po,body.anim-off .plate.flip,body.anim-off .run.new,body.anim-off .sheet,body.anim-off .coin{animation:none}
+  body.anim-off .post.intro .po,body.anim-off .plate.flip,body.anim-off .run.new,body.anim-off .sheet,body.anim-off .coin,body.anim-off .ring.spin,body.anim-off .wcard.flip .pl-name{animation:none}
 </style>
 </head>
 <body>
@@ -275,7 +355,7 @@
 
 <header class="top">
   <div class="brand"><span class="blaze" aria-hidden="true"></span>Parcours</div>
-  <div id="gps" class="gps" role="status"><span class="dot"></span><span id="gpsText">GPS inactif</span></div>
+  <div class="top-right"><div id="gps" class="gps" role="status"><span class="dot"></span><span id="gpsText">GPS inactif</span></div><button id="gear" class="gear" type="button" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
 </header>
 <div id="banner" class="banner hidden" role="alert"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -320,6 +400,12 @@
     </div>
   </section>
 
+  <!-- Séances -->
+  <section class="view" id="v-seances" aria-label="Séances" inert>
+    <h2 class="h-title">Séances d'exercices</h2>
+    <div id="seances"></div>
+  </section>
+
   <!-- Progrès -->
   <section class="view" id="v-progres" aria-label="Progrès" inert>
     <h2 class="h-title">Tes progrès</h2>
@@ -346,6 +432,8 @@
         <span class="switch"><input id="voice" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="voiceEvery">Fréquence</label>
         <select id="voiceEvery"><option value="500">Tous les 500 m</option><option value="1000">Tous les km</option><option value="2000">Tous les 2 km</option><option value="5000">Tous les 5 km</option></select></div>
+      <div class="row"><label for="beeps">Bips du minuteur<small>3, 2, 1 avant chaque changement pendant les séances</small></label>
+        <span class="switch"><input id="beeps" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><button id="voiceTest" class="linkbtn" type="button">Écouter un exemple</button></div>
     </div>
     <div class="set-title">Affichage et capteurs</div>
@@ -371,8 +459,8 @@
   <button class="tab" type="button" data-view="0" aria-current="page"><svg viewBox="0 0 24 24"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/></svg>Sortie</button>
   <button class="tab" type="button" data-view="1"><svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>Carte</button>
   <button id="fab" class="fab" type="button" aria-label="Démarrer la sortie"><svg viewBox="0 0 24 24" id="fabIcon"><path d="M8 5v14l11-7z"/></svg></button>
-  <button class="tab" type="button" data-view="2"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Progrès</button>
-  <button class="tab" type="button" data-view="3"><svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>Réglages</button>
+  <button class="tab" type="button" data-view="2"><svg viewBox="0 0 24 24"><path d="M6.5 7v10M17.5 7v10M3 10v4M21 10v4M6.5 12h11"/></svg>Séances</button>
+  <button class="tab" type="button" data-view="3"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Progrès</button>
 </nav>
 
 <!-- Fin de sortie -->
@@ -414,6 +502,75 @@
   </div>
 </div>
 
+<!-- Séance : fiche -->
+<div id="wsheet" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="wsTitle">
+  <div class="sheet">
+    <div class="d-head"><h2 id="wsTitle"></h2><button id="wsClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
+    <div id="wsBody"></div>
+    <div class="btns">
+      <button id="wsStart" class="sbtn save" type="button">Lancer la séance</button>
+      <button id="wsEdit" class="sbtn cancel" type="button">Modifier</button>
+      <button id="wsDelete" class="sbtn del" type="button">Supprimer la séance</button>
+    </div>
+  </div>
+</div>
+
+<!-- Séance : création / modification -->
+<div id="weditor" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="weTitle">
+  <div class="sheet ed">
+    <div class="d-head"><h2 id="weTitle">Nouvelle séance</h2><button id="weClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
+    <label for="weName">Nom de la séance</label><input id="weName" type="text" maxlength="40" placeholder="Ma séance" autocomplete="off">
+    <div class="ed-grid">
+      <div><label for="weInt">Intensité</label><select id="weInt"><option value="etirements">Étirements</option><option value="moderee">Modérée</option><option value="intense">Intense</option></select></div>
+      <div><label for="weRounds">Nombre de tours</label><input id="weRounds" type="number" min="1" max="20" inputmode="numeric"></div>
+      <div><label for="weRest">Repos entre exercices (s)</label><input id="weRest" type="number" min="0" max="300" inputmode="numeric"></div>
+      <div><label for="weRoundRest">Repos entre tours (s)</label><input id="weRoundRest" type="number" min="0" max="600" inputmode="numeric"></div>
+      <div><label for="wePrep">Préparation (s)</label><input id="wePrep" type="number" min="0" max="60" inputmode="numeric"></div>
+    </div>
+    <label>Exercices et durée en secondes</label>
+    <div id="weList"></div>
+    <button id="weAdd" class="addex" type="button">Ajouter un exercice</button>
+    <p class="ed-total" id="weTotal"></p>
+    <div class="btns"><button id="weSave" class="sbtn save" type="button">Enregistrer la séance</button><button id="weCancel" class="sbtn cancel" type="button">Annuler</button></div>
+    <datalist id="exNames"><option value="Pompes"><option value="Pompes sur les genoux"><option value="Squats"><option value="Squats sautés"><option value="Fentes alternées"><option value="Fentes sautées"><option value="Burpees"><option value="Jumping jacks"><option value="Mountain climbers"><option value="Montées de genoux"><option value="Talons-fesses"><option value="Planche"><option value="Planche latérale gauche"><option value="Planche latérale droite"><option value="Crunchs"><option value="Relevés de jambes"><option value="Superman"><option value="Dips sur chaise"><option value="Chaise contre le mur"><option value="Pont fessier"><option value="Montées sur pointes"><option value="Corde à sauter"><option value="Rotations des bras"><option value="Rotations du buste"><option value="Gainage dynamique"><option value="Quadriceps gauche"><option value="Quadriceps droit"><option value="Ischio-jambiers"><option value="Mollets"><option value="Fessiers"><option value="Dos et épaules"><option value="Récupération active"></datalist>
+  </div>
+</div>
+
+<!-- Séance : minuteur -->
+<div id="player" class="player ph-prep hidden" role="dialog" aria-modal="true" aria-labelledby="plName">
+  <div class="pl-top"><button id="plStop" class="xbtn" type="button" aria-label="Arrêter la séance">×</button><div class="pl-pos"><b id="plTitle"></b><span id="plRound"></span></div></div>
+  <div class="pl-phase" id="plPhase">Préparation</div>
+  <div class="ring3d"><div class="disc"></div>
+    <svg class="ring" id="plRing" viewBox="0 0 240 240" aria-hidden="true">
+      <circle class="r-track" cx="120" cy="120" r="104"/>
+      <circle class="r-a" id="plRingA" cx="120" cy="120" r="108"/>
+      <circle class="r-b" id="plRingB" cx="120" cy="120" r="100"/>
+    </svg>
+    <div class="pl-time num" id="plTime">0:10</div>
+  </div>
+  <div class="wcard" id="plCard"><div class="pl-name" id="plName"></div></div>
+  <div class="pl-next"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Ensuite</span><span class="val" id="plNext"></span></div></div></div>
+  <div class="pl-total"><div class="goal-bar"><i id="plBar"></i></div><div class="pl-tot-txt"><span id="plDone"></span><span id="plLeft"></span></div></div>
+  <div class="pl-ctrl">
+    <button id="plPrev" class="pbtn" type="button" aria-label="Étape précédente"><svg viewBox="0 0 24 24"><path d="M6 5h2.2v14H6zM19 5v14L9 12z"/></svg></button>
+    <button id="plPause" class="pfab" type="button" aria-label="Mettre en pause"><svg viewBox="0 0 24 24" id="plPauseIcon"><rect x="6" y="5" width="4.2" height="14" rx="1"/><rect x="13.8" y="5" width="4.2" height="14" rx="1"/></svg></button>
+    <button id="plNextBtn" class="pbtn" type="button" aria-label="Étape suivante"><svg viewBox="0 0 24 24"><path d="M15.8 5H18v14h-2.2zM5 5v14l10-7z"/></svg></button>
+  </div>
+</div>
+
+<!-- Séance : bilan -->
+<div id="wsum" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="wsumTitle">
+  <div class="sheet">
+    <h2 id="wsumTitle">Séance terminée</h2>
+    <div class="sum" id="wsumBody"></div>
+    <div class="btns">
+      <button id="wsumSave" class="sbtn save" type="button">Enregistrer la séance</button>
+      <button id="wsumResume" class="sbtn cancel" type="button">Reprendre la séance</button>
+      <button id="wsumDrop" class="sbtn del" type="button">Ne pas enregistrer</button>
+    </div>
+  </div>
+</div>
+
 <div id="medal" class="medal hidden" role="dialog" aria-modal="true" aria-labelledby="medalTitle">
   <div class="coin"><div class="edge"></div><div class="cf"><b id="medalVal"></b></div><div class="cb"></div></div>
   <h3 id="medalTitle">Nouveau record</h3>
@@ -450,7 +607,7 @@
   const K_SET = 'parcours.settings', K_CUR = 'parcours.current', K_HIST = 'parcours.history';
   const settings = Object.assign({
     height: null, weight: null, measuredStep: null, activity: 'marche',
-    goalSteps: 10000, goalKm: 20, voice: true, voiceEvery: 1000, goalSaidDay: '',
+    goalSteps: 10000, goalKm: 20, voice: true, voiceEvery: 1000, beeps: true, goalSaidDay: '',
     sens: 'moyenne', maxAcc: 30, anim3d: !reduceMotion, map3d: true
   }, store.get(K_SET, {}));
   const saveSettings = () => store.set(K_SET, settings);
@@ -869,7 +1026,7 @@
   }
   function releaseWake() { try { if (wakeLock) wakeLock.release(); } catch (e) {} wakeLock = null; }
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') { if (S.status === 'running' && !isNative) requestWake(); relief.resume(); queueRender(); }
+    if (document.visibilityState === 'visible') { if ((S.status === 'running' || WK.w) && !isNative) requestWake(); relief.resume(); queueRender(); if (WK.w) wkTick(); }
     else { save(true); relief.stop(); }
   });
 
@@ -890,7 +1047,7 @@
     speak(resuming ? 'Reprise.' : "C'est parti !");
     if ((window.isSecureContext || isNative) && !hasProfile() && !profileAsked) {
       profileAsked = true;
-      banner('Ajoute ta taille et ton poids dans Réglages : ils servent à calculer la longueur de tes pas et tes calories. En attendant, l\'appli utilise 170 cm et 70 kg.', 'info', 'Plus tard', { label: 'Ouvrir les réglages', fn: () => go(3), tag: 'profile' });
+      banner('Ajoute ta taille et ton poids dans Réglages : ils servent à calculer la longueur de tes pas et tes calories. En attendant, l\'appli utilise 170 cm et 70 kg.', 'info', 'Plus tard', { label: 'Ouvrir les réglages', fn: () => go(4), tag: 'profile' });
     }
     save(true); render();
   }
@@ -899,7 +1056,7 @@
     accrueKcal();
     S.activeMs += Date.now() - S.resumedAt;
     S.status = 'paused'; curKmh = 0; last = null; lastKcalAt = 0;
-    stopGeo(); releaseWake(); save(true); render();
+    stopGeo(); if (!WK.w) releaseWake(); save(true); render();
     if (!silent) speak('Pause.');
   }
   function reset() {
@@ -953,7 +1110,7 @@
     const beaten = Object.keys(after).filter(k => after[k].date === entry.date && before[k] && before[k].v !== after[k].v);
     closeModal(); reset();
     renderProgress(true);
-    go(2);
+    go(3);
     speak('Sortie enregistrée : ' + sayKm(Math.round(entry.distanceM / 10) * 10) + ' en ' + sayDur(entry.durationMs / 1000) + '.');
     if (beaten.length) setTimeout(() => showMedal(beaten, after), anim() ? 700 : 50);
   }
@@ -1028,7 +1185,9 @@
     let stepsToday = 0, mWeek = 0;
     hist.forEach(h => { if (dayKey(h.date) === today) stepsToday += h.steps || 0; if (h.date >= ws) mWeek += h.distanceM || 0; });
     if (S.status !== 'idle') { if (dayKey(S.startTime) === today && S.activity !== 'velo') stepsToday += steps(); if (S.startTime >= ws) mWeek += S.distance; }
-    const days = new Set(hist.map(h => dayKey(h.date)));
+    const wlog = store.get(K_WLOG, []);
+    const days = new Set(hist.map(h => dayKey(h.date)).concat(wlog.map(l => dayKey(l.date))));
+    const wWeek = wlog.filter(l => l.date >= ws).length;
     if (S.status !== 'idle') days.add(dayKey(S.startTime));
     let streak = 0; const d = new Date(); d.setHours(12, 0, 0, 0);
     if (!days.has(dayKey(d.getTime()))) d.setDate(d.getDate() - 1);
@@ -1038,7 +1197,8 @@
     return '<div class="block"><div class="bh">Objectifs</div>' +
       '<div class="goal' + (pS >= 1 ? ' done' : '') + '"><div class="goal-top"><span>Pas aujourd\'hui</span><b>' + nf0.format(stepsToday) + ' / ' + nf0.format(gS) + '</b></div><div class="goal-bar"><i style="width:' + (pS * 100).toFixed(1) + '%"></i></div></div>' +
       '<div class="goal' + (pK >= 1 ? ' done' : '') + '"><div class="goal-top"><span>Kilomètres cette semaine</span><b>' + nf1.format(mWeek / 1000) + ' / ' + nf0.format(gK) + '</b></div><div class="goal-bar"><i style="width:' + (pK * 100).toFixed(1) + '%"></i></div></div>' +
-      '<p class="streak">' + (streak ? 'Série en cours : <b>' + streak + ' jour' + (streak > 1 ? 's' : '') + ' d\'affilée</b> avec au moins une sortie.' : 'Fais une sortie aujourd\'hui pour lancer une série de jours d\'affilée.') + '</p></div>';
+      '<p class="streak">Séances d\'exercices cette semaine : <b>' + wWeek + '</b></p>' +
+      '<p class="streak">' + (streak ? 'Série en cours : <b>' + streak + ' jour' + (streak > 1 ? 's' : '') + ' d\'affilée</b> avec au moins une sortie ou une séance.' : 'Fais une sortie ou une séance aujourd\'hui pour lancer une série de jours d\'affilée.') + '</p></div>';
   }
   function recordsHtml(hist) {
     const r = computeRecords(hist), keys = Object.keys(REC).filter(k => r[k]);
@@ -1277,19 +1437,318 @@
     return new Promise((res, rej) => cv.toBlob(bl => bl ? res(bl) : rej(new Error('toBlob')), 'image/png'));
   }
 
+
+  // ---------- Séances d'exercices (minuteur) ----------
+  const K_WORKOUTS = 'parcours.workouts', K_WLOG = 'parcours.workoutlog';
+  // METs du Compendium des activités physiques : étirements 2,3 ; gymnastique modérée 3,8 ; intense 8,0
+  const W_MET = { etirements: 2.3, moderee: 3.8, intense: 8.0 }, REST_MET = 1.8;
+  const W_INT = { etirements: 'Étirements', moderee: 'Modérée', intense: 'Intense' };
+  const EX = str => str.split('|').map(x => { const [name, sec] = x.split(':'); return { name, sec: +sec }; });
+  const PRESETS = [
+    { id: 'p-echauffement', preset: true, name: 'Échauffement', intensity: 'moderee', prep: 10, rest: 10, rounds: 1, roundRest: 0,
+      exercises: EX('Montées de genoux:40|Jumping jacks:40|Rotations des bras:30|Squats:40|Fentes alternées:40|Talons-fesses:40') },
+    { id: 'p-hiit', preset: true, name: 'HIIT express', intensity: 'intense', prep: 10, rest: 15, rounds: 3, roundRest: 60,
+      exercises: EX('Burpees:30|Squats sautés:30|Mountain climbers:30|Pompes:30') },
+    { id: 'p-tabata', preset: true, name: 'Tabata', intensity: 'intense', prep: 10, rest: 10, rounds: 8, roundRest: 10, exercises: EX('Squats sautés:20') },
+    { id: 'p-gainage', preset: true, name: 'Gainage', intensity: 'moderee', prep: 10, rest: 15, rounds: 2, roundRest: 45,
+      exercises: EX('Planche:45|Planche latérale gauche:30|Planche latérale droite:30|Superman:30|Crunchs:45') },
+    { id: 'p-jambes', preset: true, name: 'Jambes', intensity: 'intense', prep: 10, rest: 20, rounds: 3, roundRest: 60,
+      exercises: EX('Squats:45|Fentes alternées:45|Chaise contre le mur:45|Montées sur pointes:45') },
+    { id: 'p-etirements', preset: true, name: 'Étirements', intensity: 'etirements', prep: 5, rest: 5, rounds: 1, roundRest: 0,
+      exercises: EX('Quadriceps gauche:30|Quadriceps droit:30|Ischio-jambiers:40|Mollets:40|Fessiers:40|Dos et épaules:40') }
+  ];
+  const allWorkouts = () => PRESETS.concat(store.get(K_WORKOUTS, []));
+  const esc = str => String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const plural = (n, w) => n + ' ' + w + (n > 1 ? 's' : '');
+  function fmtSec(sec) { if (sec < 60) return sec + ' s'; const m = Math.floor(sec / 60), r = sec % 60; return m + ' min' + (r ? ' ' + pad(r) : ''); }
+  function fmtMin(sec) { return sec < 60 ? sec + ' s' : Math.round(sec / 60) + ' min'; }
+  function expand(w) {
+    const st = [], ex = (w.exercises || []).filter(e => e.sec > 0);
+    if (!ex.length) return st;
+    if (w.prep > 0) st.push({ type: 'prep', sec: w.prep, name: 'Prépare-toi' });
+    for (let r = 1; r <= w.rounds; r++) ex.forEach((e, k) => {
+      st.push({ type: 'work', sec: e.sec, name: e.name, round: r, k });
+      const lastOfRound = k === ex.length - 1;
+      if (!(lastOfRound && r === w.rounds)) {
+        const rs = lastOfRound ? (w.roundRest || 0) : (w.rest || 0);
+        if (rs > 0) st.push({ type: 'rest', sec: rs, name: 'Repos', round: r, roundEnd: lastOfRound });
+      }
+    });
+    return st;
+  }
+  const totalSec = w => expand(w).reduce((a, x) => a + x.sec, 0);
+  const estKcal = w => expand(w).reduce((a, x) => a + (x.type === 'work' ? (W_MET[w.intensity] || 3.8) : REST_MET) * weightKg() * 0.0175 * x.sec / 60, 0);
+
+  // Liste des séances : chaque séance est une plaque du poteau, avec sa durée
+  const RYS = [-12, 8, -5, 13, -8, 10, -4, 12];
+  function renderSeances() {
+    const ws = allWorkouts(), log = store.get(K_WLOG, []);
+    let h = '<button class="newbtn" id="wNew" type="button">Créer une séance</button><div class="post wpost"><div class="pole" aria-hidden="true"></div>';
+    ws.forEach((w, i) => {
+      h += '<button class="po wplate" type="button" data-w="' + esc(w.id) + '" style="--ry:' + RYS[i % RYS.length] + 'deg"><span class="plate"><span class="back"></span><span class="face">' +
+        '<span class="lbl"><b>' + esc(w.name) + '</b><small>' + plural(w.exercises.length, 'exercice') + ', ' + plural(w.rounds, 'tour') + '</small></span>' +
+        '<span class="val num">' + fmtMin(totalSec(w)) + '</span></span></span></button>';
+    });
+    h += '</div><div class="block wplog"><div class="bh">Dernières séances</div>';
+    if (!log.length) h += '<p class="empty">Aucune séance terminée pour l\'instant. Choisis une séance sur le poteau pour commencer.</p>';
+    else {
+      const n = log.filter(l => l.date >= weekStart(Date.now())).length;
+      h += '<p class="streak">Cette semaine : <b>' + plural(n, 'séance') + '</b></p>';
+      log.slice(0, 12).forEach(l => {
+        h += '<div class="wlog"><div>' + esc(l.name) + '<small>' + cap(df.format(new Date(l.date))) + ', ' + l.done + ' exercice' + (l.done > 1 ? 's' : '') + ' sur ' + l.total + '</small></div>' +
+             '<b>' + fmtClock(l.durationMs) + '<small>' + nf0.format(l.kcal) + ' kcal</small></b></div>';
+      });
+    }
+    $('seances').innerHTML = h + '</div>';
+  }
+  $('seances').addEventListener('click', e => {
+    if (e.target.closest('#wNew')) { openEditor(null); return; }
+    const p = e.target.closest('[data-w]'); if (p) openWorkout(p.dataset.w);
+  });
+
+  // Fiche d'une séance
+  let wsel = null, wDelArmed = false;
+  function openWorkout(id) {
+    const w = allWorkouts().find(x => x.id === id); if (!w) return;
+    wsel = w; wDelArmed = false;
+    $('wsTitle').textContent = w.name;
+    $('wsBody').innerHTML = '<p class="wmeta">' + fmtMin(totalSec(w)) + ', ' + plural(w.rounds, 'tour') + ', intensité ' + W_INT[w.intensity].toLowerCase() + '</p>' +
+      '<ol class="exlist">' + w.exercises.map(e => '<li><span>' + esc(e.name) + '</span><b>' + fmtSec(e.sec) + '</b></li>').join('') + '</ol>' +
+      '<div class="sum">' + cell('Repos entre exercices', w.exercises.length > 1 ? fmtSec(w.rest) : '–') + cell('Repos entre tours', w.rounds > 1 ? fmtSec(w.roundRest) : '–') +
+      cell('Préparation', fmtSec(w.prep)) + cell('Calories estimées', nf0.format(estKcal(w)) + ' kcal') + '</div>';
+    $('wsEdit').textContent = w.preset ? 'Modifier une copie' : 'Modifier';
+    $('wsDelete').classList.toggle('hidden', !!w.preset); $('wsDelete').textContent = 'Supprimer la séance';
+    $('wsheet').classList.remove('hidden');
+  }
+  $('wsClose').addEventListener('click', () => $('wsheet').classList.add('hidden'));
+  $('wsStart').addEventListener('click', () => wsel && startWorkout(wsel));
+  $('wsEdit').addEventListener('click', () => wsel && openEditor(wsel));
+  $('wsDelete').addEventListener('click', () => {
+    if (!wsel || wsel.preset) return;
+    if (!wDelArmed) { wDelArmed = true; $('wsDelete').textContent = 'Touche encore pour supprimer'; return; }
+    store.set(K_WORKOUTS, store.get(K_WORKOUTS, []).filter(x => x.id !== wsel.id));
+    $('wsheet').classList.add('hidden'); renderSeances(); toast('Séance supprimée');
+  });
+
+  // Création / modification
+  let edTarget = null, edEx = [];
+  const intOr = (v, a, b, d) => { const n = parseInt(v, 10); return isFinite(n) ? clamp(n, a, b) : d; };
+  function openEditor(w) {
+    const src = w ? JSON.parse(JSON.stringify(w)) : { name: '', intensity: 'moderee', prep: 10, rest: 15, rounds: 3, roundRest: 60,
+      exercises: [{ name: 'Squats', sec: 30 }, { name: 'Pompes', sec: 30 }, { name: 'Planche', sec: 30 }] };
+    edTarget = (w && !w.preset) ? w.id : null;
+    $('weTitle').textContent = edTarget ? 'Modifier la séance' : 'Nouvelle séance';
+    $('weName').value = w && w.preset ? w.name + ' (perso)' : src.name;
+    $('weInt').value = src.intensity; $('weRounds').value = src.rounds; $('weRest').value = src.rest; $('weRoundRest').value = src.roundRest; $('wePrep').value = src.prep;
+    edEx = src.exercises.map(e => ({ name: e.name, sec: e.sec }));
+    renderEdList(); updateEdTotal();
+    $('wsheet').classList.add('hidden'); $('weditor').classList.remove('hidden');
+  }
+  function renderEdList() {
+    $('weList').innerHTML = edEx.map((e, i) => '<div class="exrow" data-i="' + i + '">' +
+      '<input type="text" list="exNames" maxlength="40" value="' + esc(e.name) + '" placeholder="Nom de l\'exercice" aria-label="Exercice ' + (i + 1) + '" data-f="name" autocomplete="off">' +
+      '<input type="number" min="5" max="600" inputmode="numeric" value="' + e.sec + '" aria-label="Durée de l\'exercice ' + (i + 1) + ' en secondes" data-f="sec">' +
+      '<button class="ibtn" type="button" data-a="up" aria-label="Monter l\'exercice ' + (i + 1) + '"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+      '<button class="ibtn" type="button" data-a="down" aria-label="Descendre l\'exercice ' + (i + 1) + '"' + (i === edEx.length - 1 ? ' disabled' : '') + '>↓</button>' +
+      '<button class="ibtn" type="button" data-a="del" aria-label="Retirer l\'exercice ' + (i + 1) + '"' + (edEx.length === 1 ? ' disabled' : '') + '>×</button></div>').join('');
+  }
+  function readEditor() {
+    return { name: $('weName').value.trim() || 'Ma séance', intensity: $('weInt').value,
+      prep: intOr($('wePrep').value, 0, 60, 10), rest: intOr($('weRest').value, 0, 300, 15),
+      rounds: intOr($('weRounds').value, 1, 20, 1), roundRest: intOr($('weRoundRest').value, 0, 600, 0),
+      exercises: edEx.map(e => ({ name: (e.name || '').trim() || 'Exercice', sec: clamp(Math.round(e.sec || 0), 5, 600) })) };
+  }
+  function updateEdTotal() { const w = readEditor(); $('weTotal').innerHTML = 'Durée totale : <b>' + fmtMin(totalSec(w)) + '</b>, environ <b>' + nf0.format(estKcal(w)) + ' kcal</b>'; }
+  $('weList').addEventListener('input', e => {
+    const row = e.target.closest('.exrow'); if (!row) return;
+    const i = +row.dataset.i;
+    if (e.target.dataset.f === 'name') edEx[i].name = e.target.value; else edEx[i].sec = parseInt(e.target.value, 10) || 0;
+    updateEdTotal();
+  });
+  $('weList').addEventListener('click', e => {
+    const b = e.target.closest('[data-a]'); if (!b) return;
+    const i = +b.closest('.exrow').dataset.i, a = b.dataset.a;
+    if (a === 'up' && i > 0) [edEx[i - 1], edEx[i]] = [edEx[i], edEx[i - 1]];
+    if (a === 'down' && i < edEx.length - 1) [edEx[i + 1], edEx[i]] = [edEx[i], edEx[i + 1]];
+    if (a === 'del' && edEx.length > 1) edEx.splice(i, 1);
+    renderEdList(); updateEdTotal();
+  });
+  ['weInt', 'weRounds', 'weRest', 'weRoundRest', 'wePrep'].forEach(id => $(id).addEventListener('input', updateEdTotal));
+  $('weAdd').addEventListener('click', () => {
+    edEx.push({ name: '', sec: 30 }); renderEdList(); updateEdTotal();
+    const inputs = $('weList').querySelectorAll('input[type=text]'); inputs[inputs.length - 1].focus();
+  });
+  const closeEditor = () => $('weditor').classList.add('hidden');
+  $('weClose').addEventListener('click', closeEditor); $('weCancel').addEventListener('click', closeEditor);
+  $('weSave').addEventListener('click', () => {
+    const w = readEditor(), list = store.get(K_WORKOUTS, []);
+    if (edTarget) { w.id = edTarget; const k = list.findIndex(x => x.id === edTarget); if (k >= 0) list[k] = w; else list.push(w); }
+    else { w.id = 'c-' + Date.now(); list.push(w); }
+    store.set(K_WORKOUTS, list);
+    closeEditor(); renderSeances(); toast('Séance « ' + w.name + ' » enregistrée');
+  });
+
+  // Sons : petits bips générés (pas de fichier audio)
+  let actx = null;
+  function audioUnlock() { try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); } catch (e) {} }
+  function beep(freq, ms, vol) {
+    if (!actx || settings.beeps === false) return;
+    try {
+      const o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime;
+      o.type = 'sine'; o.frequency.value = freq;
+      g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.35, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + ms / 1000);
+      o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + ms / 1000 + 0.03);
+    } catch (e) {}
+  }
+
+  // Minuteur
+  const WK = { w: null, steps: [], i: 0, end: 0, rem: 0, paused: false, lastTick: 0, beepSec: -1, said10: false, kcal: 0, activeMs: 0, workMs: 0, done: 0, startedAt: 0, timer: 0 };
+  const CA = 2 * Math.PI * 108, CB = 2 * Math.PI * 100;
+  $('plRingA').style.strokeDasharray = CA; $('plRingB').style.strokeDasharray = CB;
+  const nextWork = i => { for (let k = i + 1; k < WK.steps.length; k++) if (WK.steps[k].type === 'work') return WK.steps[k]; return null; };
+  function startWorkout(w) {
+    const steps = expand(w);
+    if (!steps.length) { toast('Ajoute au moins un exercice à cette séance.'); return; }
+    audioUnlock();
+    ['wsheet', 'weditor', 'wsum'].forEach(id => $(id).classList.add('hidden'));
+    Object.assign(WK, { w, steps, i: 0, paused: false, ended: false, kcal: 0, activeMs: 0, workMs: 0, done: 0, startedAt: Date.now(), lastTick: Date.now() });
+    $('player').classList.remove('hidden');
+    setPauseIcon();
+    requestWake();
+    enterStep(0, true);
+    clearInterval(WK.timer); WK.timer = setInterval(wkTick, 200);
+  }
+  function enterStep(i, announce) {
+    WK.i = i;
+    const st = WK.steps[i], nxt = nextWork(i), works = WK.steps.filter(x => x.type === 'work');
+    WK.end = Date.now() + st.sec * 1000; WK.rem = st.sec * 1000; WK.beepSec = -1; WK.said10 = false;
+    const pl = $('player');
+    pl.classList.remove('ph-work', 'ph-rest', 'ph-prep'); pl.classList.add('ph-' + st.type);
+    $('plPhase').textContent = st.type === 'work' ? 'Effort' : st.type === 'rest' ? (st.roundEnd ? 'Repos entre les tours' : 'Repos') : 'Préparation';
+    $('plName').textContent = st.type === 'work' ? st.name : st.type === 'rest' ? 'Repos' : 'Prépare-toi';
+    $('plNext').textContent = nxt ? nxt.name + ' (' + fmtSec(nxt.sec) + ')' : 'Fin de la séance';
+    $('plTitle').textContent = WK.w.name;
+    $('plRound').textContent = (st.round && WK.w.rounds > 1 ? 'Tour ' + st.round + ' sur ' + WK.w.rounds : '');
+    if (anim()) {
+      const c = $('plCard'); c.classList.remove('flip'); void c.offsetWidth; c.classList.add('flip');
+      if (st.type === 'work') { const r = $('plRing'); r.classList.remove('spin'); void r.getBoundingClientRect(); r.classList.add('spin'); }
+    }
+    try { navigator.vibrate && navigator.vibrate(st.type === 'work' ? [120, 60, 120] : 200); } catch (e) {}
+    if (st.type === 'work') beep(990, 320, 0.4);
+    if (announce) {
+      if (st.type === 'prep') speak('Séance ' + WK.w.name + '. Prépare-toi. Premier exercice : ' + (nxt ? nxt.name + ', ' + sayDur(nxt.sec) : '') + '.');
+      else if (st.type === 'work') speak((i > 0 && WK.steps[i - 1].type === 'prep' ? "C'est parti : " : '') + st.name + ', ' + sayDur(st.sec) + '.');
+      else speak((st.roundEnd ? 'Fin du tour ' + st.round + '. ' : '') + 'Repos, ' + sayDur(st.sec) + '.' + (nxt ? ' Ensuite : ' + nxt.name + '.' : ''));
+    }
+    renderPlayer();
+  }
+  function renderPlayer() {
+    const st = WK.steps[WK.i]; if (!st) return;
+    const frac = clamp(WK.rem / (st.sec * 1000), 0, 1);
+    $('plTime').textContent = fmtClock(Math.ceil(Math.max(0, WK.rem) / 1000) * 1000);
+    $('plRingA').style.strokeDashoffset = CA * (1 - frac); $('plRingB').style.strokeDashoffset = CB * (1 - frac);
+    let total = 0, before = 0;
+    WK.steps.forEach((x, k) => { total += x.sec; if (k < WK.i) before += x.sec; });
+    const done = before + (st.sec - Math.max(0, WK.rem) / 1000);
+    $('plBar').style.width = (clamp(done / total, 0, 1) * 100).toFixed(1) + '%';
+    const works = WK.steps.filter(x => x.type === 'work'), wi = WK.steps.slice(0, WK.i + 1).filter(x => x.type === 'work').length;
+    $('plDone').textContent = 'Exercice ' + Math.max(1, wi) + ' sur ' + works.length;
+    $('plLeft').textContent = 'Reste ' + fmtClock((total - done) * 1000);
+  }
+  function wkTick() {
+    if (!WK.w) return;
+    const now = Date.now(), dt = Math.min(5000, now - WK.lastTick); WK.lastTick = now;
+    if (WK.paused) return;
+    let st = WK.steps[WK.i];
+    WK.activeMs += dt; if (st.type === 'work') WK.workMs += dt;
+    WK.kcal += (st.type === 'work' ? (W_MET[WK.w.intensity] || 3.8) : REST_MET) * weightKg() * 0.0175 * dt / 60000;
+    let rem = WK.end - now;
+    while (rem <= 0) { // étape finie (on rattrape plusieurs étapes si l'écran était éteint)
+      if (st.type === 'work') WK.done++;
+      if (WK.i + 1 >= WK.steps.length) { finishWorkout(true, true); return; }
+      const over = -rem;
+      enterStep(WK.i + 1, over < 2000);
+      WK.end -= over; rem = WK.end - now; st = WK.steps[WK.i];
+    }
+    WK.rem = rem;
+    const secLeft = Math.ceil(rem / 1000);
+    if (secLeft <= 3 && secLeft >= 1 && secLeft !== WK.beepSec) { WK.beepSec = secLeft; beep(660, 130); }
+    if (st.type === 'work' && st.sec >= 30 && !WK.said10 && rem <= 10000 && rem > 8500) { WK.said10 = true; speak('Encore 10 secondes.'); }
+    renderPlayer();
+  }
+  function setPauseIcon() {
+    $('plPauseIcon').innerHTML = WK.paused ? ICON_PLAY : ICON_PAUSE;
+    $('plPause').classList.toggle('paused', WK.paused);
+    $('plPause').setAttribute('aria-label', WK.paused ? 'Reprendre' : 'Mettre en pause');
+  }
+  function wkPause(p) {
+    if (!WK.w || WK.paused === p) return;
+    wkTick();
+    if (p) { WK.rem = WK.end - Date.now(); WK.paused = true; speak('Pause.'); }
+    else { WK.end = Date.now() + WK.rem; WK.paused = false; WK.lastTick = Date.now(); audioUnlock(); speak('Reprise.'); }
+    setPauseIcon(); renderPlayer();
+  }
+  $('plPause').addEventListener('click', () => wkPause(!WK.paused));
+  $('plNextBtn').addEventListener('click', () => {
+    if (!WK.w) return;
+    if (WK.i + 1 >= WK.steps.length) { finishWorkout(true); return; }
+    enterStep(WK.i + 1, true); if (WK.paused) WK.rem = WK.steps[WK.i].sec * 1000;
+  });
+  $('plPrev').addEventListener('click', () => {
+    if (!WK.w) return;
+    const st = WK.steps[WK.i], spent = st.sec * 1000 - (WK.paused ? WK.rem : WK.end - Date.now());
+    enterStep(spent > 3000 || WK.i === 0 ? WK.i : WK.i - 1, true); if (WK.paused) WK.rem = WK.steps[WK.i].sec * 1000;
+  });
+  $('plStop').addEventListener('click', () => finishWorkout(false));
+  function finishWorkout(complete, fromTick) {
+    if (!WK.w || WK.ended) return;
+    if (!fromTick) { wkTick(); if (WK.ended) return; } // compte le temps écoulé jusqu'ici
+    WK.ended = true;
+    clearInterval(WK.timer); WK.paused = true;
+    const total = WK.steps.filter(x => x.type === 'work').length;
+    if (complete) { WK.rem = 0; renderPlayer(); beep(880, 220); setTimeout(() => beep(1175, 450), 240); speak('Séance terminée. Bravo !'); try { navigator.vibrate && navigator.vibrate([100, 80, 100, 80, 300]); } catch (e) {} }
+    $('wsumTitle').textContent = complete ? 'Séance terminée' : 'Séance arrêtée';
+    $('wsumBody').innerHTML = cell('Durée', fmtClock(WK.activeMs)) + cell('Exercices terminés', WK.done + ' sur ' + total) +
+      cell("Temps d'effort", fmtClock(WK.workMs)) + cell('Calories', nf0.format(WK.kcal) + ' kcal');
+    $('wsumResume').classList.toggle('hidden', complete);
+    WK.complete = complete;
+    $('wsum').classList.remove('hidden');
+  }
+  function closePlayer() {
+    clearInterval(WK.timer); WK.w = null; WK.paused = false;
+    $('player').classList.add('hidden'); $('wsum').classList.add('hidden');
+    if (S.status !== 'running') releaseWake();
+  }
+  $('wsumSave').addEventListener('click', () => {
+    const log = store.get(K_WLOG, []);
+    log.unshift({ date: WK.startedAt, id: WK.w.id, name: WK.w.name, intensity: WK.w.intensity, durationMs: Math.round(WK.activeMs), workMs: Math.round(WK.workMs),
+      done: WK.done, total: WK.steps.filter(x => x.type === 'work').length, kcal: Math.round(WK.kcal) });
+    store.set(K_WLOG, log.slice(0, 300));
+    closePlayer(); renderSeances(); toast('Séance enregistrée');
+  });
+  $('wsumDrop').addEventListener('click', () => { closePlayer(); renderSeances(); });
+  $('wsumResume').addEventListener('click', () => {
+    $('wsum').classList.add('hidden'); WK.ended = false;
+    WK.lastTick = Date.now(); clearInterval(WK.timer); WK.timer = setInterval(wkTick, 200);
+    wkPause(false);
+  });
+
   // ---------- Navigation en cube 3D ----------
-  const VIEWS = ['v-sortie', 'v-carte', 'v-progres', 'v-reglages'];
+  const VIEWS = ['v-sortie', 'v-carte', 'v-seances', 'v-progres', 'v-reglages'];
   let switching = false;
   document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => go(+t.dataset.view)));
+  $('gear').addEventListener('click', () => go(4));
   function go(i) {
     if (i === currentView || switching) return;
-    closeDetail(); $('sharebox').classList.add('hidden');
+    closeDetail(); $('sharebox').classList.add('hidden'); ['wsheet', 'weditor'].forEach(id => $(id).classList.add('hidden'));
     if (currentView === 1 && replayState) stopReplay();
     const from = $(VIEWS[currentView]), to = $(VIEWS[i]), dir = i > currentView ? 1 : -1;
     document.querySelectorAll('.tab').forEach(t => { if (+t.dataset.view === i) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); });
+    if (i === 4) $('gear').setAttribute('aria-current', 'page'); else $('gear').removeAttribute('aria-current');
     currentView = i;
-    if (i === 3 && $('banner').dataset.tag === 'profile') $('banner').classList.add('hidden');
-    if (i === 2) renderProgress();
+    if (i === 4 && $('banner').dataset.tag === 'profile') $('banner').classList.add('hidden');
+    if (i === 2) renderSeances();
+    if (i === 3) renderProgress();
     to.classList.add('is-active'); to.inert = false;
     document.body.classList.toggle('on-map', i === 1);
     document.body.classList.toggle('dim', i >= 2);
@@ -1571,7 +2030,8 @@
         quality--; frames = 0; slowAvg = 0.033;
         renderer.setPixelRatio(quality === 1 ? 1 : 0.7); resize();
       }
-      const target = 0.35 + (S.status === 'running' ? curKmh : 0) * (actNow() === 'velo' ? 0.06 : 0.13);
+      const wkStep = WK.w && !WK.paused ? WK.steps[WK.i] : null;
+      const target = wkStep ? (wkStep.type === 'work' ? 2.4 : 0.7) : 0.35 + (S.status === 'running' ? curKmh : 0) * (actNow() === 'velo' ? 0.06 : 0.13);
       relief.speed += (target - relief.speed) * Math.min(1, dt * 1.5);
       relief.travel += relief.speed * dt;
       const p = Math.min(1, (t - relief.t0) / 1900);
@@ -1590,7 +2050,7 @@
   // ---------- Réglages ----------
   $('height').value = settings.height || ''; $('weight').value = settings.weight || '';
   $('goalSteps').value = settings.goalSteps; $('goalKm').value = settings.goalKm;
-  $('voice').checked = !!settings.voice; $('voiceEvery').value = String(settings.voiceEvery);
+  $('beeps').checked = settings.beeps !== false; $('voice').checked = !!settings.voice; $('voiceEvery').value = String(settings.voiceEvery);
   $('sens').value = settings.sens; $('maxAcc').value = String(settings.maxAcc); $('anim3d').checked = !!settings.anim3d;
   function updateStepInfo() {
     const w = Math.round(stepWalkM() * 100), r = Math.round(stepRunM(10) * 100);
@@ -1619,6 +2079,7 @@
   numInput('goalKm', 'goalKm', 1, 500, false);
   updateStepInfo();
   $('voice').addEventListener('change', e => { settings.voice = e.target.checked; saveSettings(); if (settings.voice) speak('Annonces vocales activées.'); });
+  $('beeps').addEventListener('change', e => { settings.beeps = e.target.checked; saveSettings(); if (settings.beeps) { audioUnlock(); beep(660, 130); } });
   $('voiceEvery').addEventListener('change', e => { settings.voiceEvery = parseInt(e.target.value, 10) || 1000; saveSettings(); });
   $('voiceTest').addEventListener('click', () => {
     if (!plugin('TextToSpeech') && !('speechSynthesis' in window)) { toast("Ce navigateur ne sait pas parler."); return; }
@@ -1672,7 +2133,7 @@
         speak('Bravo, objectif de ' + nf0.format(settings.goalSteps) + ' pas atteint aujourd\'hui.'); toast('Objectif de pas atteint aujourd\'hui');
       }
     }
-    if (currentView === 2 && Date.now() % 5000 < 1000) renderProgress();
+    if (currentView === 3 && Date.now() % 5000 < 1000) renderProgress();
   }, 1000);
 
   // ---------- Démarrage ----------
@@ -1691,10 +2152,11 @@
   } else post.classList.remove('intro');
   applyAnim();
   renderProgress();
+  renderSeances();
   render();
   window.__parcours = { get state() { return S; }, get kmh() { return curKmh; }, get relief() { return relief; }, get map() { return map; },
     go, stepLenM, stepWalkM, stepRunM, kcalPerMin, bikeMet, cadence, settings, computeRecords, makeShareImage, exportGpx, startReplay, openDetail,
-    get replaying() { return !!replayState; },
+    get replaying() { return !!replayState; }, wk: WK, startWorkout, expand, allWorkouts, totalSec, estKcal,
     feed(lat, lon, alt, speed, acc) { onPos({ timestamp: Date.now(), coords: { latitude: lat, longitude: lon, accuracy: acc || 5, altitude: alt, altitudeAccuracy: alt == null ? null : 5, speed: speed == null ? null : speed, heading: null } }); } };
 })();
 </script>
