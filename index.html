@@ -2804,7 +2804,8 @@
   setTimeout(() => healthBar(), 1500);
 
   // Appli iPhone : connexion directe à Apple Santé (HealthKit), automatique, sans raccourci
-  const NH = isNative && Cap.getPlatform && Cap.getPlatform() === 'ios' ? plugin('Health') : null;
+  // settings.healthNoHK : appli installée avec un compte Apple gratuit (Santé refusé par Apple) → on passe par les raccourcis
+  let NH = isNative && Cap.getPlatform && Cap.getPlatform() === 'ios' && !settings.healthNoHK ? plugin('Health') : null;
   const NH_READ = ['steps', 'weight'], NH_WRITE = ['calories', 'steps', 'distance', 'distanceCycling', 'dietaryEnergyConsumed'];
   let nhBusy = false;
   async function nativeHealthSync() {
@@ -2849,6 +2850,13 @@
       if (currentView === 5) renderRepas();
     } finally { nhBusy = false; }
   }
+  const hLabelWeb = document.querySelector('label[for=healthOn]').innerHTML;
+  function nhToShortcuts() {
+    $('hTitle').textContent = 'Apple Santé (iPhone)'; document.querySelector('label[for=healthOn]').innerHTML = hLabelWeb;
+    ['hImport', 'hPaste'].forEach(id => { $(id).hidden = false; }); $('hResend').hidden = !settings.healthLast;
+    document.querySelector('.hguide').hidden = false; $('hImport').parentElement.hidden = false;
+    $('hImpInfo').textContent = "Tes pas du jour (ceux de l'iPhone et de la montre) et ton dernier poids";
+  }
   if (NH) {
     $('hTitle').textContent = 'Apple Santé';
     document.querySelector('label[for=healthOn]').innerHTML = 'Connecter à Apple Santé<small>Automatique : tes sorties, séances et repas sont ajoutés dans Santé, et tes pas et ton poids sont récupérés à chaque ouverture de l\'appli</small>';
@@ -2858,9 +2866,15 @@
     $('healthOn').addEventListener('change', async e => {
       if (!e.target.checked) return;
       try { await NH.requestAuthorization({ read: NH_READ, write: NH_WRITE }); nativeHealthSync(); }
-      catch (err) { toast("Santé n'a pas pu être connecté. Vérifie dans Réglages > Santé > Accès aux données."); }
+      catch (err) {
+        if (/entitlement|not authorized|missing|HealthKit/i.test(String(err && (err.message || err)))) {
+          // compte Apple gratuit : pas de HealthKit, on garde les raccourcis
+          settings.healthNoHK = true; saveSettings(); NH = null; nhToShortcuts();
+          toast('Cette version de l\'appli n\'a pas accès direct à Santé : utilise les raccourcis (guide ci-dessous).');
+        } else toast("Santé n'a pas pu être connecté. Vérifie dans Réglages > Santé > Accès aux données.");
+      }
     });
-    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') nativeHealthSync(); });
+    document.addEventListener('visibilitychange', () => { if (NH && document.visibilityState === 'visible') nativeHealthSync(); });
     setTimeout(nativeHealthSync, 2000);
   }
   // ---------- Carte 3D (MapLibre + OpenFreeMap) ----------
