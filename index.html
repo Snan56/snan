@@ -302,6 +302,15 @@
   .mphotos{display:flex;gap:18px} .mphotos .linkbtn{display:inline-block}
   .mtotal{font-size:18px;margin:8px 0 14px} .mtotal b{font-size:24px}
   .sbtn:disabled{opacity:.45;cursor:default}
+  .hbar{position:fixed;z-index:64;left:12px;right:12px;bottom:calc(96px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:10px;
+    background:var(--blanc);color:var(--encre);border-radius:16px;padding:10px 10px 10px 14px;box-shadow:0 10px 30px rgba(0,0,0,.45);font-size:14px;line-height:1.3}
+  .hbar.hidden{display:none}
+  .hbar span{flex:1} .hbar #hbarGo{background:var(--rouge);color:#fff;border:0;border-radius:12px;padding:10px 12px;font:inherit;font-weight:700;white-space:nowrap;min-height:44px}
+  .hbar #hbarX{background:none;border:0;font-size:22px;color:var(--encre);min-width:36px;min-height:44px}
+  .hbtns{display:flex;flex-wrap:wrap;gap:6px 18px;padding:0 0 10px}
+  .hguide{border-top:1px solid rgba(157,183,217,.14);padding:12px 0;font-size:14px;line-height:1.45}
+  .hguide summary{font-weight:700;cursor:pointer;color:var(--jaune);min-height:32px} .hguide h4{margin:14px 0 4px;font-size:15px} .hguide ol{padding-left:20px;margin:4px 0} .hguide li{margin:5px 0} .hguide p{color:var(--gris)}
+  .hsteps{margin:0 0 12px;font-size:14px;color:var(--gris)} .hsteps b{color:var(--blanc);font-size:18px}
 
   /* ---------- Écran Séances ---------- */
   .newbtn{display:block;width:100%;border:0;border-radius:16px;padding:14px;background:var(--blanc);color:var(--encre);font-weight:700;font-size:16px;cursor:pointer;
@@ -506,6 +515,7 @@
 </header>
 <div id="banner" class="banner hidden" role="alert"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="hbar" class="hbar hidden" role="region" aria-label="Apple Santé"><span id="hbarTxt"></span><button id="hbarGo" type="button"></button><button id="hbarX" type="button" aria-label="Plus tard">×</button></div>
 
 <main class="stage" id="stage">
   <!-- Sortie -->
@@ -608,6 +618,36 @@
         <select id="sens"><option value="faible">Faible</option><option value="moyenne">Moyenne</option><option value="forte">Forte</option></select></div>
       <div class="row"><label for="maxAcc">Précision GPS minimale<small>Les points moins précis sont ignorés</small></label>
         <select id="maxAcc"><option value="20">20 m</option><option value="30">30 m</option><option value="50">50 m</option></select></div>
+    </div>
+    <div class="set-title" id="hTitle">Apple Santé (iPhone)</div>
+    <div class="set" id="hBox">
+      <div class="row"><label for="healthOn">Envoyer vers Apple Santé<small>Après chaque sortie, séance ou repas, un bouton te propose de l'ajouter dans Santé (calories, pas, distance)</small></label>
+        <span class="switch"><input id="healthOn" type="checkbox" role="switch"><span></span></span></div>
+      <div class="row"><div class="rl">Récupérer depuis Santé<small id="hImpInfo">Tes pas du jour (ceux de l'iPhone et de la montre) et ton dernier poids</small></div></div>
+      <div class="hbtns"><button id="hImport" class="linkbtn" type="button">Lancer le raccourci</button><button id="hPaste" class="linkbtn" type="button">Coller les données de Santé</button></div>
+      <details class="hguide"><summary>Créer les raccourcis (une seule fois, environ 5 minutes)</summary>
+        <p>Santé n'est pas accessible depuis un site web, donc Parcours passe par l'app <b>Raccourcis</b> de l'iPhone. Ouvre Raccourcis, touche <b>+</b>, et cherche chaque action par son nom dans la barre de recherche en bas. Les noms des raccourcis doivent être écrits exactement comme ici.</p>
+        <h4>1. Raccourci « Parcours vers Santé »</h4>
+        <ol>
+          <li>Ajoute l'action <b>Obtenir le dictionnaire à partir de</b>, et choisis <b>Entrée du raccourci</b>. Si Raccourcis demande quoi recevoir, choisis <b>Texte</b>.</li>
+          <li>Ajoute <b>Obtenir la valeur du dictionnaire</b> : clé <b>actif</b>.</li>
+          <li>Ajoute <b>Si</b> : « Valeur du dictionnaire » <b>a une valeur</b>.</li>
+          <li>Dans le Si, ajoute <b>Enregistrer un échantillon de santé</b> : type <b>Énergie active</b>, valeur = <b>Valeur du dictionnaire</b>, unité <b>kcal</b>.</li>
+          <li>Refais les étapes 2 à 4 pour la clé <b>pas</b> (type <b>Pas</b>), la clé <b>km</b> (type <b>Distance (marche et course)</b>, unité <b>km</b>) et la clé <b>mange</b> (type <b>Énergie alimentaire</b>, unité <b>kcal</b>).</li>
+          <li>Nomme le raccourci <b>Parcours vers Santé</b>. La première fois, l'iPhone te demande l'autorisation d'écrire dans Santé : accepte.</li>
+        </ol>
+        <h4>2. Raccourci « Santé vers Parcours » (pour récupérer tes pas et ton poids)</h4>
+        <ol>
+          <li>Ajoute <b>Rechercher des échantillons de santé</b> : type <b>Pas</b>, date de début <b>aujourd'hui</b>.</li>
+          <li>Ajoute <b>Calculer des statistiques</b> : <b>Somme</b> des échantillons.</li>
+          <li>Ajoute encore <b>Rechercher des échantillons de santé</b> : type <b>Poids</b>, trier par <b>date de début</b>, <b>le plus récent d'abord</b>, limite <b>1</b>.</li>
+          <li>Ajoute <b>Texte</b> et écris : <b>PARCOURS pas=</b> puis insère « Résultat des statistiques », puis <b> poids=</b> et insère les échantillons de poids.</li>
+          <li>Ajoute <b>Copier dans le presse-papiers</b>.</li>
+          <li>Nomme-le <b>Santé vers Parcours</b>. Ensuite, reviens dans Parcours et touche <b>Coller les données de Santé</b>.</li>
+        </ol>
+        <p>Rien n'est envoyé ailleurs : les données passent seulement entre Parcours, Raccourcis et Santé, sur ton iPhone.</p>
+      </details>
+      <button id="hResend" class="linkbtn" type="button" hidden>Renvoyer le dernier envoi</button>
     </div>
     <div class="set" id="apkBox" hidden><div class="row"><div class="rl">Appli Android<small>Avec l'appli, le suivi continue quand l'écran est verrouillé.</small></div></div>
       <a class="linkbtn" href="parcours.apk" download style="display:block;text-decoration:none">Télécharger l'appli Android</a></div>
@@ -1406,7 +1446,7 @@
     const beaten = Object.keys(after).filter(k => after[k].date === entry.date && before[k] && before[k].v !== after[k].v);
     closeModal(); reset();
     renderProgress(true);
-    go(3);
+    go(3); healthChanged();
     speak('Sortie enregistrée : ' + sayKm(Math.round(entry.distanceM / 10) * 10) + ' en ' + sayDur(entry.durationMs / 1000) + '.');
     if (beaten.length) setTimeout(() => showMedal(beaten, after), anim() ? 700 : 50);
   }
@@ -1501,6 +1541,7 @@
       if (h.date >= ws) { st.km += (h.distanceM || 0) / 1000; st.kcal += h.kcal || 0; }
       if (h.activity !== 'velo') st.longest = Math.max(st.longest, (h.distanceM || 0) / 1000);
     });
+    if (settings.healthSteps && settings.healthSteps.day === today) st.steps = Math.max(st.steps, settings.healthSteps.v); // pas de toute la journée, si importés depuis Santé
     wlog.forEach(l => {
       if (l.date >= ws) { st.sessions++; st.kcal += l.kcal || 0; }
       if (l.kind === 'navette' && l.official) st.navette = Math.max(st.navette, l.stage || 0);
@@ -2121,7 +2162,7 @@
     log.unshift({ date: WK.startedAt, id: WK.w.id, name: WK.w.name, intensity: WK.w.intensity, durationMs: Math.round(WK.activeMs), workMs: Math.round(WK.workMs),
       done: WK.done, total: WK.steps.filter(x => x.type === 'work').length, kcal: Math.round(WK.kcal) });
     store.set(K_WLOG, log.slice(0, 300));
-    closePlayer(); renderSeances(); toast('Séance enregistrée');
+    closePlayer(); renderSeances(); toast('Séance enregistrée'); healthChanged();
   });
   $('wsumDrop').addEventListener('click', () => { closePlayer(); renderSeances(); });
   $('wsumResume').addEventListener('click', () => {
@@ -2272,7 +2313,7 @@
     const r = NV.res; if (!r) { navClose(); return; }
     const best = navBest(), isRecord = r.official && best && r.laps > best.laps;
     const log = store.get(K_WLOG, []); log.unshift(r); store.set(K_WLOG, log.slice(0, 300));
-    navClose(); renderSeances(); toast('Résultat enregistré');
+    navClose(); renderSeances(); toast('Résultat enregistré'); healthChanged();
     if (isRecord) {
       $('medalVal').textContent = 'Palier ' + r.stage; $('medalTitle').textContent = 'Nouveau record';
       $('medalText').textContent = 'Test navette : ' + navScore(r) + ', à ' + nf1.format(r.speed) + ' km/h.';
@@ -2625,7 +2666,7 @@
     meals.unshift({ date: MS.date, type: +$('mType').value, items, kcal: items.reduce((a, x) => a + x.kcal, 0), thumb: MS.thumb });
     let kept = meals.slice(0, 300);
     while (!store.set(K_MEALS, kept) && kept.length > 20) kept = kept.slice(0, Math.floor(kept.length * 0.8)).map((m, i) => i > 30 ? Object.assign({}, m, { thumb: '' }) : m);
-    closeMeal(); renderRepas(); toast('Repas enregistré');
+    closeMeal(); renderRepas(); toast('Repas enregistré'); healthChanged();
   });
   ['mCamera', 'mGallery'].forEach(id => $(id).addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) openMeal(f); }));
   $('mNoPhoto').addEventListener('click', () => openMeal(null));
@@ -2646,6 +2687,7 @@
     let h = '<div class="block"><div class="bh">Aujourd\'hui</div><div class="energy">' +
       '<div><span>Mangées</span><b class="num">' + nf0.format(en.eaten) + '</b><small>kcal</small></div>' +
       '<div><span>Dépensées en activité</span><b class="num">' + nf0.format(Math.round(en.burned)) + '</b><small>kcal</small></div></div>' +
+      (settings.healthSteps && settings.healthSteps.day === today ? '<p class="hsteps">Pas aujourd\'hui selon Apple Santé : <b class="num">' + nf0.format(settings.healthSteps.v) + '</b></p>' : '') +
       '<div class="mbtns"><label class="mbig"><input id="mCameraP" type="file" accept="image/*" capture="environment" hidden>Prendre une photo du repas</label>' +
       '<label class="mbig alt"><input id="mGalleryP" type="file" accept="image/*" hidden>Choisir une photo</label>' +
       '<button class="linkbtn" type="button" id="mNoPhotoP">Ajouter un repas sans photo</button></div></div>';
@@ -2678,6 +2720,87 @@
     const meals = store.get(K_MEALS, []); meals.splice(i, 1); store.set(K_MEALS, meals); mealDelArmed = -1; renderRepas(); toast('Repas supprimé');
   });
 
+
+  // ---------- Apple Santé (via l'app Raccourcis de l'iPhone) ----------
+  // Un site web ne peut ni lire ni écrire dans Santé. Parcours ouvre donc des raccourcis créés par l'utilisateur :
+  // « Parcours vers Santé » reçoit les chiffres en texte, « Santé vers Parcours » copie les pas et le poids dans le presse-papiers.
+  const SC_OUT = 'Parcours vers Santé', SC_IN = 'Santé vers Parcours';
+  if (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) { $('hTitle').hidden = true; $('hBox').hidden = true; } // appli Android : pas d'Apple Santé
+  const runShortcut = (name, text) => { location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent(name) + (text != null ? '&input=text&text=' + encodeURIComponent(text) : ''); };
+  function healthPending() {
+    if (!settings.healthOn) return null;
+    const since = Math.max(settings.healthSince || 0, Date.now() - 2 * 864e5), out = { actif: 0, pas: 0, km: 0, mange: 0 }, refs = [];
+    const scan = (key, fn) => store.get(key, []).forEach(x => { if (!x.hs && x.date >= since) { fn(x); refs.push([key, x.date]); } });
+    scan(K_HIST, h => { out.actif += h.kcal || 0; out.pas += h.steps || 0; if (h.activity !== 'velo') out.km += (h.distanceM || 0) / 1000; });
+    scan(K_WLOG, l => { out.actif += l.kcal || 0; if (l.kind === 'navette') out.km += (l.distanceM || 0) / 1000; });
+    scan(K_MEALS, m => { out.mange += m.kcal || 0; });
+    if (!refs.length) return null;
+    const pay = {}; out.actif = Math.round(out.actif); out.km = Math.round(out.km * 100) / 100; out.mange = Math.round(out.mange);
+    Object.keys(out).forEach(k => { if (out[k] > 0) pay[k] = out[k]; });
+    return Object.keys(pay).length ? { pay, refs } : null;
+  }
+  function healthSummary(p) {
+    const t = [];
+    if (p.actif) t.push(nf0.format(p.actif) + ' kcal dépensées');
+    if (p.mange) t.push(nf0.format(p.mange) + ' kcal mangées');
+    if (p.pas) t.push(nf0.format(p.pas) + ' pas');
+    if (p.km) t.push(String(p.km).replace('.', ',') + ' km');
+    return t.join(', ');
+  }
+  let hbarMode = '';
+  function healthBar(mode) {
+    if (mode === 'paste') { hbarMode = 'paste'; $('hbarTxt').textContent = 'Le raccourci a copié tes données Santé.'; $('hbarGo').textContent = 'Importer'; $('hbar').classList.remove('hidden'); return; }
+    if (hbarMode === 'paste') return;
+    const p = healthPending();
+    if (!p) { $('hbar').classList.add('hidden'); hbarMode = ''; return; }
+    hbarMode = 'send'; $('hbarTxt').textContent = 'Ajouter à Apple Santé : ' + healthSummary(p.pay); $('hbarGo').textContent = 'Envoyer';
+    $('hbar').classList.remove('hidden');
+  }
+  function healthSend() {
+    const p = healthPending(); if (!p) return;
+    [K_HIST, K_WLOG, K_MEALS].forEach(key => {
+      const ds = new Set(p.refs.filter(r => r[0] === key).map(r => r[1]));
+      if (!ds.size) return;
+      const arr = store.get(key, []); arr.forEach(x => { if (ds.has(x.date)) x.hs = 1; }); store.set(key, arr);
+    });
+    settings.healthLast = p.pay; saveSettings(); $('hResend').hidden = false;
+    $('hbar').classList.add('hidden'); hbarMode = '';
+    runShortcut(SC_OUT, JSON.stringify(p.pay));
+  }
+  const healthChanged = () => setTimeout(() => healthBar(), 600);
+  $('hbarGo').addEventListener('click', () => { if (hbarMode === 'paste') healthPaste(); else healthSend(); });
+  $('hbarX').addEventListener('click', () => { $('hbar').classList.add('hidden'); hbarMode = ''; });
+  $('healthOn').checked = !!settings.healthOn; $('hResend').hidden = !settings.healthLast;
+  $('healthOn').addEventListener('change', e => {
+    settings.healthOn = e.target.checked;
+    if (settings.healthOn && !settings.healthSince) settings.healthSince = Date.now();
+    saveSettings();
+    if (settings.healthOn) { $('hbar').classList.add('hidden'); toast('Crée d\'abord le raccourci « ' + SC_OUT + ' » (guide ci-dessous)'); }
+    else { $('hbar').classList.add('hidden'); hbarMode = ''; }
+  });
+  $('hResend').addEventListener('click', () => { if (settings.healthLast) runShortcut(SC_OUT, JSON.stringify(settings.healthLast)); });
+  let awaitPaste = false;
+  $('hImport').addEventListener('click', () => { awaitPaste = true; runShortcut(SC_IN); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && awaitPaste) { awaitPaste = false; healthBar('paste'); } });
+  function healthApply(txt) {
+    const num = re => { const m = txt.match(re); return m ? parseFloat(m[1].replace(/[\s  ]/g, '').replace(',', '.')) : NaN; };
+    const pas = num(/pas\s*=\s*([\d\s  .,]*\d)/i), poids = num(/poids\s*=\s*(\d+(?:[.,]\d+)?)/i);
+    if (!/PARCOURS/i.test(txt) || (isNaN(pas) && isNaN(poids))) { toast('Pas de données Santé dans le presse-papiers. Relance le raccourci « ' + SC_IN + ' ».'); return; }
+    const msg = [];
+    if (!isNaN(pas)) { settings.healthSteps = { day: dayKey(Date.now()), v: Math.round(pas) }; msg.push(nf0.format(Math.round(pas)) + ' pas'); }
+    if (!isNaN(poids) && poids >= 30 && poids <= 250) { settings.weight = Math.round(poids * 10) / 10; $('weight').value = settings.weight; msg.push('poids ' + String(settings.weight).replace('.', ',') + ' kg'); }
+    saveSettings(); $('hbar').classList.add('hidden'); hbarMode = '';
+    $('hImpInfo').textContent = 'Dernier import : ' + msg.join(', ');
+    toast('Importé depuis Santé : ' + msg.join(', '));
+    if (currentView === 5) renderRepas();
+  }
+  async function healthPaste() {
+    let txt = '';
+    try { txt = await navigator.clipboard.readText(); } catch (e) { txt = prompt('Colle ici le texte copié par le raccourci « ' + SC_IN + ' » :') || ''; }
+    if (txt) healthApply(txt);
+  }
+  $('hPaste').addEventListener('click', healthPaste);
+  setTimeout(() => healthBar(), 1500);
   // ---------- Carte 3D (MapLibre + OpenFreeMap) ----------
   let map = null, mapLoading = false, styleLoaded = false, styleFellBack = false, meMarker = null, mapFollow = true, mapRouteDirty = true, lastRouteFlush = 0;
   function mapMsg(t) { const m = $('mapMsg'); m.textContent = t; m.classList.toggle('hidden', !t); }
@@ -3089,7 +3212,7 @@
       fillVoiceSelect();
     }).catch(() => {});
   }
-  window.__parcours = { openMeal, classifyPhoto, renderRepas, loadFoodAI, get MS() { return MS; }, get state() { return S; }, get kmh() { return curKmh; }, get relief() { return relief; }, get map() { return map; },
+  window.__parcours = { healthApply, healthPending, healthSend, openMeal, classifyPhoto, renderRepas, loadFoodAI, get MS() { return MS; }, get state() { return S; }, get kmh() { return curKmh; }, get relief() { return relief; }, get map() { return map; },
     go, stepLenM, stepWalkM, stepRunM, kcalPerMin, bikeMet, cadence, settings, computeRecords, makeShareImage, exportGpx, startReplay, openDetail,
     get replaying() { return !!replayState; }, wk: WK, startWorkout, expand, allWorkouts, totalSec, estKcal, nv: NV, navSchedule, navVo2, navStart, beep, speak, voiceList, get actx() { return actx; }, ac: AC, openAccueil, goalStats, goCard, get silentEl() { return silentEl; },
     feed(lat, lon, alt, speed, acc) { onPos({ timestamp: Date.now(), coords: { latitude: lat, longitude: lon, accuracy: acc || 5, altitude: alt, altitudeAccuracy: alt == null ? null : 5, speed: speed == null ? null : speed, heading: null } }); } };
