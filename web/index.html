@@ -375,6 +375,81 @@
   .stopbtn:active{transform:translateY(5px);box-shadow:0 1px 0 var(--rouge-fonce)}
   #voiceSel{width:170px}
   @media (max-height:700px){ .lane3d{height:min(28vh,200px)} .nv-big{font-size:48px} .nv-stats b{font-size:19px} }
+
+  /* ---------- Page d'accueil 3D ---------- */
+  .brand-btn{background:none;border:0;padding:0;cursor:pointer;color:inherit;font:inherit;display:flex;align-items:center;gap:10px}
+  body.ac-open .stage,body.ac-open .tabbar,body.ac-open .top,body.ac-open .end-btn,body.ac-open .banner{visibility:hidden}
+  body.ac-open .stage .view{visibility:hidden!important}
+  body.ac-open .stage{opacity:0;pointer-events:none}
+  .accueil{position:fixed;inset:0;z-index:58;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    background:linear-gradient(to bottom,rgba(17,26,44,.62) 0%,rgba(17,26,44,.18) 42%,rgba(17,26,44,.55) 75%,rgba(17,26,44,.9) 100%)}
+  .ac-step{min-height:100%;display:flex;flex-direction:column;align-items:center;text-align:center;
+    padding:calc(var(--safe-t) + 26px) 22px calc(var(--safe-b) + 24px);max-width:560px;margin:0 auto}
+  .ac-3d{perspective:700px;margin:8vh 0 10px}
+  .ac-blaze{width:128px;height:84px;margin:0 auto 26px;position:relative;transform-style:preserve-3d;transform:rotateX(18deg) rotateY(-24deg);animation:blazein 1.4s cubic-bezier(.2,1.1,.3,1) both}
+  .ac-blaze i{position:absolute;left:0;right:0}
+  .ac-blaze .bk{top:0;bottom:0;background:#6d1411;transform:translateZ(-16px)}
+  .ac-blaze .w{top:0;height:50%;background:var(--blanc)} .ac-blaze .r{bottom:0;height:50%;background:var(--rouge)}
+  @keyframes blazein{from{transform:rotateX(70deg) rotateY(-200deg) scale(.4);opacity:0}to{transform:rotateX(18deg) rotateY(-24deg)}}
+  .ac-h1{margin:0;font-size:clamp(70px,22vw,120px);font-weight:900;font-stretch:66%;letter-spacing:-.02em;line-height:.9;
+    text-shadow:0 1px 0 #c9d2e2,0 2px 0 #b3bed2,0 3px 0 #9eaac1,0 4px 0 #8a97b0,0 5px 0 #75839f,0 6px 0 #61708d,0 10px 18px rgba(0,0,0,.45);
+    transform:rotateX(16deg);animation:titlein 1.2s .25s cubic-bezier(.2,1.1,.3,1) both}
+  @keyframes titlein{from{transform:rotateX(80deg) translateY(30px);opacity:0}to{transform:rotateX(16deg)}}
+  .ac-lead{font-size:18px;line-height:1.5;max-width:30ch;margin:18px auto 0;color:#dbe3f0;animation:fadein .8s .9s both}
+  @keyframes fadein{from{opacity:0;transform:translateY(12px)}}
+  .ac-h2{margin:0;font-size:clamp(34px,10vw,48px);font-weight:900;font-stretch:70%;line-height:1;letter-spacing:-.01em}
+  .ac-sub{font-size:15px;color:var(--gris);margin:8px 0 0;max-width:36ch;line-height:1.45}
+  .ac-cta{margin-top:auto;width:100%;max-width:420px;border:0;border-radius:18px;padding:17px;font-size:18px;font-weight:800;cursor:pointer;
+    background:var(--rouge);color:#fff;box-shadow:0 6px 0 var(--rouge-fonce),0 14px 26px rgba(0,0,0,.4)}
+  .ac-cta:active{transform:translateY(5px);box-shadow:0 1px 0 var(--rouge-fonce)}
+  .ac-link{background:none;border:0;color:var(--blanc);font-weight:700;font-size:16px;padding:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .ac-form{width:100%;max-width:420px;margin:22px 0 18px;text-align:left}
+  .ac-form label{display:block;font-size:13px;color:var(--gris);font-weight:600;margin:12px 0 4px}
+  .ac-form input{width:100%}
+  .ac-form .ed-grid{gap:0 12px}
+  .ac-hello{width:100%;text-align:left}
+  .ac-hint{font-size:14px;color:var(--gris);margin:6px 0 0;min-height:1.4em}
+  .carousel{position:relative;width:100%;height:340px;perspective:1100px;perspective-origin:50% 40%;margin:10px 0 2px;touch-action:pan-y;user-select:none;-webkit-user-select:none;flex:none}
+  .c-ring{position:absolute;left:50%;top:12px;width:232px;height:304px;margin-left:-116px;transform-style:preserve-3d;transition:transform .75s cubic-bezier(.2,.9,.3,1)}
+  .c-ring.intro{transition:transform 1.6s cubic-bezier(.15,.85,.25,1)}
+  .gcard{position:absolute;inset:0;transform-style:preserve-3d;cursor:pointer}
+  .gc-face{transition:filter .45s}
+  .c-ring{pointer-events:none} /* l'anneau tourné de 90° peut sinon « couvrir » tout l'écran */
+  .gcard{pointer-events:none} .gcard.cur{pointer-events:auto}
+  .gcard:not(.cur) .gc-face{filter:brightness(.62) saturate(.8)} /* pas d'opacité sur la carte : elle aplatirait la 3D */
+  .gc-face,.gc-back{position:absolute;inset:0;border-radius:24px}
+  .gc-back{background:linear-gradient(160deg,#c99d12,#a17c0b);transform:translateZ(-12px)}
+  .gc-face{background:linear-gradient(180deg,#ffe066 0%,#ffd23f 50%,#f1c12a 100%);color:var(--encre);padding:18px 16px;display:flex;flex-direction:column;align-items:center;
+    -webkit-backface-visibility:hidden;backface-visibility:hidden;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+  .gcard.off .gc-face{background:linear-gradient(180deg,#e6eaf1,#cfd6e2);color:#3b4760}
+  .gcard.off .gc-back{background:#8f9bb1}
+  .gc-title{font-size:19px;font-weight:800;font-stretch:80%;line-height:1.15;min-height:2.3em;display:flex;align-items:center}
+  .gc-ringbox{position:relative;width:132px;height:132px;margin:6px 0 4px}
+  .gc-ring{width:100%;height:100%;transform:rotate(-90deg)}
+  .gc-ring circle{fill:none}
+  .gc-ring .t{stroke:rgba(20,33,58,.14);stroke-width:16}
+  .gc-ring .a{stroke:var(--blanc);stroke-width:7;transition:stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)}
+  .gc-ring .b{stroke:var(--rouge);stroke-width:7;transition:stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)}
+  .gcard.done .gc-ring .a,.gcard.done .gc-ring .b{stroke:var(--encre)}
+  .gc-pct{position:absolute;inset:0;display:grid;place-items:center;font-size:34px}
+  .gc-val{font-size:26px;line-height:1.05}
+  .gc-val small{font-size:14px;font-weight:700;font-stretch:90%}
+  .gc-sub{font-size:13px;font-weight:600;margin-top:6px;opacity:.85;line-height:1.3}
+  .gc-desc{font-size:13px;line-height:1.35;margin:2px 0 12px;opacity:.85;min-height:3.9em}
+  .gc-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;font-size:14px;font-weight:700;text-align:left;margin-bottom:14px}
+  .stepper{display:flex;align-items:center;justify-content:space-between;width:100%;background:rgba(20,33,58,.1);border-radius:16px;padding:6px}
+  .stepper button{width:46px;height:46px;border-radius:12px;border:0;background:var(--encre);color:var(--blanc);font-size:24px;font-weight:700;cursor:pointer;line-height:1}
+  .stepper button:disabled{opacity:.3}
+  .stepper .num{font-size:28px;line-height:1;text-align:center} .stepper small{display:block;font-size:12px;font-weight:700;font-stretch:90%}
+  .gcard.off .stepper{opacity:.45}
+  .c-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin:2px 0 6px}
+  .c-nav .pbtn{width:44px;height:44px;font-size:22px}
+  .c-dots{display:flex;gap:8px}
+  .c-dots button{width:10px;height:10px;border-radius:50%;border:0;padding:0;background:rgba(157,183,217,.35);cursor:pointer}
+  .c-dots button[aria-current="true"]{background:var(--blanc);width:24px;border-radius:5px}
+  .ac-streak{margin:4px 0 16px}
+  .ac-empty{max-width:30ch;margin:40px auto;color:var(--gris)}
+  @media (max-height:700px){ .carousel{height:300px} .c-ring{height:270px;top:6px} .gc-ringbox{width:104px;height:104px} .gc-desc{min-height:0} .ac-3d{margin-top:4vh} }
   @media (max-height:700px){
     .speed-num{font-size:clamp(64px,22vw,100px)}
     .po{height:48px;margin-bottom:8px} .face .val{font-size:26px} .post{margin-top:10px} .hint{display:none}
@@ -383,7 +458,7 @@
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   }
-  body.anim-off .post.intro .po,body.anim-off .plate.flip,body.anim-off .run.new,body.anim-off .sheet,body.anim-off .coin,body.anim-off .ring.spin,body.anim-off .wcard.flip .pl-name,body.anim-off .nv-head.flip{animation:none}
+  body.anim-off .post.intro .po,body.anim-off .plate.flip,body.anim-off .run.new,body.anim-off .sheet,body.anim-off .coin,body.anim-off .ring.spin,body.anim-off .wcard.flip .pl-name,body.anim-off .nv-head.flip,body.anim-off .ac-blaze,body.anim-off .ac-h1,body.anim-off .ac-lead{animation:none}
 </style>
 </head>
 <body>
@@ -391,7 +466,7 @@
 <canvas id="relief" aria-hidden="true"></canvas>
 
 <header class="top">
-  <div class="brand"><span class="blaze" aria-hidden="true"></span>Parcours</div>
+  <div class="brand"><button id="brandBtn" class="brand-btn" type="button" aria-label="Ouvrir l'accueil et tes objectifs"><span class="blaze" aria-hidden="true"></span>Parcours</button></div>
   <div class="top-right"><div id="gps" class="gps" role="status"><span class="dot"></span><span id="gpsText">GPS inactif</span></div><button id="gear" class="gear" type="button" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
 </header>
 <div id="banner" class="banner hidden" role="alert"></div>
@@ -454,6 +529,7 @@
     <h2 class="h-title">Réglages</h2>
     <div class="set-title">Ton profil</div>
     <div class="set">
+      <div class="row"><label for="pname">Ton prénom<small>Pour te dire bonjour sur l'accueil</small></label><input id="pname" type="text" maxlength="24" autocomplete="given-name" style="width:150px"></div>
       <div class="row"><label for="height">Ta taille<small>Sert à calculer la longueur de tes pas</small></label><span class="unitfield"><input id="height" type="number" min="100" max="230" step="1" inputmode="numeric" placeholder="170"> cm</span></div>
       <div class="row"><label for="weight">Ton poids<small>Sert à calculer les calories dépensées</small></label><span class="unitfield"><input id="weight" type="number" min="30" max="250" step="1" inputmode="numeric" placeholder="70"> kg</span></div>
       <div class="row"><label for="age">Ton âge (facultatif)<small>Sert à estimer ta VO2max au test navette si tu as moins de 18 ans</small></label><span class="unitfield"><input id="age" type="number" min="6" max="99" step="1" inputmode="numeric"> ans</span></div>
@@ -463,6 +539,7 @@
     <div class="set">
       <div class="row"><label for="goalSteps">Pas par jour<small>Compte les pas faits pendant tes sorties</small></label><span class="unitfield"><input id="goalSteps" type="number" min="500" max="60000" step="500" inputmode="numeric"></span></div>
       <div class="row"><label for="goalKm">Kilomètres par semaine<small>Du lundi au dimanche</small></label><span class="unitfield"><input id="goalKm" type="number" min="1" max="500" step="1" inputmode="numeric"> km</span></div>
+      <div class="row"><button id="openGoals" class="linkbtn" type="button">Choisir et régler tous mes objectifs</button></div>
     </div>
     <div class="set-title">Annonces vocales</div>
     <div class="set">
@@ -482,6 +559,8 @@
     </div>
     <div class="set-title">Affichage et capteurs</div>
     <div class="set">
+      <div class="row"><label for="showWelcome">Accueil au démarrage<small>Affiche tes objectifs à l'ouverture de l'appli</small></label>
+        <span class="switch"><input id="showWelcome" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="anim3d">Animations 3D<small>Relief animé et transitions. Coupe-les pour économiser la batterie.</small></label>
         <span class="switch"><input id="anim3d" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="sens">Sensibilité du podomètre<small>Augmente-la si des pas sont oubliés</small></label>
@@ -663,6 +742,40 @@
   </div>
 </div>
 
+<!-- Page d'accueil 3D -->
+<div id="accueil" class="accueil hidden" role="dialog" aria-modal="true" aria-label="Accueil">
+  <section class="ac-step" id="acIntro">
+    <div class="ac-3d">
+      <div class="ac-blaze" aria-hidden="true"><i class="bk"></i><i class="w"></i><i class="r"></i></div>
+      <h1 class="ac-h1">Parcours</h1>
+    </div>
+    <p class="ac-lead">Marche, cours, roule et entraîne-toi. Fixe-toi des objectifs et regarde-toi progresser.</p>
+    <button class="ac-cta" type="button" data-ac="profil">Commencer</button>
+  </section>
+  <section class="ac-step hidden" id="acProfil">
+    <h2 class="ac-h2">Présente-toi</h2>
+    <p class="ac-sub">Ces infos servent à calculer tes pas, tes calories et ta VO2max. Elles restent sur ton téléphone.</p>
+    <div class="ac-form">
+      <label for="acName">Prénom</label><input id="acName" type="text" maxlength="24" autocomplete="given-name" placeholder="Ton prénom">
+      <div class="ed-grid">
+        <div><label for="acHeight">Taille (cm)</label><input id="acHeight" type="number" min="100" max="230" inputmode="numeric" placeholder="170"></div>
+        <div><label for="acWeight">Poids (kg)</label><input id="acWeight" type="number" min="30" max="250" inputmode="numeric" placeholder="70"></div>
+        <div><label for="acAge">Âge (facultatif)</label><input id="acAge" type="number" min="6" max="99" inputmode="numeric"></div>
+      </div>
+    </div>
+    <button class="ac-cta" type="button" data-ac="goals">Suivant</button>
+    <button class="ac-link" type="button" data-ac="goals">Passer cette étape</button>
+  </section>
+  <section class="ac-step hidden" id="acMain">
+    <div class="ac-hello"><h2 class="ac-h2" id="acHello">Bonjour</h2><p class="ac-sub" id="acDate"></p><p class="ac-hint" id="acHint"></p></div>
+    <div class="carousel" id="acCarousel" tabindex="0" aria-roledescription="carrousel" aria-label="Tes objectifs"><div class="c-ring" id="acRing"></div></div>
+    <div class="c-nav"><button id="acPrev" class="pbtn" type="button" aria-label="Objectif précédent">‹</button><div class="c-dots" id="acDots"></div><button id="acNext" class="pbtn" type="button" aria-label="Objectif suivant">›</button></div>
+    <p class="streak ac-streak" id="acStreak"></p>
+    <button class="ac-cta" id="acEnter" type="button">Entrer dans l'appli</button>
+    <button class="ac-link" id="acEdit" type="button">Modifier mes objectifs</button>
+  </section>
+</div>
+
 <div id="medal" class="medal hidden" role="dialog" aria-modal="true" aria-labelledby="medalTitle">
   <div class="coin"><div class="edge"></div><div class="cf"><b id="medalVal"></b></div><div class="cb"></div></div>
   <h3 id="medalTitle">Nouveau record</h3>
@@ -701,6 +814,8 @@
     height: null, weight: null, measuredStep: null, activity: 'marche',
     goalSteps: 10000, goalKm: 20, voice: true, voiceEvery: 1000, beeps: true, goalSaidDay: '', age: null,
     vURI: '', vIdx: -1, vRate: 1, vPitch: 1, vVol: 1, beepSound: 'classique', nav: null,
+    name: '', onboarded: false, showWelcome: true, goalSessions: 3, goalKcal: 2000, goalLongest: 5, goalNavette: 8,
+    goalsOn: { steps: true, km: true, sessions: false, kcal: false, longest: false, navette: false },
     sens: 'moyenne', maxAcc: 30, anim3d: !reduceMotion, map3d: true
   }, store.get(K_SET, {}));
   const saveSettings = () => store.set(K_SET, settings);
@@ -716,7 +831,7 @@
   let S = fresh();
   let watchId = null, nativeWatcher = null, last = null, curKmh = 0, lastMoveTs = 0, lastFix = null, lastFixAt = 0;
   let wakeLock = null, motionSeen = false, renderQueued = false, lastSave = 0, wasRunningBeforeModal = false;
-  let currentView = 0, lastKcalAt = 0, profileAsked = false;
+  let currentView = 0, lastKcalAt = 0, profileAsked = false, acOpen = false;
 
   // ---------- Utilitaires ----------
   const R = 6371008.8, rad = d => d * Math.PI / 180, deg = r => r * 180 / Math.PI;
@@ -1301,25 +1416,58 @@
   }
   const df = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   const dfLong = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
-  function goalsHtml(hist) {
-    const now = Date.now(), today = dayKey(now), ws = weekStart(now);
-    let stepsToday = 0, mWeek = 0;
-    hist.forEach(h => { if (dayKey(h.date) === today) stepsToday += h.steps || 0; if (h.date >= ws) mWeek += h.distanceM || 0; });
-    if (S.status !== 'idle') { if (dayKey(S.startTime) === today && S.activity !== 'velo') stepsToday += steps(); if (S.startTime >= ws) mWeek += S.distance; }
-    const wlog = store.get(K_WLOG, []);
+  // Les 6 objectifs que l'on peut se fixer
+  const GOALS = [
+    { k: 'steps', key: 'goalSteps', title: 'Pas par jour', now: "Pas aujourd'hui", unit: 'pas', step: 500, min: 1000, max: 60000, desc: 'Les pas comptés pendant tes sorties à pied.', f: v => nf0.format(v),
+      left: d => 'Encore ' + nf0.format(d) + ' pas aujourd\'hui', ok: "Atteint aujourd'hui, bravo !" },
+    { k: 'km', key: 'goalKm', title: 'Kilomètres par semaine', now: 'Kilomètres cette semaine', unit: 'km', step: 1, min: 1, max: 300, desc: 'Toutes tes sorties, du lundi au dimanche.', f: v => nf1.format(v),
+      left: d => 'Encore ' + nf1.format(d) + ' km cette semaine', ok: 'Atteint cette semaine, bravo !' },
+    { k: 'sessions', key: 'goalSessions', title: 'Séances par semaine', now: 'Séances cette semaine', unit: 'séances', step: 1, min: 1, max: 14, desc: 'Séances d\'exercices et tests navette.', f: v => nf0.format(v),
+      left: d => 'Encore ' + nf0.format(d) + ' séance' + (d > 1 ? 's' : '') + ' cette semaine', ok: 'Atteint cette semaine, bravo !' },
+    { k: 'kcal', key: 'goalKcal', title: 'Calories par semaine', now: 'Calories cette semaine', unit: 'kcal', step: 250, min: 250, max: 20000, desc: 'Calories dépensées pendant tes sorties et tes séances.', f: v => nf0.format(v),
+      left: d => 'Encore ' + nf0.format(d) + ' kcal cette semaine', ok: 'Atteint cette semaine, bravo !' },
+    { k: 'longest', key: 'goalLongest', title: 'Courir une longue distance', now: 'Ta plus longue sortie à pied', unit: 'km', step: 1, min: 1, max: 100, desc: 'Une sortie à pied d\'un seul coup, de cette distance.', f: v => nf1.format(v),
+      left: d => 'Il te manque ' + nf1.format(d) + ' km', ok: 'Distance atteinte, bravo !' },
+    { k: 'navette', key: 'goalNavette', title: 'Palier au test navette', now: 'Ton meilleur palier', unit: 'palier', step: 1, min: 2, max: 20, desc: 'Ton meilleur résultat au test navette officiel.', f: v => nf0.format(v),
+      left: d => 'Encore ' + nf0.format(d) + ' palier' + (d > 1 ? 's' : '') + ' à gagner', ok: 'Palier atteint, bravo !' }
+  ];
+  const goalOn = k => !!(settings.goalsOn && settings.goalsOn[k]);
+  const gT = (g, v) => Number.isInteger(v) ? nf0.format(v) : g.f(v); // objectif : « 20 km » plutôt que « 20,0 km »
+  function goalStats() {
+    const hist = store.get(K_HIST, []), wlog = store.get(K_WLOG, []), now = Date.now(), today = dayKey(now), ws = weekStart(now);
+    const st = { steps: 0, km: 0, sessions: 0, kcal: 0, longest: 0, navette: 0, streak: 0 };
+    hist.forEach(h => {
+      if (dayKey(h.date) === today) st.steps += h.steps || 0;
+      if (h.date >= ws) { st.km += (h.distanceM || 0) / 1000; st.kcal += h.kcal || 0; }
+      if (h.activity !== 'velo') st.longest = Math.max(st.longest, (h.distanceM || 0) / 1000);
+    });
+    wlog.forEach(l => {
+      if (l.date >= ws) { st.sessions++; st.kcal += l.kcal || 0; }
+      if (l.kind === 'navette' && l.official) st.navette = Math.max(st.navette, l.stage || 0);
+    });
+    if (S.status !== 'idle') {
+      if (dayKey(S.startTime) === today && S.activity !== 'velo') st.steps += steps();
+      if (S.startTime >= ws) { st.km += S.distance / 1000; st.kcal += S.kcal || 0; }
+      if (S.activity !== 'velo') st.longest = Math.max(st.longest, S.distance / 1000);
+    }
     const days = new Set(hist.map(h => dayKey(h.date)).concat(wlog.map(l => dayKey(l.date))));
-    const wWeek = wlog.filter(l => l.date >= ws).length;
     if (S.status !== 'idle') days.add(dayKey(S.startTime));
-    let streak = 0; const d = new Date(); d.setHours(12, 0, 0, 0);
+    const d = new Date(); d.setHours(12, 0, 0, 0);
     if (!days.has(dayKey(d.getTime()))) d.setDate(d.getDate() - 1);
-    while (days.has(dayKey(d.getTime()))) { streak++; d.setDate(d.getDate() - 1); }
-    const gS = settings.goalSteps || 10000, gK = settings.goalKm || 20;
-    const pS = Math.min(1, stepsToday / gS), pK = Math.min(1, mWeek / 1000 / gK);
-    return '<div class="block"><div class="bh">Objectifs</div>' +
-      '<div class="goal' + (pS >= 1 ? ' done' : '') + '"><div class="goal-top"><span>Pas aujourd\'hui</span><b>' + nf0.format(stepsToday) + ' / ' + nf0.format(gS) + '</b></div><div class="goal-bar"><i style="width:' + (pS * 100).toFixed(1) + '%"></i></div></div>' +
-      '<div class="goal' + (pK >= 1 ? ' done' : '') + '"><div class="goal-top"><span>Kilomètres cette semaine</span><b>' + nf1.format(mWeek / 1000) + ' / ' + nf0.format(gK) + '</b></div><div class="goal-bar"><i style="width:' + (pK * 100).toFixed(1) + '%"></i></div></div>' +
-      '<p class="streak">Séances d\'exercices cette semaine : <b>' + wWeek + '</b></p>' +
-      '<p class="streak">' + (streak ? 'Série en cours : <b>' + streak + ' jour' + (streak > 1 ? 's' : '') + ' d\'affilée</b> avec au moins une sortie ou une séance.' : 'Fais une sortie ou une séance aujourd\'hui pour lancer une série de jours d\'affilée.') + '</p></div>';
+    while (days.has(dayKey(d.getTime()))) { st.streak++; d.setDate(d.getDate() - 1); }
+    return st;
+  }
+  const streakText = n => n ? 'Série en cours : <b>' + n + ' jour' + (n > 1 ? 's' : '') + ' d\'affilée</b> avec au moins une sortie ou une séance.'
+    : 'Fais une sortie ou une séance aujourd\'hui pour lancer une série de jours d\'affilée.';
+  function goalsHtml() {
+    const st = goalStats(), active = GOALS.filter(g => goalOn(g.k));
+    let h = '<div class="block"><div class="bh">Objectifs<button type="button" class="linkbtn" data-open-goals="1" style="padding:0;font-size:14px">Modifier</button></div>';
+    if (!active.length) h += '<p class="empty">Aucun objectif choisi. Touche « Modifier » pour t\'en fixer un.</p>';
+    active.forEach(g => {
+      const target = settings[g.key], cur = st[g.k], p = Math.min(1, cur / target);
+      h += '<div class="goal' + (p >= 1 ? ' done' : '') + '"><div class="goal-top"><span>' + g.now + '</span><b>' + g.f(cur) + ' / ' + gT(g, target) + '</b></div><div class="goal-bar"><i style="width:' + (p * 100).toFixed(1) + '%"></i></div></div>';
+    });
+    return h + '<p class="streak">' + streakText(st.streak) + '</p></div>';
   }
   function recordsHtml(hist) {
     const r = computeRecords(hist), keys = Object.keys(REC).filter(k => r[k]);
@@ -1360,7 +1508,7 @@
   }
   function renderProgress(highlightFirst) {
     const hist = store.get(K_HIST, []), box = $('progress');
-    let html = goalsHtml(hist);
+    let html = goalsHtml();
     if (!hist.length) {
       box.innerHTML = html + '<div class="block"><div class="bh">Tes sorties</div><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton rouge, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>';
       return;
@@ -1383,6 +1531,7 @@
     box.innerHTML = html + '</ul>';
   }
   $('progress').addEventListener('click', e => {
+    if (e.target.closest('[data-open-goals]')) { openAccueil('edit'); return; }
     const mode = e.target.closest('[data-mode]');
     if (mode) { statMode = mode.dataset.mode; renderProgress(); return; }
     const run = e.target.closest('.run');
@@ -2073,6 +2222,188 @@
     }
   });
 
+  // ---------- Page d'accueil 3D et objectifs ----------
+  const AC = { mode: 'view', cur: 0, n: 0, rot: 0, step: 0, R: 0, drag: null, cards: [] };
+  const CA_G = 2 * Math.PI * 54, CB_G = 2 * Math.PI * 46;
+  const dfDay = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  function acShow(id) { ['acIntro', 'acProfil', 'acMain'].forEach(x => $(x).classList.toggle('hidden', x !== id)); $('accueil').scrollTop = 0; }
+  function openAccueil(step) {
+    acOpen = true; document.body.classList.add('ac-open');
+    $('accueil').classList.remove('hidden');
+    ['wsheet', 'weditor', 'nsheet', 'detail', 'sharebox'].forEach(id => $(id).classList.add('hidden'));
+    relief.resume();
+    if (step === 'intro') acShow('acIntro');
+    else if (step === 'profil') acProfilFill();
+    else acMain(step === 'edit' ? 'edit' : 'view');
+  }
+  function closeAccueil() {
+    acOpen = false; document.body.classList.remove('ac-open'); $('accueil').classList.add('hidden');
+    if (currentView === 1) { relief.stop(); if (map) map.resize(); }
+    if (currentView === 3) renderProgress();
+  }
+  function acProfilFill() {
+    $('acName').value = settings.name || ''; $('acHeight').value = settings.height || ''; $('acWeight').value = settings.weight || ''; $('acAge').value = settings.age || '';
+    acShow('acProfil');
+  }
+  function acProfilSave() {
+    const num = (id, a, b) => { const v = parseInt($(id).value, 10); return v >= a && v <= b ? v : null; };
+    settings.name = $('acName').value.trim().slice(0, 24);
+    const h = num('acHeight', 100, 230), w = num('acWeight', 30, 250), a = num('acAge', 6, 99);
+    if (h) { if (h !== settings.height) settings.measuredStep = null; settings.height = h; }
+    if (w) settings.weight = w;
+    settings.age = a;
+    saveSettings(); syncSettingsForm(); updateStepInfo();
+  }
+  function syncSettingsForm() {
+    $('pname').value = settings.name || ''; $('height').value = settings.height || ''; $('weight').value = settings.weight || ''; $('age').value = settings.age || '';
+    $('goalSteps').value = settings.goalSteps; $('goalKm').value = settings.goalKm; $('showWelcome').checked = settings.showWelcome !== false;
+  }
+  document.querySelectorAll('[data-ac]').forEach(b => b.addEventListener('click', () => {
+    const to = b.dataset.ac;
+    if (to === 'profil') acProfilFill();
+    if (to === 'goals') { if (b.classList.contains('ac-cta')) acProfilSave(); acMain('edit'); }
+  }));
+  // Carrousel 3D : chaque objectif est une carte posée sur un cylindre qui tourne
+  function acMain(mode) {
+    AC.mode = mode;
+    acShow('acMain');
+    const st = goalStats();
+    $('acHello').textContent = mode === 'edit' ? 'Tes objectifs' : 'Bonjour' + (settings.name ? ' ' + settings.name : '');
+    $('acDate').textContent = cap(dfDay.format(new Date()));
+    $('acHint').textContent = mode === 'edit' ? 'Fais tourner les cartes, active les objectifs que tu veux et règle leur valeur.' : '';
+    $('acStreak').innerHTML = mode === 'edit' ? '' : streakText(st.streak);
+    $('acEnter').textContent = mode === 'edit' ? 'Valider mes objectifs' : "Entrer dans l'appli";
+    $('acEdit').textContent = mode === 'edit' ? (settings.onboarded ? 'Annuler' : '') : 'Modifier mes objectifs';
+    $('acEdit').classList.toggle('hidden', mode === 'edit' && !settings.onboarded);
+    AC.cards = mode === 'edit' ? GOALS.slice() : GOALS.filter(g => goalOn(g.k));
+    AC.draftOn = Object.assign({}, settings.goalsOn); AC.draftVal = {};
+    GOALS.forEach(g => AC.draftVal[g.k] = settings[g.key]);
+    buildRing(st);
+  }
+  function cardHtml(g, st, i) {
+    if (AC.mode === 'edit') {
+      const on = !!AC.draftOn[g.k], v = AC.draftVal[g.k];
+      return '<div class="gcard' + (on ? '' : ' off') + '" data-i="' + i + '"><div class="gc-back"></div><div class="gc-face">' +
+        '<div class="gc-title">' + g.title + '</div><p class="gc-desc">' + g.desc + '</p>' +
+        '<label class="gc-toggle"><span>Je me fixe cet objectif</span><span class="switch"><input type="checkbox" data-gon="' + g.k + '"' + (on ? ' checked' : '') + ' aria-label="Activer l\'objectif ' + g.title + '"><span></span></span></label>' +
+        '<div class="stepper"><button type="button" data-gk="' + g.k + '" data-d="-1" aria-label="Diminuer"' + (v <= g.min ? ' disabled' : '') + '>−</button>' +
+        '<div class="num"><span data-gv="' + g.k + '">' + gT(g, v) + '</span><small>' + g.unit + '</small></div>' +
+        '<button type="button" data-gk="' + g.k + '" data-d="1" aria-label="Augmenter"' + (v >= g.max ? ' disabled' : '') + '>+</button></div></div></div>';
+    }
+    const target = settings[g.key], cur = st[g.k], p = Math.min(1, cur / target), done = p >= 1;
+    const sub = done ? g.ok : (g.k === 'navette' && !cur ? 'Fais le test dans l\'onglet Séances' : g.left(Math.max(0, target - cur)));
+    return '<div class="gcard' + (done ? ' done' : '') + '" data-i="' + i + '"><div class="gc-back"></div><div class="gc-face">' +
+      '<div class="gc-title">' + g.now + '</div>' +
+      '<div class="gc-ringbox"><svg class="gc-ring" viewBox="0 0 132 132" aria-hidden="true"><circle class="t" cx="66" cy="66" r="50"/>' +
+      '<circle class="a" cx="66" cy="66" r="54" stroke-dasharray="' + CA_G + '" stroke-dashoffset="' + CA_G + '" data-p="' + p + '"/>' +
+      '<circle class="b" cx="66" cy="66" r="46" stroke-dasharray="' + CB_G + '" stroke-dashoffset="' + CB_G + '" data-p="' + p + '"/></svg>' +
+      '<div class="gc-pct num">' + Math.round(p * 100) + ' %</div></div>' +
+      '<div class="gc-val num">' + g.f(cur) + ' <small>/ ' + gT(g, target) + ' ' + g.unit + '</small></div><div class="gc-sub">' + sub + '</div></div></div>';
+  }
+  function buildRing(st) {
+    const ring = $('acRing'), n = AC.cards.length;
+    AC.n = n; AC.cur = Math.min(AC.cur, Math.max(0, n - 1));
+    if (!n) {
+      ring.innerHTML = '<p class="ac-empty">Tu n\'as pas encore d\'objectif. Touche « Modifier mes objectifs » pour en choisir.</p>';
+      ring.style.transform = 'none'; $('acDots').innerHTML = ''; return;
+    }
+    AC.step = 360 / n;
+    AC.R = n > 1 ? Math.round(116 / Math.tan(Math.PI / n) + 24) : 0;
+    ring.innerHTML = AC.cards.map((g, i) => cardHtml(g, st, i)).join('');
+    ring.querySelectorAll('.gcard').forEach((c, i) => { c.style.transform = 'rotateY(' + (i * AC.step) + 'deg) translateZ(' + AC.R + 'px)'; });
+    $('acDots').innerHTML = AC.cards.map((g, i) => '<button type="button" data-dot="' + i + '" aria-label="' + (AC.mode === 'edit' ? g.title : g.now) + '"></button>').join('');
+    // entrée : le cylindre tourne une fois sur lui-même avant de se poser
+    ring.classList.remove('intro');
+    AC.rot = -AC.cur * AC.step;
+    if (anim()) {
+      ring.style.transition = 'none'; ring.style.transform = ringTf(AC.rot - 300); void ring.offsetWidth;
+      ring.style.transition = ''; ring.classList.add('intro');
+    }
+    requestAnimationFrame(() => { ring.style.transform = ringTf(AC.rot); fillRings(); });
+    setTimeout(() => ring.classList.remove('intro'), 1700);
+    markCur();
+  }
+  const ringTf = rot => 'translateZ(' + (-AC.R) + 'px) rotateX(-4deg) rotateY(' + rot + 'deg)';
+  function fillRings() {
+    setTimeout(() => $('acRing').querySelectorAll('circle[data-p]').forEach(c => {
+      const C = +c.getAttribute('stroke-dasharray'); c.style.strokeDashoffset = C * (1 - +c.dataset.p);
+    }), anim() ? 500 : 0);
+  }
+  function markCur() {
+    $('acRing').querySelectorAll('.gcard').forEach((c, i) => c.classList.toggle('cur', i === AC.cur));
+    $('acDots').querySelectorAll('button').forEach((b, i) => b.setAttribute('aria-current', String(i === AC.cur)));
+    $('acRing').querySelectorAll('.gcard input, .gcard button').forEach(el => { el.tabIndex = el.closest('.gcard').classList.contains('cur') ? 0 : -1; });
+  }
+  function goCard(i) {
+    if (!AC.n) return;
+    const target = ((i % AC.n) + AC.n) % AC.n;
+    // tourne par le chemin le plus court
+    let delta = (target - AC.cur) % AC.n; if (delta > AC.n / 2) delta -= AC.n; if (delta < -AC.n / 2) delta += AC.n;
+    AC.cur = target; AC.rot -= delta * AC.step;
+    $('acRing').style.transform = ringTf(AC.rot); markCur();
+  }
+  $('acPrev').addEventListener('click', () => goCard(AC.cur - 1));
+  $('acNext').addEventListener('click', () => goCard(AC.cur + 1));
+  $('acDots').addEventListener('click', e => { const d = e.target.closest('[data-dot]'); if (d) goCard(+d.dataset.dot); });
+  $('acCarousel').addEventListener('keydown', e => { if (e.key === 'ArrowLeft') goCard(AC.cur - 1); if (e.key === 'ArrowRight') goCard(AC.cur + 1); });
+  // glisser pour faire tourner
+  $('acCarousel').addEventListener('pointerdown', e => {
+    if (!AC.n || e.target.closest('button, input, label')) return;
+    AC.drag = { x: e.clientX, rot: AC.rot, moved: false, id: e.pointerId };
+    $('acRing').style.transition = 'none';
+  });
+  window.addEventListener('pointermove', e => {
+    const d = AC.drag; if (!d || e.pointerId !== d.id) return;
+    const dx = e.clientX - d.x; if (Math.abs(dx) > 6) d.moved = true;
+    $('acRing').style.transform = ringTf(d.rot + dx * 0.32);
+  });
+  window.addEventListener('pointerup', e => {
+    const d = AC.drag; if (!d || e.pointerId !== d.id) return;
+    AC.drag = null; $('acRing').style.transition = '';
+    const dx = e.clientX - d.x;
+    if (!d.moved) { // appui court à côté de la carte de devant : on tourne vers la gauche ou la droite
+      $('acRing').style.transform = ringTf(AC.rot);
+      if (!(e.target.closest && e.target.closest('.gcard.cur'))) {
+        const r = $('acCarousel').getBoundingClientRect(), mid = r.left + r.width / 2;
+        if (e.clientX < mid - 100) goCard(AC.cur - 1); else if (e.clientX > mid + 100) goCard(AC.cur + 1);
+      }
+      return;
+    }
+    const steps = Math.round(-(dx * 0.32) / AC.step) || (dx < 0 ? 1 : -1);
+    goCard(AC.cur + steps);
+  });
+  // réglage des objectifs (mode édition)
+  $('acRing').addEventListener('change', e => {
+    const k = e.target.dataset && e.target.dataset.gon; if (!k) return;
+    AC.draftOn[k] = e.target.checked; e.target.closest('.gcard').classList.toggle('off', !e.target.checked);
+  });
+  $('acRing').addEventListener('click', e => {
+    const b = e.target.closest('[data-gk]'); if (!b) return;
+    const g = GOALS.find(x => x.k === b.dataset.gk), v = clamp(AC.draftVal[g.k] + (+b.dataset.d) * g.step, g.min, g.max);
+    AC.draftVal[g.k] = Math.round(v * 10) / 10;
+    if (!AC.draftOn[g.k]) { AC.draftOn[g.k] = true; const card = b.closest('.gcard'); card.classList.remove('off'); card.querySelector('[data-gon]').checked = true; }
+    $('acRing').querySelector('[data-gv="' + g.k + '"]').textContent = gT(g, AC.draftVal[g.k]);
+    const [minus, plus] = b.parentElement.querySelectorAll('button'); minus.disabled = AC.draftVal[g.k] <= g.min; plus.disabled = AC.draftVal[g.k] >= g.max;
+  });
+  $('acEnter').addEventListener('click', () => {
+    if (AC.mode === 'edit') {
+      settings.goalsOn = Object.assign({}, AC.draftOn);
+      GOALS.forEach(g => settings[g.key] = AC.draftVal[g.k]);
+      settings.onboarded = true; saveSettings(); syncSettingsForm();
+      AC.cur = 0; acMain('view');
+      const n = GOALS.filter(g => goalOn(g.k)).length;
+      toast(n ? plural(n, 'objectif') + ' enregistré' + (n > 1 ? 's' : '') : 'Aucun objectif choisi');
+      if (n) speak('C\'est noté. Tu as ' + plural(n, 'objectif') + '.');
+      return;
+    }
+    closeAccueil();
+  });
+  $('acEdit').addEventListener('click', () => { if (AC.mode === 'edit') acMain('view'); else { AC.cur = 0; acMain('edit'); } });
+  $('brandBtn').addEventListener('click', () => { AC.cur = 0; openAccueil('view'); });
+  $('openGoals').addEventListener('click', () => { AC.cur = 0; openAccueil('edit'); });
+  $('pname').addEventListener('change', e => { settings.name = e.target.value.trim().slice(0, 24); saveSettings(); });
+  $('showWelcome').addEventListener('change', e => { settings.showWelcome = e.target.checked; saveSettings(); });
+
   // ---------- Navigation en cube 3D ----------
   const VIEWS = ['v-sortie', 'v-carte', 'v-seances', 'v-progres', 'v-reglages'];
   let switching = false;
@@ -2277,7 +2608,7 @@
     ready: false, running: false, raf: 0, tx: 0, ty: 0, speed: 0.35, travel: 0, t0: 0, lastT: 0, rise: 0,
     stop() { this.running = false; cancelAnimationFrame(this.raf); },
     resume() {
-      if (!this.ready || this.running || !anim() || currentView === 1 || document.hidden) return;
+      if (!this.ready || this.running || !anim() || (currentView === 1 && !acOpen) || document.hidden) return;
       this.running = true; this.lastT = performance.now(); this.raf = requestAnimationFrame(this.frame);
     }
   };
@@ -2378,8 +2709,10 @@
       relief.rise = 1 - Math.pow(1 - p, 3);
       uniforms.uTravel.value = relief.travel; uniforms.uRise.value = relief.rise;
       const cx = trailX(3 - relief.travel), lx = trailX(-13 - relief.travel);
-      camera.position.set(cx + relief.tx * 0.9, 2.05 - relief.ty * 0.35, 6);
-      camera.lookAt(lx + relief.tx * 0.4, 0.55, -13);
+      relief.camY = relief.camY == null ? 2.05 : relief.camY + ((acOpen ? 4.6 : 2.05) - relief.camY) * Math.min(1, dt * 1.2); // accueil : vue aérienne
+      const lookY = 0.55 - (relief.camY - 2.05) * 0.45;
+      camera.position.set(cx + relief.tx * 0.9, relief.camY - relief.ty * 0.35, 6);
+      camera.lookAt(lx + relief.tx * 0.4, lookY, -13);
       renderer.render(scene, camera);
     };
     relief.ready = true; relief.loading = false;
@@ -2478,7 +2811,7 @@
     if (currentView === 1 && mapRouteDirty) flushRoute();
     // objectif de pas atteint aujourd'hui : on le dit une fois
     const today = dayKey(Date.now());
-    if (settings.goalSaidDay !== today && S.activity !== 'velo') {
+    if (settings.goalSaidDay !== today && S.activity !== 'velo' && goalOn('steps')) {
       const hist = store.get(K_HIST, []);
       const tot = hist.filter(h => dayKey(h.date) === today).reduce((a, h) => a + (h.steps || 0), 0) + steps();
       if (tot >= (settings.goalSteps || 10000)) {
@@ -2504,10 +2837,16 @@
     setTimeout(() => post.classList.remove('intro'), 2600);
   } else post.classList.remove('intro');
   applyAnim();
+  syncSettingsForm();
   renderProgress();
   renderSeances();
   render();
   fillVoiceSelect();
+  // page d'accueil : présentation la première fois, puis tes objectifs à chaque ouverture
+  if (S.status === 'idle') {
+    if (!settings.onboarded) openAccueil('intro');
+    else if (settings.showWelcome !== false) openAccueil('view');
+  }
   if (plugin('TextToSpeech') && plugin('TextToSpeech').getSupportedVoices) {
     plugin('TextToSpeech').getSupportedVoices().then(r => {
       nativeVoices = ((r && r.voices) || []).map((v, i) => ({ id: String(i), label: v.name || v.voiceURI || ('Voix ' + (i + 1)), lang: v.lang || '' }));
@@ -2516,7 +2855,7 @@
   }
   window.__parcours = { get state() { return S; }, get kmh() { return curKmh; }, get relief() { return relief; }, get map() { return map; },
     go, stepLenM, stepWalkM, stepRunM, kcalPerMin, bikeMet, cadence, settings, computeRecords, makeShareImage, exportGpx, startReplay, openDetail,
-    get replaying() { return !!replayState; }, wk: WK, startWorkout, expand, allWorkouts, totalSec, estKcal, nv: NV, navSchedule, navVo2, navStart, beep, speak, voiceList, get actx() { return actx; }, get silentEl() { return silentEl; },
+    get replaying() { return !!replayState; }, wk: WK, startWorkout, expand, allWorkouts, totalSec, estKcal, nv: NV, navSchedule, navVo2, navStart, beep, speak, voiceList, get actx() { return actx; }, ac: AC, openAccueil, goalStats, goCard, get silentEl() { return silentEl; },
     feed(lat, lon, alt, speed, acc) { onPos({ timestamp: Date.now(), coords: { latitude: lat, longitude: lon, accuracy: acc || 5, altitude: alt, altitudeAccuracy: alt == null ? null : 5, speed: speed == null ? null : speed, heading: null } }); } };
 })();
 </script>
