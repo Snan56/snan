@@ -690,6 +690,8 @@
   .stopbtn{background:var(--accent-grad);box-shadow:0 12px 28px rgba(255,90,31,.4)}
   .stopbtn:active{transform:scale(.98);box-shadow:0 6px 16px rgba(255,90,31,.35)}
   .wcard{flex-direction:column}
+  .banner.info{background:#1c1f25;border-color:rgba(255,90,31,.45);color:var(--blanc)}
+  .banner button{border-radius:10px}
 </style>
 </head>
 <body>
@@ -803,6 +805,8 @@
         <span class="switch"><input id="anim3d" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="sens">Sensibilité du podomètre<small>Augmente-la si des pas sont oubliés</small></label>
         <select id="sens"><option value="faible">Faible</option><option value="moyenne">Moyenne</option><option value="forte">Forte</option></select></div>
+      <div class="row"><label for="vehPause">Pause automatique en voiture<small>Si tu vas trop vite pour ton activité (voiture, bus, train), l'enregistrement se met en pause, puis reprend quand tu marches</small></label>
+        <span class="switch"><input id="vehPause" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="maxAcc">Précision GPS minimale<small>Les points moins précis sont ignorés</small></label>
         <select id="maxAcc"><option value="20">20 m</option><option value="30">30 m</option><option value="50">50 m</option></select></div>
     </div>
@@ -1154,7 +1158,7 @@
   }
   const dayKey = t => { const d = new Date(t); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
   function weekStart(t) { const d = new Date(t); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - (d.getDay() + 6) % 7); return d.getTime(); }
-  const elapsed = () => S.activeMs + (S.status === 'running' ? Date.now() - S.resumedAt : 0);
+  const elapsed = () => S.activeMs + (S.status === 'running' && !S.veh ? Date.now() - S.resumedAt : 0);
   const avgKmh = () => { const h = elapsed() / 3600000; return h > 0.0014 ? (S.distance / 1000) / h : 0; };
   const steps = () => Math.round(S.motionOk ? S.sensorSteps : (S.estSteps || 0));
   const heightM = () => (settings.height || 170) / 100;
@@ -1205,7 +1209,7 @@
     return vo2 * kg / 1000 * 5;
   }
   function accrueKcal() {
-    if (S.status !== 'running' || !lastKcalAt) return;
+    if (S.status !== 'running' || S.veh || !lastKcalAt) return;
     const now = Date.now(), dt = Math.min(30, (now - lastKcalAt) / 1000);
     lastKcalAt = now;
     S.kcal = (S.kcal || 0) + kcalPerMin(curKmh) * dt / 60;
@@ -1427,6 +1431,74 @@
     }
     return Math.round(S.altSmooth * 10) / 10;
   }
+  // ---------- Pause automatique en voiture (ou en bus, en train…) ----------
+  // Si la vitesse est trop élevée pour l'activité choisie, ou si on avance vite sans faire de pas, on arrête d'enregistrer.
+  // On efface aussi ce qui a été compté depuis le début du trajet en véhicule, puis on reprend quand on remarche.
+  const VEH = { sp: [], hist: [], steps: 0, stepHist: [] };
+  const VEH_IN = { marche: 14, course: 26, velo: 60 }, VEH_OUT = { marche: 8, course: 12, velo: 30 };
+  const median = a => { const b = a.slice().sort((x, y) => x - y); return b.length ? b[b.length >> 1] : 0; };
+  function vehSnapshot(ts) {
+    const seg = S.track[S.track.length - 1] || [];
+    VEH.hist.push({ ts, distance: S.distance, sensorSteps: S.sensorSteps, estSteps: S.estSteps || 0, kcal: S.kcal || 0, ms: elapsed(), seg: S.track.length - 1, segLen: seg.length,
+      splits: S.splits.length, splitBaseMs: S.splitBaseMs, lastPtMs: S.lastPtMs, lastKm: S.lastKm, lastAnnounce: S.lastAnnounce, dplus: S.dplus, dminus: S.dminus, maxKmh: S.maxKmh });
+    while (VEH.hist.length && ts - VEH.hist[0].ts > 120000) VEH.hist.shift();
+  }
+  function vehReset() { VEH.sp = []; VEH.hist = []; VEH.steps = 0; VEH.stepHist = []; }
+  // renvoie true si le point GPS ne doit pas compter (on est en véhicule)
+  function vehCheck(ts, kmh, pt) {
+    if (settings.vehPause === false || !(kmh >= 0)) return !!S.veh;
+    const act = actNow();
+    VEH.sp.push({ ts, kmh, pt }); while (VEH.sp.length && ts - VEH.sp[0].ts > 60000) VEH.sp.shift();
+    VEH.stepHist.push({ ts, n: S.veh ? VEH.steps : S.sensorSteps }); while (VEH.stepHist.length && ts - VEH.stepHist[0].ts > 60000) VEH.stepHist.shift();
+    const win = sec => VEH.sp.filter(s => ts - s.ts <= sec * 1000);
+    const stepsIn = sec => { const old = VEH.stepHist.find(s => ts - s.ts <= sec * 1000); return old ? VEH.stepHist[VEH.stepHist.length - 1].n - old.n : 0; };
+    const sensorLive = act !== 'velo' && S.motionOk && !document.hidden && motionSeen;
+    if (!S.veh) {
+      const w20 = win(20), w25 = win(25);
+      const fast = w20.length >= 4 && ts - w20[0].ts >= 12000 && median(w20.map(s => s.kmh)) > VEH_IN[act];
+      const noSteps = sensorLive && w25.length >= 5 && ts - w25[0].ts >= 18000 && median(w25.map(s => s.kmh)) > 11 && stepsIn(25) < 6;
+      if (fast || noSteps) {
+        // on remonte au premier point trop rapide : ce qui précède (la marche) reste compté
+        const lim = fast ? VEH_IN[act] : 11, recent = VEH.sp.filter(s => ts - s.ts <= 30000);
+        let k = recent.length - 1; while (k > 0 && recent[k - 1].kmh > lim) k--;
+        vehEnter(recent[k] ? recent[k].ts - 1 : ts - 25000); VEH.since = ts; return true;
+      }
+      vehSnapshot(ts); return false;
+    }
+    const w = win(25).filter(s => s.ts >= (VEH.since || 0));
+    const slow = w.length >= 4 && ts - w[0].ts >= 18000 && median(w.map(s => s.kmh)) < VEH_OUT[act];
+    if (slow && (!sensorLive || stepsIn(25) >= 8)) {
+      let k = w.length - 1; while (k > 0 && w[k - 1].kmh < VEH_OUT[act]) k--; // début de la partie lente (on ne recompte pas la fin du trajet)
+      vehExit(false, w[k].pt); return false;
+    }
+    return true;
+  }
+  function vehEnter(fromTs) {
+    // on revient à l'état d'avant le trajet en véhicule
+    let snap = null; for (const h of VEH.hist) { if (h.ts <= fromTs) snap = h; else break; }
+    if (!snap) snap = VEH.hist[0];
+    if (snap) {
+      ['distance', 'sensorSteps', 'estSteps', 'kcal', 'splitBaseMs', 'lastPtMs', 'lastKm', 'lastAnnounce', 'dplus', 'dminus', 'maxKmh'].forEach(k => { S[k] = snap[k]; });
+      S.splits.length = Math.min(S.splits.length, snap.splits);
+      const seg = S.track[snap.seg]; if (seg) seg.length = Math.min(seg.length, snap.segLen);
+      S.track.length = Math.min(S.track.length, snap.seg + 1);
+      S.activeMs = snap.ms;
+    } else S.activeMs += Date.now() - S.resumedAt;
+    S.veh = true; S.vehCount = (S.vehCount || 0) + 1; VEH.steps = 0; VEH.stepHist = []; lastKcalAt = 0;
+    banner('Déplacement en véhicule détecté : l\'enregistrement est en pause. Il reprendra tout seul quand tu marcheras de nouveau.', 'info', 'OK', { tag: 'veh', label: 'Je ne suis pas en voiture', fn: () => { settings.vehPause = false; saveSettings(); vehExit(true); $('vehPause').checked = false; toast('Pause automatique désactivée pour l\'instant (Réglages)'); } });
+    speak('Déplacement en véhicule détecté. Enregistrement en pause.');
+    save(true); queueRender();
+  }
+  function vehExit(manual, fromPt) {
+    if (!S.veh) return;
+    S.veh = false; S.resumedAt = Date.now(); lastKcalAt = Date.now();
+    S.track.push([]); last = null; vehReset();
+    // on compte la marche depuis le début de la fenêtre lente (elle a servi à détecter la sortie du véhicule)
+    if (fromPt) { last = fromPt; S.lastPtMs = elapsed(); S.track[S.track.length - 1].push([r6(fromPt.lat), r6(fromPt.lon), null, Math.round((fromPt.ts - S.startTime) / 1000)]); }
+    if ($('banner').dataset.tag === 'veh') banner('');
+    if (!manual) speak('Reprise de l\'enregistrement.');
+    save(true); queueRender();
+  }
   function onPos(pos) {
     const c = pos.coords, ts = pos.timestamp || Date.now();
     lastFix = { lat: c.latitude, lon: c.longitude, acc: c.accuracy, ts, heading: (typeof c.heading === 'number' && isFinite(c.heading)) ? c.heading : null };
@@ -1453,6 +1525,10 @@
     if (dt <= 0) return;
     const d = haversine(last, p), v = d / dt;
     if (v > 70) return; // saut aberrant
+    if (vehCheck(ts, gpsKmh !== null ? gpsKmh : v * 3.6, p)) { last = p; lastMoveTs = ts; setSpeed(gpsKmh !== null ? gpsKmh : v * 3.6); queueRender(); return; }
+    if (!last) { // reprise après un trajet en véhicule : ce point devient le départ du nouveau tronçon
+      last = p; lastMoveTs = ts; S.lastPtMs = elapsed(); S.track[S.track.length - 1].push([r6(p.lat), r6(p.lon), handleAltitude(c), tSec]); queueRender(); return;
+    }
     const threshold = Math.max(4, (last.acc + p.acc) / 4);
     let moved = false;
     if (d >= threshold) {
@@ -1516,7 +1592,8 @@
     if (!M.above && M.f > th.hi) {
       M.above = true;
       if (now - M.lastStep > 280) {
-        S.sensorSteps++; M.lastStep = now;
+        if (S.veh) VEH.steps++; else S.sensorSteps++;
+        M.lastStep = now;
         if (!M.cadStart) M.cadStart = now;
         M.times.push(now); if (M.times.length > 60) M.times.shift();
         queueRender();
@@ -1563,7 +1640,7 @@
     if (!window.isSecureContext && !isNative) banner(INSECURE, 'err'); else banner('');
     const resuming = S.status === 'paused';
     if (S.status === 'idle') { S = fresh(); S.startTime = Date.now(); M.g = null; M.f = 0; M.above = false; M.lastT = 0; mapRouteDirty = true; }
-    S.status = 'running'; S.resumedAt = Date.now(); lastKcalAt = Date.now();
+    S.status = 'running'; S.resumedAt = Date.now(); lastKcalAt = Date.now(); S.veh = false; vehReset();
     M.times = []; M.cadStart = 0;
     S.track.push([]); last = null; curKmh = 0; lastMoveTs = Date.now();
     startGeo(); if (!isNative) requestWake();
@@ -1577,7 +1654,8 @@
   function pause(silent) {
     if (S.status !== 'running') return;
     accrueKcal();
-    S.activeMs += Date.now() - S.resumedAt;
+    if (!S.veh) S.activeMs += Date.now() - S.resumedAt;
+    S.veh = false; vehReset(); if ($('banner').dataset.tag === 'veh') banner('');
     S.status = 'paused'; curKmh = 0; last = null; lastKcalAt = 0;
     stopGeo(); if (!WK.w) releaseWake(); save(true); render();
     if (!silent) speak('Pause.');
@@ -3151,6 +3229,8 @@
     try { txt = await navigator.clipboard.readText(); } catch (e) { txt = prompt('Colle ici le texte copié par le raccourci « ' + SC_IN + ' » :') || ''; }
     if (txt) healthApply(txt);
   }
+  $('vehPause').checked = settings.vehPause !== false;
+  $('vehPause').addEventListener('change', e => { settings.vehPause = e.target.checked; saveSettings(); if (!e.target.checked) vehExit(true); });
   $('hPaste').addEventListener('click', healthPaste);
   setTimeout(() => healthBar(), 1500);
 
