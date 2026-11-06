@@ -2939,9 +2939,10 @@
     const img = await ai.T.RawImage.fromBlob(blob);
     const { image_embeds } = await ai.vis(await ai.proc(img));
     const v = Array.from(image_embeds.data), n = Math.hypot(...v);
-    const sims = ai.data.foods.map(f => { let s = 0; for (let k = 0; k < v.length; k++) s += f.vec[k] * v[k]; return s / n - (f.b || 0); }); // b : correction pour les plats que l'IA voit partout
+    const cand = ai.data.foods.filter(f => f.ai !== 0); // plats que l'IA sait distinguer ; les autres sont proposés en variantes
+    const sims = cand.map(f => { let s = 0; for (let k = 0; k < v.length; k++) s += f.vec[k] * v[k]; return s / n - (f.b || 0); }); // b : correction pour les plats que l'IA voit partout
     const mx = Math.max(...sims), ex = sims.map(s => Math.exp(100 * (s - mx))), sum = ex.reduce((a, b) => a + b, 0); // échelle du modèle CLIP
-    return ai.data.foods.map((f, i) => ({ f, p: ex[i] / sum })).sort((a, b) => b.p - a.p);
+    return cand.map((f, i) => ({ f, p: ex[i] / sum })).sort((a, b) => b.p - a.p);
   }
 
   // Fenêtre d'analyse d'un repas
@@ -2950,7 +2951,7 @@
     $('mList').innerHTML = MS.items.length ? MS.items.map((it, i) =>
       '<div class="mrow' + (it.on ? '' : ' off') + '" data-i="' + i + '">' +
       '<label class="mchk"><input type="checkbox" data-mon="' + i + '"' + (it.on ? ' checked' : '') + ' aria-label="Garder ' + esc(it.f.fr) + '"><span></span></label>' +
-      '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + (it.p != null ? (it.p >= 0.5 ? 'Très probable' : it.p >= 0.12 ? 'Probable' : 'Possible') + ', ' : '') + 'portion : ' + esc(it.f.portion) + '</small></div>' +
+      '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + (it.v ? 'Variante, ' : it.p != null ? (it.p >= 0.5 ? 'Très probable' : it.p >= 0.12 ? 'Probable' : 'Possible') + ', ' : '') + 'portion : ' + esc(it.f.portion) + '</small></div>' +
       '<select data-mq="' + i + '" aria-label="Nombre de portions de ' + esc(it.f.fr) + '">' + QTY.map(([q, l]) => '<option value="' + q + '"' + (q === it.q ? ' selected' : '') + '>× ' + l + '</option>').join('') + '</select>' +
       '<b class="mkcal num">' + nf0.format(Math.round(it.f.kcal * it.q)) + '</b></div>').join('')
       : '<p class="empty">Ajoute les aliments de ton repas avec la recherche ci-dessous.</p>';
@@ -2979,6 +2980,10 @@
       const res = await classifyPhoto(ph.blob);
       const top = res.slice(0, 6);
       MS.items = top.map((r, i) => ({ f: r.f, p: r.p, q: 1, on: i === 0 || r.p >= 0.3 }));
+      // variantes : plats de la liste complète très proches du premier choix (ex. pizza → pizza 4 fromages, margherita…)
+      const cos = (a, b) => { let s = 0, na = 0, nb = 0; for (let k = 0; k < a.length; k++) { s += a[k] * b[k]; na += a[k] * a[k]; nb += b[k] * b[k]; } return s / Math.sqrt(na * nb); };
+      const vars = foodsList.foods.filter(f => f.ai === 0).map(f => [f, cos(f.vec, top[0].f.vec)]).filter(x => x[1] > 0.8).sort((a, b) => b[1] - a[1]).slice(0, 3);
+      MS.items.splice(1, 0, ...vars.map(([f]) => ({ f, p: null, v: true, q: 1, on: false })));
       mealStatus(''); mealRows();
     } catch (e) {
       mealStatus(navigator.onLine === false ? "La première analyse a besoin d'internet pour télécharger l'IA (environ 45 Mo). Ensuite, elle marche sans connexion. Tu peux aussi ajouter les aliments avec la recherche."
@@ -2991,7 +2996,8 @@
   }
   $('mSearch').addEventListener('change', e => {
     const q = e.target.value.trim().toLowerCase(); if (!q || !foodsList) return;
-    const f = foodsList.foods.find(x => x.fr.toLowerCase() === q) || foodsList.foods.find(x => x.fr.toLowerCase().includes(q));
+    const nz = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ı/g, 'i'), qn = nz(q); // sans accents : « kofte » trouve « Köfte »
+    const f = foodsList.foods.find(x => nz(x.fr) === qn) || foodsList.foods.find(x => nz(x.fr).startsWith(qn)) || foodsList.foods.find(x => nz(x.fr).includes(qn));
     if (!f) { toast('Aliment introuvable dans la liste.'); return; }
     const ex = MS.items.find(x => x.f.id === f.id);
     if (ex) ex.on = true; else MS.items.unshift({ f, p: null, q: 1, on: true });
