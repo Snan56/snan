@@ -2,10 +2,10 @@
   "name": "parcours-android",
   "version": "1.0.0",
   "private": true,
-  "description": "Appli Android de Parcours (Capacitor) avec GPS en arrière-plan",
+  "description": "Applis Android et iPhone de Parcours (Capacitor)",
   "scripts": {
     "build:www": "node build-www.mjs",
-    "sync": "npm run build:www && npx cap sync android"
+    "sync": "npm run build:www && npx cap sync"
   },
   "dependencies": {
     "@capacitor-community/background-geolocation": "^1.3.1",
@@ -14,7 +14,9 @@
     "@capacitor/cli": "^8.6.0",
     "@capacitor/core": "^8.6.0",
     "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/ios": "^8.6.0",
     "@capacitor/share": "^8.0.3",
+    "@capgo/capacitor-health": "^8.11.14",
     "maplibre-gl": "^4.7.1",
     "three": "^0.160.0"
   }

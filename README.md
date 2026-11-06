@@ -1,6 +1,6 @@
-# Parcours : appli Android
+# Parcours : applis Android et iPhone
 
-Cette branche contient le code de l'appli Android de **Parcours**. L'appli suit tes sorties (marche, course, vélo) avec le GPS : distance, vitesse, pas, calories, dénivelé, temps par kilomètre, annonces vocales, carte 3D et records.
+Cette branche contient le code des applis Android et iPhone de **Parcours**. L'appli suit tes sorties (marche, course, vélo) avec le GPS : distance, vitesse, pas, calories, dénivelé, temps par kilomètre, annonces vocales, carte 3D et records.
 
 La version web est sur la branche `gh-pages` et en ligne ici : https://snan56.github.io/snan/
 
@@ -33,3 +33,24 @@ cd android
 ```
 
 Pour mettre à jour la page web de l'appli, remplace les fichiers du dossier `web/` par ceux de la branche `gh-pages`, puis relance les commandes ci-dessus.
+
+
+## Appli iPhone
+
+Le dossier `ios/` contient l'appli iPhone (même page web, emballée avec Capacitor). En plus du site, elle apporte :
+
+- **Apple Santé en automatique** (plugin `@capgo/capacitor-health`) : les sorties, séances, tests navette et repas sont ajoutés dans Santé (énergie active, pas, distance, énergie alimentaire) sans rien toucher, et les pas du jour et le dernier poids sont lus à chaque ouverture de l'appli ;
+- **le GPS écran verrouillé**, comme sur Android.
+
+Il n'y a pas besoin de Mac : [Codemagic](https://codemagic.io) construit l'appli sur ses Mac (500 minutes gratuites par mois) avec `codemagic.yaml`, puis l'envoie sur **TestFlight**.
+
+### À faire une seule fois
+
+1. **Compte développeur Apple** (environ 99 € par an) : https://developer.apple.com/programs/
+2. **Identifiant de l'appli** : sur https://developer.apple.com/account/resources/identifiers, ajoute un App ID `fr.snan56.parcours` et coche **HealthKit**.
+3. **Fiche de l'appli** : sur https://appstoreconnect.apple.com, Apps → « + » → Nouvelle app, nom « Parcours », identifiant `fr.snan56.parcours`.
+4. **Clé API** : App Store Connect → Utilisateurs et accès → Intégrations → Clés API d'App Store Connect → « + » (accès « Gestionnaire d'apps »). Télécharge le fichier `.p8` et note l'Issuer ID et le Key ID.
+5. **Codemagic** : crée un compte avec GitHub, ajoute le dépôt `Snan56/snan`. Dans Team settings → Integrations → Developer Portal, ajoute la clé API sous le nom **Parcours**.
+6. Lance le workflow **Parcours iPhone (TestFlight)** sur la branche `appli-android`. Environ 15 minutes plus tard, l'appli arrive dans **TestFlight** (app gratuite de l'App Store) sur ton iPhone.
+
+Au premier lancement, accepte la position (« Toujours » pour l'écran verrouillé), puis active **Réglages → Apple Santé → Connecter à Apple Santé**.
