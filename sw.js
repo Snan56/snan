@@ -1,5 +1,5 @@
 // Parcours — mode hors-ligne : garde l'appli, ses librairies et les morceaux de carte déjà vus.
-const VERSION = 'parcours-v13';
+const VERSION = 'parcours-v14';
 const LIBCACHE = 'parcours-libs'; // librairies aux adresses figées (gros fichiers de l'IA repas) : gardées d'une version à l'autre
 const TILES = 'parcours-tuiles';
 const MAX_TILES = 600;
