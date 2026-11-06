@@ -4,7 +4,7 @@
   "webDir": "www",
   "android": {
     "useLegacyBridge": true,
-    "backgroundColor": "#162033"
+    "backgroundColor": "#0b0c0f"
   },
   "plugins": {
     "SystemBars": { "insetsHandling": "css", "style": "DARK" }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#162033">
+<meta name="theme-color" content="#0b0c0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -20,7 +20,7 @@
   :root{
     --nuit:#162033; --nuit-2:#1d2b45; --nuit-3:#24365a;
     --relief:#5f7fa8; --relief-clair:#9db7d9;
-    --rouge:#e5322d; --rouge-fonce:#a51f1b;
+    --rouge:#ff5a1f; --rouge-fonce:#a51f1b;
     --blanc:#f4f6fb; --jaune:#ffd23f; --jaune-fonce:#b98f10;
     --encre:#14213a; --gris:#a9b6c9;
     --safe-t:var(--safe-area-inset-top,env(safe-area-inset-top,0px)); --safe-b:var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px));
@@ -35,27 +35,27 @@
   .hidden{display:none!important}
 
   /* ---------- Fond : ciel + relief 3D ---------- */
-  .sky{position:fixed;inset:0;z-index:0;background:linear-gradient(to bottom,#111a2c 0%,#17243d 34%,#1b2a46 52%,#1b2a46 100%)}
+  .sky{position:fixed;inset:0;z-index:0;background:linear-gradient(to bottom,#0b0c0f 0%,#0b0c0f 34%,#0b0c0f 52%,#0b0c0f 100%)}
   #relief{position:fixed;inset:0;width:100%;height:100%;z-index:1;display:block;opacity:0;transition:opacity 1.4s ease}
   #relief.on{opacity:1}
   body.dim #relief.on{opacity:.4}
   body.no-relief #relief{display:none}
   body.no-relief .sky{background:
       repeating-radial-gradient(ellipse 120% 70% at 30% 115%,transparent 0 26px,rgba(95,127,168,.20) 26px 27px),
-      linear-gradient(to bottom,#111a2c,#1b2a46)}
+      linear-gradient(to bottom,#0b0c0f,#0b0c0f)}
 
   /* ---------- En-tête ---------- */
   .top{position:fixed;top:0;left:0;right:0;z-index:30;height:var(--top);padding:var(--safe-t) 16px 0;
     display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none;transition:background .3s}
   .top>*{pointer-events:auto}
-  body.on-map .top{background:linear-gradient(to bottom,rgba(22,32,51,.92),rgba(22,32,51,0))}
-  body.dim .top{background:linear-gradient(to bottom,rgba(20,30,49,.97) 0,rgba(20,30,49,.97) 78%,rgba(20,30,49,0) 100%)}
+  body.on-map .top{background:linear-gradient(to bottom,rgba(11,12,15,.92),rgba(11,12,15,0))}
+  body.dim .top{background:linear-gradient(to bottom,rgba(11,12,15,.97) 0,rgba(11,12,15,.97) 78%,rgba(11,12,15,0) 100%)}
   .set select{width:150px}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-stretch:78%;font-size:23px;letter-spacing:-.01em}
   .blaze{width:24px;height:16px;display:inline-grid;grid-template-rows:1fr 1fr;flex:none}
   .blaze::before{content:"";background:var(--blanc)} .blaze::after{content:"";background:var(--rouge)}
-  .gps{display:flex;align-items:center;gap:7px;background:rgba(17,26,44,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
-    border:1px solid rgba(157,183,217,.22);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--gris);white-space:nowrap}
+  .gps{display:flex;align-items:center;gap:7px;background:rgba(21,23,28,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+    border:1px solid rgba(200,205,215,.22);border-radius:999px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--gris);white-space:nowrap}
   .dot{width:9px;height:9px;border-radius:50%;background:#5b6578;flex:none}
   .gps.wait .dot{background:var(--jaune);animation:blink 1s infinite}
   .gps.good .dot{background:#3fd47e} .gps.ok .dot{background:var(--jaune)} .gps.weak .dot{background:var(--rouge)}
@@ -82,12 +82,12 @@
   /* ---------- Écran Sortie ---------- */
   #v-sortie{display:flex;flex-direction:column;overflow:hidden}
   .acts{display:flex;gap:8px;margin:2px 0 10px}
-  .act{border:1px solid rgba(157,183,217,.3);background:rgba(17,26,44,.62);color:var(--gris);border-radius:999px;padding:7px 15px;
+  .act{border:1px solid rgba(200,205,215,.3);background:rgba(21,23,28,.62);color:var(--gris);border-radius:999px;padding:7px 15px;
     font-weight:700;font-size:14px;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
   .act[aria-pressed="true"]{background:var(--blanc);color:var(--encre);border-color:var(--blanc)}
   .speed-num{font-size:clamp(80px,27vw,132px);line-height:.84;letter-spacing:-.02em;font-stretch:66%;display:flex;align-items:flex-end}
   .speed-num .unit{font-size:20px;font-weight:600;font-stretch:90%;color:var(--gris);margin:0 0 10px 10px;letter-spacing:0}
-  .speed-bar{position:relative;margin:22px 0 10px;height:12px;width:min(100%,280px);background:rgba(157,183,217,.13)}
+  .speed-bar{position:relative;margin:22px 0 10px;height:12px;width:min(100%,280px);background:rgba(200,205,215,.13)}
   .speed-bar i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(var(--blanc) 0 50%,var(--rouge) 50% 100%);
     transition:width .8s cubic-bezier(.2,.8,.2,1)}
   .speed-meta{display:flex;flex-wrap:wrap;gap:2px 20px;font-size:15px;color:var(--gris)}
@@ -112,11 +112,11 @@
   .plate.flip{animation:flip 1.1s cubic-bezier(.3,1.25,.5,1)}
   @keyframes flip{from{transform:rotateX(0)}to{transform:rotateX(360deg)}}
   .hint{align-self:flex-start;font-size:14px;color:var(--gris);margin:4px 0 10px 52px;max-width:34ch;position:relative;padding:8px 12px;border-radius:12px;
-    background:rgba(17,26,44,.78);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+    background:rgba(21,23,28,.78);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
   .hint:empty{display:none}
 
   /* ---------- Écran Carte ---------- */
-  #v-carte{padding:0;max-width:none;background:#1b2a46;overflow:hidden}
+  #v-carte{padding:0;max-width:none;background:#0b0c0f;overflow:hidden}
   #map{position:absolute;inset:0}
   .map-msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:30px;color:var(--gris);font-size:15px}
   .hud{position:absolute;z-index:5;top:calc(var(--top) + 2px);left:14px;height:56px;width:min(78%,330px);filter:drop-shadow(0 8px 18px rgba(0,0,0,.35))}
@@ -130,26 +130,26 @@
   .me{width:24px;height:24px;border-radius:50%;background:var(--rouge);border:4px solid var(--blanc);box-shadow:0 2px 8px rgba(0,0,0,.4);position:relative}
   .me::after{content:"";position:absolute;inset:-12px;border-radius:50%;border:3px solid var(--rouge);animation:ring 1.8s ease-out infinite}
   .replay{position:absolute;z-index:6;left:14px;right:14px;bottom:calc(var(--bottom) + 16px);display:flex;gap:12px;align-items:center;
-    background:rgba(15,23,39,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(157,183,217,.2);border-radius:18px;padding:10px 10px 10px 14px}
+    background:rgba(11,12,15,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(200,205,215,.2);border-radius:18px;padding:10px 10px 10px 14px}
   .rp-info{display:flex;flex-direction:column;min-width:86px}
   .rp-info b{font-size:22px;font-stretch:70%;font-weight:800;font-variant-numeric:tabular-nums}
   .rp-info span{font-size:13px;color:var(--gris);font-variant-numeric:tabular-nums}
-  .rp-track{flex:1;height:10px;background:rgba(157,183,217,.15)}
+  .rp-track{flex:1;height:10px;background:rgba(200,205,215,.15)}
   .rp-track i{display:block;height:100%;width:0;background:linear-gradient(var(--blanc) 0 50%,var(--rouge) 50% 100%)}
 
   /* ---------- Écran Progrès ---------- */
   .h-title{font-size:30px;font-weight:800;font-stretch:72%;margin:6px 0 16px;letter-spacing:-.01em}
-  .set,.block{background:rgba(29,43,69,.8);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(157,183,217,.18);border-radius:18px;padding:4px 16px;margin-bottom:14px}
+  .set,.block{background:rgba(21,23,28,.8);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(200,205,215,.18);border-radius:18px;padding:4px 16px;margin-bottom:14px}
   .block{padding:14px 16px}
   .bh{font-size:21px;font-weight:800;font-stretch:76%;margin:0 0 6px;display:flex;justify-content:space-between;align-items:center;gap:10px}
   .goal{margin:12px 0 4px}
   .goal-top{display:flex;justify-content:space-between;gap:10px;font-size:15px;margin-bottom:6px}
   .goal-top b{font-variant-numeric:tabular-nums}
-  .goal-bar{height:12px;background:rgba(157,183,217,.14)}
+  .goal-bar{height:12px;background:rgba(200,205,215,.14)}
   .goal-bar i{display:block;height:100%;width:0;background:linear-gradient(var(--blanc) 0 50%,var(--rouge) 50% 100%);transition:width 1s cubic-bezier(.2,.8,.2,1)}
   .goal.done .goal-bar i{background:linear-gradient(var(--jaune) 0 50%,var(--rouge) 50% 100%)}
   .streak{font-size:15px;color:var(--gris);margin:12px 0 2px} .streak b{color:var(--blanc)}
-  .rec{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(157,183,217,.14)}
+  .rec{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(200,205,215,.14)}
   .rec:first-of-type{border-top:0}
   .rec small{display:block;color:var(--gris);font-size:12px}
   .rec .v{font-size:24px;font-variant-numeric:tabular-nums;font-stretch:70%;font-weight:800;white-space:nowrap;text-align:right}
@@ -163,7 +163,7 @@
   .total{height:66px;margin:0 0 14px;perspective:800px}
   .total .po{--ry:-8deg;height:66px;margin:0}
   .runs{list-style:none;margin:6px 0 0;padding:0}
-  .run{display:grid;grid-template-columns:66px 1fr;gap:14px;align-items:center;padding:14px 0;border:0;border-top:1px solid rgba(157,183,217,.16);
+  .run{display:grid;grid-template-columns:66px 1fr;gap:14px;align-items:center;padding:14px 0;border:0;border-top:1px solid rgba(200,205,215,.16);
     width:100%;background:none;text-align:left;cursor:pointer}
   .thumb{width:66px;height:66px;border-radius:12px;background:var(--nuit-3);display:block}
   .run-date{font-size:14px;color:var(--gris)}
@@ -175,29 +175,29 @@
   .empty{color:var(--gris);font-size:15px;max-width:34ch;margin:6px 0}
 
   /* ---------- Réglages ---------- */
-  .row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-top:1px solid rgba(157,183,217,.14)}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-top:1px solid rgba(200,205,215,.14)}
   .row:first-child{border-top:0}
   .row label,.row .rl{flex:1;font-weight:600}
   .row small{display:block;font-weight:400;color:var(--gris);font-size:13px;margin-top:2px}
   .set-title{font-size:13px;color:var(--gris);font-weight:700;margin:18px 4px 6px}
-  input[type=number],select{background:var(--nuit);color:var(--blanc);border:1px solid rgba(157,183,217,.3);border-radius:10px;padding:8px 10px;font:inherit;font-size:16px;width:124px}
+  input[type=number],select{background:var(--nuit);color:var(--blanc);border:1px solid rgba(200,205,215,.3);border-radius:10px;padding:8px 10px;font:inherit;font-size:16px;width:124px}
   .unitfield{display:flex;align-items:center;gap:6px;color:var(--gris);font-weight:600}
   .unitfield input{width:92px}
   .switch{position:relative;width:52px;height:30px;flex:none}
   .switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
-  .switch span{position:absolute;inset:0;border-radius:999px;background:#3a4864;transition:background .2s;pointer-events:none}
+  .switch span{position:absolute;inset:0;border-radius:999px;background:#2e323b;transition:background .2s;pointer-events:none}
   .switch span::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--blanc);transition:transform .2s}
   .switch input:checked+span{background:var(--rouge)}
   .switch input:checked+span::after{transform:translateX(22px)}
   .switch input:focus-visible+span{outline:3px solid var(--jaune);outline-offset:3px}
   .linkbtn{background:none;border:0;color:var(--jaune);font-weight:700;padding:13px 0;cursor:pointer;text-align:left}
   .danger-btn{background:none;border:0;color:#ff8f8f;font-weight:700;padding:14px 0;cursor:pointer}
-  .about{font-size:14px;color:var(--gris);margin:0 0 20px;padding:12px 16px;border-radius:18px;background:rgba(29,43,69,.8);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  .about{font-size:14px;color:var(--gris);margin:0 0 20px;padding:12px 16px;border-radius:18px;background:rgba(21,23,28,.8);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 
   /* ---------- Barre d'onglets + bouton principal ---------- */
   .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;height:var(--bottom);padding-bottom:var(--safe-b);
     display:grid;grid-template-columns:1fr 1fr 96px 1fr 1fr;align-items:center;
-    background:rgba(15,23,39,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid rgba(157,183,217,.16)}
+    background:rgba(11,12,15,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid rgba(200,205,215,.16)}
   .tab{background:none;border:0;color:var(--gris);font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;cursor:pointer;position:relative}
   .tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
   .tab[aria-current="page"]{color:var(--blanc)}
@@ -217,9 +217,9 @@
   body.on-map .end-btn{bottom:calc(var(--bottom) + 84px)}
 
   /* ---------- Fenêtres ---------- */
-  .modal{position:fixed;inset:0;z-index:60;background:rgba(8,12,22,.62);display:flex;align-items:flex-end;justify-content:center;
+  .modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.62);display:flex;align-items:flex-end;justify-content:center;
     padding:calc(var(--safe-t) + 14px) 14px calc(var(--safe-b) + 14px);perspective:900px}
-  .sheet{background:var(--nuit-2);border:1px solid rgba(157,183,217,.22);border-radius:22px;padding:20px;width:100%;max-width:520px;max-height:100%;overflow-y:auto;
+  .sheet{background:var(--nuit-2);border:1px solid rgba(200,205,215,.22);border-radius:22px;padding:20px;width:100%;max-width:520px;max-height:100%;overflow-y:auto;
     transform-origin:50% 100%;animation:sheetIn .6s cubic-bezier(.2,1.25,.4,1);box-shadow:0 20px 50px rgba(0,0,0,.5)}
   @keyframes sheetIn{from{transform:rotateX(-80deg);opacity:0}}
   .sheet h2{margin:0 0 14px;font-size:24px;font-weight:800;font-stretch:75%;line-height:1.15}
@@ -237,7 +237,7 @@
   .d-route{display:block;width:100%;height:auto;border-radius:16px;background:var(--nuit);margin-bottom:12px}
   .d-sub{font-size:15px;font-weight:700;margin:16px 0 8px}
   .splits{width:100%;border-collapse:collapse;font-size:15px;font-variant-numeric:tabular-nums}
-  .splits td{padding:6px 0;border-top:1px solid rgba(157,183,217,.12)}
+  .splits td{padding:6px 0;border-top:1px solid rgba(200,205,215,.12)}
   .splits td:first-child{width:56px;color:var(--gris)} .splits td:last-child{width:64px;text-align:right;font-weight:700}
   .splits .bar{height:10px;background:var(--relief);margin-right:12px}
   .splits tr.best .bar{background:var(--rouge)} .splits tr.best td:last-child{color:#ff9b93}
@@ -247,7 +247,7 @@
 
   /* ---------- Médaille de record ---------- */
   .medal{position:fixed;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
-    background:rgba(8,12,22,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);perspective:800px;text-align:center;padding:30px;cursor:pointer}
+    background:rgba(0,0,0,.88);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);perspective:800px;text-align:center;padding:30px;cursor:pointer}
   .coin{width:190px;height:190px;position:relative;transform-style:preserve-3d;animation:coin 2.6s cubic-bezier(.2,.8,.2,1) both}
   .coin .cf,.coin .cb{position:absolute;inset:0;border-radius:50%;-webkit-backface-visibility:hidden;backface-visibility:hidden;display:grid;place-items:center}
   .coin .cf{background:radial-gradient(circle at 35% 30%,#fff0a6,#ffd23f 45%,#d9a514 100%);border:9px solid #b98f10;color:var(--encre);
@@ -263,19 +263,19 @@
 
   /* ---------- En-tête : bouton Réglages ---------- */
   .top-right{display:flex;align-items:center;gap:8px}
-  .gear{width:38px;height:38px;border-radius:50%;border:1px solid rgba(157,183,217,.22);background:rgba(17,26,44,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  .gear{width:38px;height:38px;border-radius:50%;border:1px solid rgba(200,205,215,.22);background:rgba(21,23,28,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
     display:grid;place-items:center;cursor:pointer;color:var(--gris);padding:0}
   .gear svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .gear[aria-current="page"]{color:var(--blanc);border-color:var(--blanc)}
   .gear+.gear{margin-left:0}
   .energy{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 12px}
-  .energy div{background:rgba(17,26,44,.6);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column}
+  .energy div{background:rgba(21,23,28,.6);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column}
   .energy span{font-size:13px;color:var(--gris)} .energy b{font-size:34px;font-weight:800;font-stretch:76%;line-height:1.05} .energy small{color:var(--gris)}
   .mbtns{display:flex;flex-direction:column;gap:10px}
   .mbig{display:block;text-align:center;background:var(--rouge);color:var(--blanc);border-radius:16px;padding:15px;font-weight:700;font-size:16px;cursor:pointer}
   .mbig.alt{background:var(--nuit-3)}
   .mbig:focus-within{outline:3px solid var(--jaune);outline-offset:2px}
-  .meal{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(157,183,217,.14)}
+  .meal{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(200,205,215,.14)}
   .meal img,.mthumb{width:52px;height:52px;border-radius:12px;object-fit:cover;flex:none;background:var(--nuit-3)}
   .meal>div:nth-child(2){flex:1;min-width:0;display:flex;flex-direction:column} .meal small{color:var(--gris);font-size:13px}
   .mright{text-align:right;display:flex;flex-direction:column;align-items:flex-end} .mright b{font-size:20px}
@@ -286,13 +286,13 @@
   .wbars i{width:42%;border-radius:4px 4px 0 0;min-height:2px} .we,.le{background:var(--jaune)} .wb,.lb{background:var(--rouge)}
   .legend{font-size:13px;color:var(--gris);margin:8px 0 0} .legend span{display:inline-block;width:10px;height:10px;border-radius:2px;margin:0 4px 0 8px}
   .mphoto{width:100%;max-height:220px;object-fit:cover;border-radius:16px;margin:10px 0}
-  .mstatus{background:rgba(17,26,44,.6);border-radius:14px;padding:12px;margin:10px 0;font-size:15px}
+  .mstatus{background:rgba(21,23,28,.6);border-radius:14px;padding:12px;margin:10px 0;font-size:15px}
   .mbarbox{height:8px;border-radius:4px;background:var(--nuit-3);margin-top:8px;overflow:hidden} .mbarbox i{display:block;height:100%;width:0;background:var(--jaune);transition:width .2s}
   .mtype{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0;font-weight:700}
-  #msheet select,.msearch{background:var(--nuit-3);color:var(--blanc);border:1px solid rgba(157,183,217,.22);border-radius:12px;padding:9px 10px;font:inherit;font-size:16px}
+  #msheet select,.msearch{background:var(--nuit-3);color:var(--blanc);border:1px solid rgba(200,205,215,.22);border-radius:12px;padding:9px 10px;font:inherit;font-size:16px}
   .msearch{width:100%;margin:10px 0 0}
   .mrow select{width:78px;padding:9px 6px} #mType{min-width:150px}
-  .mrow{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(157,183,217,.14)}
+  .mrow{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(200,205,215,.14)}
   .mrow.off .mname,.mrow.off .mkcal{opacity:.5}
   .mname{display:flex;flex-direction:column;min-width:0} .mname small{color:var(--gris);font-size:13px}
   .mkcal{font-size:18px;min-width:48px;text-align:right}
@@ -308,7 +308,7 @@
   .hbar span{flex:1} .hbar #hbarGo{background:var(--rouge);color:#fff;border:0;border-radius:12px;padding:10px 12px;font:inherit;font-weight:700;white-space:nowrap;min-height:44px}
   .hbar #hbarX{background:none;border:0;font-size:22px;color:var(--encre);min-width:36px;min-height:44px}
   .hbtns{display:flex;flex-wrap:wrap;gap:6px 18px;padding:0 0 10px}
-  .hguide{border-top:1px solid rgba(157,183,217,.14);padding:12px 0;font-size:14px;line-height:1.45}
+  .hguide{border-top:1px solid rgba(200,205,215,.14);padding:12px 0;font-size:14px;line-height:1.45}
   .hguide summary{font-weight:700;cursor:pointer;color:var(--jaune);min-height:32px} .hguide h4{margin:14px 0 4px;font-size:15px} .hguide ol{padding-left:20px;margin:4px 0} .hguide li{margin:5px 0} .hguide p{color:var(--gris)}
   .hsteps{margin:0 0 12px;font-size:14px;color:var(--gris)} .hsteps b{color:var(--blanc);font-size:18px}
 
@@ -325,12 +325,12 @@
   .wplate .lbl small{display:block;font-size:13px;font-weight:600;opacity:.75}
   .wplate .val{font-size:27px}
   .wplog{margin-top:18px}
-  .wlog{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid rgba(157,183,217,.14);font-size:15px}
+  .wlog{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid rgba(200,205,215,.14);font-size:15px}
   .wlog:first-of-type{border-top:0}
   .wlog small{display:block;color:var(--gris);font-size:13px;font-weight:400}
   .wlog b{white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
   .exlist{list-style:none;margin:0 0 14px;padding:0}
-  .exlist li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid rgba(157,183,217,.12);font-size:15px}
+  .exlist li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid rgba(200,205,215,.12);font-size:15px}
   .exlist li b{font-variant-numeric:tabular-nums;white-space:nowrap}
   .wmeta{color:var(--gris);font-size:14px;margin:-6px 0 12px}
   .ed label{display:block;font-size:13px;color:var(--gris);font-weight:600;margin:12px 0 4px}
@@ -341,12 +341,12 @@
   .ibtn{width:34px;height:38px;border-radius:10px;border:0;background:var(--nuit-3);color:var(--blanc);cursor:pointer;font-size:16px;padding:0}
   .ibtn:disabled{opacity:.3;cursor:default}
   .ed-total{font-size:15px;margin:8px 0 14px;color:var(--gris)} .ed-total b{color:var(--blanc)}
-  .addex{background:none;border:1px dashed rgba(157,183,217,.45);color:var(--blanc);border-radius:12px;padding:10px;width:100%;font-weight:700;cursor:pointer;margin:2px 0 4px}
-  input[type=text]{background:var(--nuit);color:var(--blanc);border:1px solid rgba(157,183,217,.3);border-radius:10px;padding:9px 10px;font:inherit;font-size:16px}
+  .addex{background:none;border:1px dashed rgba(200,205,215,.45);color:var(--blanc);border-radius:12px;padding:10px;width:100%;font-weight:700;cursor:pointer;margin:2px 0 4px}
+  input[type=text]{background:var(--nuit);color:var(--blanc);border:1px solid rgba(200,205,215,.3);border-radius:10px;padding:9px 10px;font:inherit;font-size:16px}
 
   /* ---------- Minuteur de séance ---------- */
   .player{position:fixed;inset:0;z-index:55;display:flex;flex-direction:column;align-items:center;padding:calc(var(--safe-t) + 12px) 20px calc(var(--safe-b) + 22px);
-    background:rgba(15,23,39,.93);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);--ph:var(--rouge);--ph2:var(--blanc);text-align:center}
+    background:rgba(11,12,15,.93);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);--ph:var(--rouge);--ph2:var(--blanc);text-align:center}
   .player.ph-rest{--ph:var(--relief-clair);--ph2:var(--relief)}
   .player.ph-prep{--ph:var(--jaune);--ph2:var(--blanc)}
   .pl-top{width:100%;max-width:520px;display:flex;justify-content:space-between;align-items:center;gap:12px}
@@ -354,11 +354,11 @@
   .pl-pos b{color:var(--blanc);font-weight:700}
   .pl-phase{margin-top:4px;font-size:22px;font-weight:800;font-stretch:78%;color:var(--ph)}
   .ring3d{position:relative;width:min(68vw,290px);aspect-ratio:1/1;margin:6px 0 4px;perspective:700px;flex:none}
-  .ring3d .disc{position:absolute;inset:7%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#26385c,#111a2c 72%);transform:rotateX(16deg) translateZ(-26px);
+  .ring3d .disc{position:absolute;inset:7%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#23262e,#0b0c0f 72%);transform:rotateX(16deg) translateZ(-26px);
     box-shadow:0 26px 40px rgba(0,0,0,.45)}
   .ring{position:absolute;inset:0;width:100%;height:100%;transform:rotateX(16deg);overflow:visible}
   .ring circle{fill:none;transform:rotate(-90deg);transform-box:fill-box;transform-origin:50% 50%;transition:stroke .4s}
-  .ring .r-track{stroke:rgba(157,183,217,.16);stroke-width:18}
+  .ring .r-track{stroke:rgba(200,205,215,.16);stroke-width:18}
   .ring .r-a{stroke:var(--ph2);stroke-width:8}
   .ring .r-b{stroke:var(--ph);stroke-width:8}
   .ring.spin{animation:ringspin .85s cubic-bezier(.3,1.25,.5,1)}
@@ -374,7 +374,7 @@
   .pl-total{width:min(100%,420px);margin-top:auto}
   .pl-tot-txt{display:flex;justify-content:space-between;font-size:14px;color:var(--gris);margin-top:6px;font-variant-numeric:tabular-nums}
   .pl-ctrl{display:flex;align-items:center;gap:26px;margin-top:16px}
-  .pbtn{width:56px;height:56px;border-radius:50%;border:1px solid rgba(157,183,217,.35);background:rgba(17,26,44,.8);color:var(--blanc);display:grid;place-items:center;cursor:pointer;padding:0}
+  .pbtn{width:56px;height:56px;border-radius:50%;border:1px solid rgba(200,205,215,.35);background:rgba(21,23,28,.8);color:var(--blanc);display:grid;place-items:center;cursor:pointer;padding:0}
   .pbtn svg,.pfab svg{width:26px;height:26px;fill:currentColor}
   .pfab{width:82px;height:82px;border-radius:50%;border:0;cursor:pointer;display:grid;place-items:center;background:var(--blanc);color:var(--rouge);padding:0;
     box-shadow:0 6px 0 #aeb9cc,0 14px 26px rgba(0,0,0,.4)}
@@ -411,7 +411,7 @@
   .nv-info{display:flex;justify-content:space-between;gap:10px;width:min(100%,420px);font-size:15px;color:var(--gris);font-variant-numeric:tabular-nums}
   .nv-info b{color:var(--blanc)}
   .nv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(100%,420px);margin-top:12px}
-  .nv-stats div{background:rgba(29,43,69,.9);border-radius:14px;padding:8px 10px;text-align:left}
+  .nv-stats div{background:rgba(21,23,28,.9);border-radius:14px;padding:8px 10px;text-align:left}
   .nv-stats span{display:block;font-size:12px;color:var(--gris)}
   .nv-stats b{font-size:22px;font-stretch:70%;font-weight:800;font-variant-numeric:tabular-nums}
   .stopbtn{margin-top:auto;width:min(100%,420px);border:0;border-radius:18px;padding:18px;font-size:20px;font-weight:800;background:var(--rouge);color:#fff;
@@ -426,7 +426,7 @@
   body.ac-open .stage .view{visibility:hidden!important}
   body.ac-open .stage{opacity:0;pointer-events:none}
   .accueil{position:fixed;inset:0;z-index:58;overflow-y:auto;-webkit-overflow-scrolling:touch;
-    background:linear-gradient(to bottom,rgba(17,26,44,.62) 0%,rgba(17,26,44,.18) 42%,rgba(17,26,44,.55) 75%,rgba(17,26,44,.9) 100%)}
+    background:linear-gradient(to bottom,rgba(21,23,28,.62) 0%,rgba(21,23,28,.18) 42%,rgba(21,23,28,.55) 75%,rgba(21,23,28,.9) 100%)}
   .ac-step{min-height:100%;display:flex;flex-direction:column;align-items:center;text-align:center;
     padding:calc(var(--safe-t) + 26px) 22px calc(var(--safe-b) + 24px);max-width:560px;margin:0 auto}
   .ac-3d{perspective:700px;margin:8vh 0 10px}
@@ -489,7 +489,7 @@
   .c-nav{display:flex;align-items:center;justify-content:center;gap:16px;margin:2px 0 6px}
   .c-nav .pbtn{width:44px;height:44px;font-size:22px}
   .c-dots{display:flex;gap:8px}
-  .c-dots button{width:10px;height:10px;border-radius:50%;border:0;padding:0;background:rgba(157,183,217,.35);cursor:pointer}
+  .c-dots button{width:10px;height:10px;border-radius:50%;border:0;padding:0;background:rgba(200,205,215,.35);cursor:pointer}
   .c-dots button[aria-current="true"]{background:var(--blanc);width:24px;border-radius:5px}
   .ac-streak{margin:4px 0 16px}
   .ac-empty{max-width:30ch;margin:40px auto;color:var(--gris)}
@@ -503,6 +503,193 @@
     *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   }
   body.anim-off .post.intro .po,body.anim-off .plate.flip,body.anim-off .run.new,body.anim-off .sheet,body.anim-off .coin,body.anim-off .ring.spin,body.anim-off .wcard.flip .pl-name,body.anim-off .nv-head.flip,body.anim-off .ac-blaze,body.anim-off .ac-h1,body.anim-off .ac-lead{animation:none}
+
+  /* ================= Thème « sport moderne » ================= */
+  :root{
+    --nuit:#0b0c0f; --nuit-2:#15171c; --nuit-3:#23262e;
+    --relief:#3b404b; --relief-clair:#8b929e;
+    --rouge:#ff5a1f; --rouge-fonce:#c43f0e;
+    --blanc:#f6f6f7; --jaune:#ffb27a; --jaune-fonce:#c4793d;
+    --encre:#0b0c0f; --gris:#8f96a2;
+    --carte:#15171c; --carte-2:#1c1f25; --ligne:rgba(255,255,255,.07);
+    --accent-grad:linear-gradient(135deg,#ff7a2f,#ff3d1f);
+  }
+  html,body{background:var(--nuit)}
+  ::selection{background:var(--rouge);color:#fff}
+  .num{font-stretch:68%;font-weight:900;letter-spacing:-.01em}
+  .sky{background:radial-gradient(120% 60% at 85% -10%,rgba(255,90,31,.20),transparent 60%),radial-gradient(90% 50% at -10% 0%,rgba(255,90,31,.08),transparent 60%),var(--nuit)}
+  body.no-relief .sky{background:radial-gradient(120% 60% at 85% -10%,rgba(255,90,31,.20),transparent 60%),var(--nuit)}
+  body.dim #relief.on{opacity:.28}
+
+  /* En-tête */
+  .brand{font-size:24px;font-weight:900;font-stretch:72%;text-transform:uppercase;letter-spacing:.02em;font-style:italic}
+  .blaze{width:26px;height:26px;border-radius:8px;background:var(--accent-grad);display:grid;place-items:center;grid-template-rows:none;box-shadow:0 4px 14px rgba(255,90,31,.45)}
+  .blaze::before{content:"";width:11px;height:11px;border:3px solid #fff;border-radius:50%;background:none}
+  .blaze::after{content:none}
+  .gps,.gear{background:rgba(21,23,28,.8);border-color:var(--ligne)}
+  body.on-map .top{background:linear-gradient(to bottom,rgba(11,12,15,.92),rgba(11,12,15,0))}
+  body.dim .top{background:linear-gradient(to bottom,rgba(11,12,15,.97) 0,rgba(11,12,15,.97) 78%,rgba(11,12,15,0) 100%)}
+  .gear[aria-current="page"]{color:#fff;border-color:var(--rouge);background:rgba(255,90,31,.18)}
+
+  /* Écran Sortie : chiffres en grand et cartes */
+  .act{background:var(--carte);border-color:var(--ligne);color:var(--gris)}
+  .act[aria-pressed="true"]{background:var(--rouge);border-color:var(--rouge);color:#fff;box-shadow:0 6px 18px rgba(255,90,31,.35)}
+  .speed-num{font-size:clamp(96px,32vw,150px);font-weight:900;font-style:italic;letter-spacing:-.04em}
+  .speed-num .unit{font-style:normal;color:var(--rouge);font-weight:800;text-transform:uppercase;font-size:18px;letter-spacing:.04em}
+  .speed-bar{height:6px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.08);width:100%}
+  .speed-bar i{background:var(--accent-grad);border-radius:3px}
+  .post{padding-left:0;perspective:none;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start;margin-top:16px}
+  .post .pole{display:none}
+  .po{height:auto;margin:0;transform:none;width:auto}
+  .post.intro .po{animation:cardIn .7s cubic-bezier(.2,1.2,.4,1) both;animation-delay:calc(var(--i) * 70ms + 250ms)}
+  @keyframes cardIn{from{transform:translateY(18px) scale(.96);opacity:0}}
+  .po .plate{position:relative;inset:auto}
+  .po .back{display:none}
+  .po .face{position:relative;inset:auto;clip-path:none;background:var(--carte);color:var(--blanc);border:1px solid var(--ligne);border-radius:20px;
+    flex-direction:column;align-items:flex-start;justify-content:space-between;gap:6px;padding:12px 14px;min-height:86px}
+  .po .face .lbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gris);font-stretch:100%}
+  .po .face .val{font-size:34px}
+  .po .face .val small{font-size:14px;color:var(--gris);font-weight:700}
+  #pDist{grid-column:1/-1}
+  #pDist .face{background:var(--accent-grad);border:0;min-height:112px;box-shadow:0 12px 30px rgba(255,90,31,.28)}
+  #pDist .face .lbl,#pDist .face .val small{color:rgba(255,255,255,.85)}
+  #pDist .face .val{font-size:58px;font-style:italic}
+  .plate.flip{animation:pop .7s cubic-bezier(.2,1.4,.4,1)}
+  @keyframes pop{40%{transform:scale(1.05)}}
+  .hint{margin:12px 0 10px;background:var(--carte);border:1px solid var(--ligne)}
+
+  /* Carte */
+  #v-carte{background:var(--nuit)}
+  .hud .face{position:absolute;inset:0;clip-path:none;border-radius:18px;background:rgba(21,23,28,.92);color:var(--blanc);border:1px solid var(--ligne);padding:0 16px}
+  .hud .back{display:none}
+  .hud .lbl{color:var(--gris);font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+  .mbtn{background:var(--carte);color:var(--blanc);border:1px solid var(--ligne);box-shadow:0 10px 22px rgba(0,0,0,.4)}
+  .mbtn:active{transform:scale(.97);box-shadow:0 6px 14px rgba(0,0,0,.4)}
+  .replay{background:rgba(16,17,21,.94);border-color:var(--ligne)}
+  .rp-track{border-radius:5px;overflow:hidden;background:rgba(255,255,255,.08)} .rp-track i{background:var(--accent-grad)}
+
+  /* Titres, cartes, réglages */
+  .h-title{font-size:34px;font-weight:900;font-stretch:70%;text-transform:uppercase;font-style:italic;letter-spacing:-.005em;margin:8px 0 16px}
+  .set,.block,.about{background:var(--carte);-webkit-backdrop-filter:none;backdrop-filter:none;border:1px solid var(--ligne);border-radius:22px}
+  .bh{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-stretch:90%;color:var(--blanc)}
+  .set-title{text-transform:uppercase;letter-spacing:.08em;font-size:12px}
+  .row,.rec,.run,.meal,.mrow,.wlog,.hguide,.splits td{border-top-color:var(--ligne)!important}
+  input[type=number],input[type=text],select{background:var(--nuit-3);border:1px solid transparent;border-radius:12px;color:var(--blanc)}
+  input[type=number]:focus,input[type=text]:focus,select:focus{border-color:var(--rouge);outline:none}
+  .switch span{background:#2e323b}
+  .linkbtn{color:var(--rouge)}
+  .goal-bar{height:8px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.08)}
+  .goal-bar i{background:var(--accent-grad);border-radius:4px}
+  .goal.done .goal-bar i{background:linear-gradient(90deg,#ffb27a,#ff5a1f)}
+  .seg{background:var(--nuit-3)} .seg button[aria-pressed="true"]{background:var(--rouge);color:#fff}
+  .rec .v{color:var(--blanc)}
+  .thumb{background:var(--nuit-3);border-radius:14px}
+  .total .po{--ry:0deg;height:auto}
+  .total .po .face{background:var(--accent-grad);border:0}
+  .total .po .face .lbl,.total .po .face .val small{color:rgba(255,255,255,.85)}
+  .energy div,.mstatus{background:var(--nuit-3);border-radius:16px}
+  .energy div:first-child b{color:var(--jaune)} .energy div:nth-child(2) b{color:var(--rouge)}
+  .we,.le{background:var(--jaune)} .wb,.lb{background:var(--rouge)}
+  .mbig{background:var(--accent-grad);box-shadow:0 10px 24px rgba(255,90,31,.3)}
+  .mbig.alt{background:var(--nuit-3);box-shadow:none}
+
+  /* Barre d'onglets et bouton principal */
+  .tabbar{background:rgba(11,12,15,.92);border-top:1px solid var(--ligne)}
+  .tab[aria-current="page"]{color:var(--rouge)}
+  .tab[aria-current="page"]::after{width:5px;height:5px;border-radius:50%;background:var(--rouge);bottom:2px}
+  .fab{background:var(--accent-grad);box-shadow:0 10px 28px rgba(255,90,31,.5),0 0 0 6px var(--nuit)}
+  .fab:active{transform:scale(.94);box-shadow:0 6px 16px rgba(255,90,31,.45),0 0 0 6px var(--nuit)}
+  .fab.running{background:var(--blanc);color:var(--rouge);box-shadow:0 10px 28px rgba(0,0,0,.5),0 0 0 6px var(--nuit)}
+  .fab.running:active{box-shadow:0 6px 16px rgba(0,0,0,.45),0 0 0 6px var(--nuit)}
+  .end-btn{background:var(--blanc);box-shadow:0 12px 26px rgba(0,0,0,.5)}
+
+  /* Fenêtres */
+  .modal{background:rgba(0,0,0,.7)}
+  .sheet{background:var(--nuit-2);border-color:var(--ligne);border-radius:26px}
+  .sheet h2{font-size:26px;font-weight:900;text-transform:uppercase;font-style:italic;font-stretch:70%}
+  .xbtn{background:var(--nuit-3);color:var(--blanc)}
+  .sum div{background:var(--nuit-3);border-radius:16px}
+  .sbtn{border-radius:16px}
+  .sbtn.save{background:var(--accent-grad);box-shadow:0 10px 24px rgba(255,90,31,.3)}
+  .sbtn.cancel{background:var(--nuit-3)}
+  .splits .bar{background:#3b404b;border-radius:3px} .splits tr.best .bar{background:var(--rouge)}
+  .toast{background:var(--blanc)}
+  .hbar #hbarGo{background:var(--rouge)}
+
+  /* Séances : filtres et cartes */
+  .chips{display:flex;gap:8px;overflow-x:auto;margin:0 -18px 14px;padding:2px 18px 6px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{flex:none;border:1px solid var(--ligne);background:var(--carte);color:var(--gris);border-radius:999px;padding:9px 15px;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
+  .chip[aria-pressed="true"]{background:var(--rouge);border-color:var(--rouge);color:#fff}
+  .newbtn{background:transparent;color:var(--rouge);border:1.5px dashed rgba(255,90,31,.6);box-shadow:none;margin-bottom:18px}
+  .newbtn:active{transform:scale(.98);box-shadow:none}
+  .wgh{margin:22px 2px 10px;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;display:flex;flex-direction:column;gap:2px}
+  .wgh small{font-size:13px;font-weight:500;text-transform:none;letter-spacing:0;color:var(--gris)}
+  .wc{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;text-align:left;cursor:pointer;font:inherit;color:inherit;
+    background:var(--carte);border:1px solid var(--ligne);border-radius:20px;padding:14px 16px;margin-bottom:10px;position:relative;overflow:hidden;
+    transition:transform .15s,border-color .2s}
+  .wc::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--rouge)}
+  .wc:active{transform:scale(.98)}
+  .wc-l{min-width:0;display:flex;flex-direction:column;gap:4px}
+  .wc-l b{font-size:18px;font-weight:800;font-stretch:85%;line-height:1.15}
+  .wc-l small{color:var(--gris);font-size:13px;display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px}
+  .wc-r{display:flex;flex-direction:column;align-items:flex-end;flex:none}
+  .wc-r b{font-size:26px;line-height:1}
+  .wc-r small{color:var(--gris);font-size:12px;margin-top:3px}
+  .wc-nav{background:linear-gradient(135deg,rgba(255,90,31,.22),rgba(255,90,31,.06)),var(--carte);border-color:rgba(255,90,31,.35)}
+  .lv{font-style:normal;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:6px;background:rgba(255,255,255,.08);color:var(--blanc)}
+  .lv1{background:rgba(64,214,140,.16);color:#6fe3a8} .lv2{background:rgba(255,178,122,.16);color:#ffb27a} .lv3{background:rgba(255,90,31,.2);color:#ff7a4a}
+  .wdesc{color:var(--blanc);font-size:15px;margin:0 0 8px;opacity:.9}
+  .wmeta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .exlist li span{display:flex;flex-direction:column}
+  .exlist li small{color:var(--gris);font-size:13px;font-weight:400;margin-top:2px;line-height:1.35}
+  .pl-tip{margin:8px auto 0;font-size:14px;color:var(--gris);max-width:34ch;text-align:center;line-height:1.4;min-height:1.4em}
+  .pl-next .back{display:none}
+  .pl-next .face{position:absolute;inset:0;padding:0 16px;clip-path:none;background:var(--carte);color:var(--blanc);border:1px solid var(--ligne);border-radius:16px}
+  /* Accueil */
+  .ac-blaze{width:96px;height:96px}
+  .ac-blaze i{border-radius:26px}
+  .ac-blaze .bk{background:#7a2408}
+  .ac-blaze .w{top:0;bottom:0;height:auto;background:var(--accent-grad)}
+  .ac-blaze .r{top:50%;left:50%;width:38px;height:38px;bottom:auto;right:auto;margin:-19px 0 0 -19px;border-radius:50%;background:none;border:7px solid #fff;transform:translateZ(2px)}
+  .ac-h1{font-style:italic;text-transform:uppercase;text-shadow:0 1px 0 #ff8a50,0 2px 0 #ff7a3d,0 3px 0 #f2652a,0 4px 0 #dd5520,0 5px 0 #c4471a,0 6px 0 #a83a14,0 12px 22px rgba(0,0,0,.6)}
+  .ac-lead{color:#c9ccd3}
+  .ac-h2{font-style:italic;text-transform:uppercase}
+  .ac-cta{background:var(--accent-grad);box-shadow:0 12px 28px rgba(255,90,31,.4)}
+  .ac-cta:active{transform:scale(.98);box-shadow:0 6px 16px rgba(255,90,31,.35)}
+  .gc-back{background:#24130b}
+  .gc-face{background:linear-gradient(170deg,#1f2229,#121418);color:var(--blanc);border:1px solid rgba(255,255,255,.08)}
+  .gcard.off .gc-face{background:linear-gradient(170deg,#1a1c21,#121317);color:#7d838e}
+  .gcard.off .gc-back{background:#101114}
+  .gc-ring .t{stroke:rgba(255,255,255,.07)}
+  .gc-ring .a{stroke:#ffb27a} .gc-ring .b{stroke:var(--rouge)}
+  .gcard.done .gc-face{background:var(--accent-grad);border:0}
+  .gcard.done .gc-ring .a,.gcard.done .gc-ring .b{stroke:#fff}
+  .gcard.done .gc-ring .t{stroke:rgba(255,255,255,.25)}
+  .stepper{background:rgba(255,255,255,.06)}
+  .stepper button{background:var(--rouge);color:#fff}
+  .c-dots button[aria-current="true"]{background:var(--rouge)}
+  .coin .cb::before{background:var(--accent-grad);border-radius:14px;width:64px;height:64px}
+  /* Lecteur de séance et test navette */
+  .player{background:rgba(8,9,11,.96)}
+  .player.ph-rest{--ph:#6fe3a8;--ph2:#2f6b4f}
+  .player.ph-prep{--ph:#ffb27a;--ph2:var(--blanc)}
+  .pl-phase{text-transform:uppercase;letter-spacing:.06em;font-style:italic;font-weight:900}
+  .pl-time{font-style:italic;font-weight:900}
+  .pl-name{text-transform:uppercase;font-style:italic;font-weight:900;font-stretch:68%}
+  .pl-next{filter:none}
+  .pbtn{border-color:var(--ligne);background:var(--carte)}
+  .pfab{background:var(--accent-grad);color:#fff;box-shadow:0 12px 28px rgba(255,90,31,.45)}
+  .pfab:active{transform:scale(.95);box-shadow:0 6px 16px rgba(255,90,31,.4)}
+  .pfab.paused{background:var(--blanc);color:var(--rouge);box-shadow:0 12px 28px rgba(0,0,0,.5)}
+  .lane{background:linear-gradient(90deg,rgba(246,246,247,.85) 0 3px,transparent 3px calc(100% - 3px),rgba(246,246,247,.85) calc(100% - 3px)),
+      repeating-linear-gradient(to top,rgba(255,90,31,.22) 0 22px,rgba(255,90,31,.08) 22px 44px)}
+  .ln{background:var(--accent-grad);border-radius:4px}
+  .nv-count{color:var(--rouge)}
+  .nv-stats div{background:var(--carte);border:1px solid var(--ligne)}
+  .stopbtn{background:var(--accent-grad);box-shadow:0 12px 28px rgba(255,90,31,.4)}
+  .stopbtn:active{transform:scale(.98);box-shadow:0 6px 16px rgba(255,90,31,.35)}
+  .wcard{flex-direction:column}
 </style>
 </head>
 <body>
@@ -771,7 +958,7 @@
     </svg>
     <div class="pl-time num" id="plTime">0:10</div>
   </div>
-  <div class="wcard" id="plCard"><div class="pl-name" id="plName"></div></div>
+  <div class="wcard" id="plCard"><div class="pl-name" id="plName"></div><p class="pl-tip" id="plTip"></p></div>
   <div class="pl-next"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Ensuite</span><span class="val" id="plNext"></span></div></div></div>
   <div class="pl-total"><div class="goal-bar"><i id="plBar"></i></div><div class="pl-tot-txt"><span id="plDone"></span><span id="plLeft"></span></div></div>
   <div class="pl-ctrl">
@@ -1144,7 +1331,7 @@
     $('hudSpeed').textContent = nf1.format(live);
     $('hudDist').textContent = nf2.format(S.distance / 1000);
     $('hint').textContent = {
-      idle: 'Choisis ton activité, puis appuie sur le bouton rouge pour démarrer.',
+      idle: 'Choisis ton activité, puis appuie sur le bouton orange pour démarrer.',
       running: isNative ? 'Sortie en cours. Tu peux verrouiller l\'écran : le suivi continue.' : "Sortie en cours. Garde l'écran allumé pour que le GPS continue.",
       paused: ''
     }[S.status];
@@ -1502,7 +1689,7 @@
   function thumbSvg(track, w, h, cls) {
     w = w || 66; h = h || 66;
     const open = '<svg class="' + (cls || 'thumb') + '" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true">';
-    if (!track || track.length < 2) return open + '<rect x="' + (w / 2 - 12) + '" y="' + (h / 2 - 8) + '" width="24" height="8" fill="#f4f6fb"/><rect x="' + (w / 2 - 12) + '" y="' + (h / 2) + '" width="24" height="8" fill="#e5322d"/></svg>';
+    if (!track || track.length < 2) return open + '<circle cx="' + (w / 2) + '" cy="' + (h / 2) + '" r="' + Math.min(w, h) * 0.14 + '" fill="none" stroke="#ff5a1f" stroke-width="' + Math.max(3, Math.min(w, h) * 0.06) + '"/></svg>';
     let a = 90, b = -90, c = 180, d = -180;
     track.forEach(p => { a = Math.min(a, p[0]); b = Math.max(b, p[0]); c = Math.min(c, p[1]); d = Math.max(d, p[1]); });
     const k = Math.cos(rad((a + b) / 2)), ww = Math.max((d - c) * k, 1e-6), hh = Math.max(b - a, 1e-6);
@@ -1511,8 +1698,8 @@
     const sw = Math.max(4, w / 14);
     const first = pts.split(' ')[0].split(','), lastP = pts.split(' ').pop().split(',');
     return open + '<polyline points="' + pts + '" fill="none" stroke="#f4f6fb" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round"/>' +
-      '<polyline points="' + pts + '" fill="none" stroke="#e5322d" stroke-width="' + (sw * 0.48) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
-      (w > 100 ? '<circle cx="' + first[0] + '" cy="' + first[1] + '" r="' + sw * 0.9 + '" fill="#f4f6fb"/><circle cx="' + lastP[0] + '" cy="' + lastP[1] + '" r="' + sw * 0.9 + '" fill="#e5322d" stroke="#f4f6fb" stroke-width="3"/>' : '') + '</svg>';
+      '<polyline points="' + pts + '" fill="none" stroke="#ff5a1f" stroke-width="' + (sw * 0.48) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+      (w > 100 ? '<circle cx="' + first[0] + '" cy="' + first[1] + '" r="' + sw * 0.9 + '" fill="#f4f6fb"/><circle cx="' + lastP[0] + '" cy="' + lastP[1] + '" r="' + sw * 0.9 + '" fill="#ff5a1f" stroke="#f4f6fb" stroke-width="3"/>' : '') + '</svg>';
   }
   const df = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   const dfLong = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
@@ -1594,9 +1781,9 @@
     let svg = '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Kilomètres par ' + (statMode === 'week' ? 'semaine' : 'mois') + '">';
     buckets.forEach((b, i) => {
       const x = i * (bw + gap), h = (b.m / max) * (base - top), y = base - h, cur = i === n - 1;
-      svg += '<rect x="' + x.toFixed(1) + '" y="' + (base - 2) + '" width="' + bw.toFixed(1) + '" height="2" fill="rgba(157,183,217,.25)"/>';
+      svg += '<rect x="' + x.toFixed(1) + '" y="' + (base - 2) + '" width="' + bw.toFixed(1) + '" height="2" fill="rgba(200,205,215,.18)"/>';
       if (b.m > 0) {
-        svg += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" fill="' + (cur ? '#e5322d' : '#5f7fa8') + '"/>';
+        svg += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" fill="' + (cur ? '#ff5a1f' : '#3b404b') + '"/>';
         svg += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + Math.min(5, h).toFixed(1) + '" fill="#f4f6fb"/>';
         svg += '<text class="lbl-v" x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 5).toFixed(1) + '" text-anchor="middle">' + nf1.format(b.m / 1000) + '</text>';
       }
@@ -1611,7 +1798,7 @@
     const hist = store.get(K_HIST, []), box = $('progress');
     let html = goalsHtml();
     if (!hist.length) {
-      box.innerHTML = html + '<div class="block"><div class="bh">Tes sorties</div><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton rouge, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>';
+      box.innerHTML = html + '<div class="block"><div class="bh">Tes sorties</div><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>';
       return;
     }
     let totalM = 0, totalKcal = 0;
@@ -1651,7 +1838,7 @@
     const W = 340, H = 120, t = 12, b = 96;
     const line = pts.map((p, i) => (xs[i] / cum * W).toFixed(1) + ',' + (b - (p[2] - lo) / span * (b - t)).toFixed(1)).join(' ');
     return '<div class="d-sub">Profil d\'altitude</div><svg class="alt" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Altitude de ' + Math.round(lo) + ' à ' + Math.round(hi) + ' mètres">' +
-      '<polygon points="0,' + b + ' ' + line + ' ' + W + ',' + b + '" fill="rgba(95,127,168,.35)"/><polyline points="' + line + '" fill="none" stroke="#9db7d9" stroke-width="2"/>' +
+      '<polygon points="0,' + b + ' ' + line + ' ' + W + ',' + b + '" fill="rgba(255,90,31,.18)"/><polyline points="' + line + '" fill="none" stroke="#ff8a50" stroke-width="2"/>' +
       '<text x="0" y="' + (H - 6) + '">0 km</text><text x="' + W + '" y="' + (H - 6) + '" text-anchor="end">' + nf1.format(cum / 1000) + ' km</text>' +
       '<text x="' + W + '" y="10" text-anchor="end">' + Math.round(hi) + ' m</text><text x="' + W + '" y="' + (b - 3) + '" text-anchor="end">' + Math.round(lo) + ' m</text></svg>';
   }
@@ -1752,11 +1939,11 @@
     try { await Promise.all([document.fonts.load('800 120px Archivo'), document.fonts.load('600 40px Archivo')]); } catch (e) {}
     const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const x = cv.getContext('2d');
-    const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#111a2c'); g.addColorStop(1, '#1e2f4f');
+    const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0b0c0f'); g.addColorStop(1, '#1c1f25');
     x.fillStyle = g; x.fillRect(0, 0, W, H);
     // courbes de niveau
     for (let k = 0; k < 28; k++) {
-      x.strokeStyle = k % 5 === 0 ? 'rgba(157,183,217,.28)' : 'rgba(95,127,168,.18)'; x.lineWidth = k % 5 === 0 ? 3 : 2;
+      x.strokeStyle = k % 5 === 0 ? 'rgba(255,120,60,.22)' : 'rgba(200,205,215,.10)'; x.lineWidth = k % 5 === 0 ? 3 : 2;
       x.beginPath();
       for (let a = 0; a <= Math.PI * 2 + 0.06; a += 0.05) {
         const r = 40 + k * 40 + Math.sin(a * 3 + k * 0.45) * 22 + Math.sin(a * 5 - k * 0.3) * 12;
@@ -1766,7 +1953,7 @@
       x.stroke();
     }
     // titre
-    x.fillStyle = '#f4f6fb'; x.fillRect(80, 82, 58, 20); x.fillStyle = '#e5322d'; x.fillRect(80, 102, 58, 20);
+    x.fillStyle = '#ff5a1f'; x.beginPath(); x.arc(109, 104, 30, 0, 7); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 7; x.beginPath(); x.arc(109, 104, 12, 0, 7); x.stroke();
     setFont(x, 800, 58, true); x.fillStyle = '#f4f6fb'; x.textBaseline = 'middle'; x.fillText('Parcours', 160, 104);
     // tracé
     const tr = h.track || [];
@@ -1777,30 +1964,30 @@
       const bx = 110, by = 190, bw = 860, bh = 600, s = Math.min(bw / ww, bh / hh), ox = bx + (bw - ww * s) / 2, oy = by + (bh - hh * s) / 2;
       const P = p => [(p[1] - c) * k * s + ox, (b - p[0]) * s + oy];
       x.lineJoin = 'round'; x.lineCap = 'round';
-      [['#f4f6fb', 28], ['#e5322d', 13]].forEach(([col, lw]) => {
+      [['#f4f6fb', 28], ['#ff5a1f', 13]].forEach(([col, lw]) => {
         x.strokeStyle = col; x.lineWidth = lw; x.beginPath();
         tr.forEach((p, i) => { const q = P(p); i ? x.lineTo(q[0], q[1]) : x.moveTo(q[0], q[1]); }); x.stroke();
       });
       const s0 = P(tr[0]), s1 = P(tr[tr.length - 1]);
       x.fillStyle = '#f4f6fb'; x.beginPath(); x.arc(s0[0], s0[1], 20, 0, 7); x.fill();
-      x.fillStyle = '#e5322d'; x.strokeStyle = '#f4f6fb'; x.lineWidth = 7; x.beginPath(); x.arc(s1[0], s1[1], 20, 0, 7); x.fill(); x.stroke();
+      x.fillStyle = '#ff5a1f'; x.strokeStyle = '#f4f6fb'; x.lineWidth = 7; x.beginPath(); x.arc(s1[0], s1[1], 20, 0, 7); x.fill(); x.stroke();
     }
     // date + activité
     x.textBaseline = 'alphabetic';
-    setFont(x, 600, 38, false); x.fillStyle = '#a9b6c9';
+    setFont(x, 600, 38, false); x.fillStyle = '#8f96a2';
     x.fillText(cap(dfLong.format(new Date(h.date))) + ' — ' + (ACT_LABEL[h.activity] || 'Sortie'), 80, 890);
     // distance
     setFont(x, 800, 210, true); x.fillStyle = '#f4f6fb';
     const dTxt = nf2.format((h.distanceM || 0) / 1000); x.fillText(dTxt, 70, 1085);
-    const dw = x.measureText(dTxt).width; setFont(x, 700, 60, true); x.fillStyle = '#a9b6c9'; x.fillText('km', 70 + dw + 20, 1085);
-    x.fillStyle = '#f4f6fb'; x.fillRect(80, 1138, 300, 10); x.fillStyle = '#e5322d'; x.fillRect(80, 1148, 300, 10);
+    const dw = x.measureText(dTxt).width; setFont(x, 700, 60, true); x.fillStyle = '#8f96a2'; x.fillText('km', 70 + dw + 20, 1085);
+    x.fillStyle = '#ff5a1f'; x.fillRect(80, 1138, 300, 14);
     // stats
     const velo = h.activity === 'velo';
     const stats = [['Durée', fmtClock(h.durationMs || 0)], velo ? ['Vitesse', nf1.format(h.avgKmh || 0) + ' km/h'] : ['Allure', fmtPace(h.durationMs || 0, h.distanceM || 0) + ' /km'],
       ['Calories', nf0.format(h.kcal || 0)], velo || !h.steps ? ['Montée', nf0.format(h.dplus || 0) + ' m'] : ['Pas', nf0.format(h.steps || 0)]];
     stats.forEach(([l, v], i) => {
       const cx = 80 + i * 245;
-      setFont(x, 600, 32, false); x.fillStyle = '#a9b6c9'; x.fillText(l, cx, 1222);
+      setFont(x, 600, 32, false); x.fillStyle = '#8f96a2'; x.fillText(l, cx, 1222);
       let fs = 58; setFont(x, 800, fs, true);
       while (x.measureText(v).width > 222 && fs > 30) { fs -= 2; setFont(x, 800, fs, true); } // la valeur doit tenir dans sa colonne
       x.fillStyle = '#f4f6fb'; x.fillText(v, cx, 1284);
@@ -1815,19 +2002,166 @@
   const W_MET = { etirements: 2.3, moderee: 3.8, intense: 8.0 }, REST_MET = 1.8;
   const W_INT = { etirements: 'Étirements', moderee: 'Modérée', intense: 'Intense' };
   const EX = str => str.split('|').map(x => { const [name, sec] = x.split(':'); return { name, sec: +sec }; });
-  const PRESETS = [
-    { id: 'p-echauffement', preset: true, name: 'Échauffement', intensity: 'moderee', prep: 10, rest: 10, rounds: 1, roundRest: 0,
-      exercises: EX('Montées de genoux:40|Jumping jacks:40|Rotations des bras:30|Squats:40|Fentes alternées:40|Talons-fesses:40') },
-    { id: 'p-hiit', preset: true, name: 'HIIT express', intensity: 'intense', prep: 10, rest: 15, rounds: 3, roundRest: 60,
-      exercises: EX('Burpees:30|Squats sautés:30|Mountain climbers:30|Pompes:30') },
-    { id: 'p-tabata', preset: true, name: 'Tabata', intensity: 'intense', prep: 10, rest: 10, rounds: 8, roundRest: 10, exercises: EX('Squats sautés:20') },
-    { id: 'p-gainage', preset: true, name: 'Gainage', intensity: 'moderee', prep: 10, rest: 15, rounds: 2, roundRest: 45,
-      exercises: EX('Planche:45|Planche latérale gauche:30|Planche latérale droite:30|Superman:30|Crunchs:45') },
-    { id: 'p-jambes', preset: true, name: 'Jambes', intensity: 'intense', prep: 10, rest: 20, rounds: 3, roundRest: 60,
-      exercises: EX('Squats:45|Fentes alternées:45|Chaise contre le mur:45|Montées sur pointes:45') },
-    { id: 'p-etirements', preset: true, name: 'Étirements', intensity: 'etirements', prep: 5, rest: 5, rounds: 1, roundRest: 0,
-      exercises: EX('Quadriceps gauche:30|Quadriceps droit:30|Ischio-jambiers:40|Mollets:40|Fessiers:40|Dos et épaules:40') }
+  // Objectifs des séances (filtres) et niveaux
+  const GOALS_W = [
+    ['cardio', 'Cardio', 'Améliorer ton souffle et ton endurance'],
+    ['hiit', 'Intensif (HIIT)', 'Courts efforts à fond, beaucoup de calories en peu de temps'],
+    ['renfo', 'Renforcement', 'Tout le corps, au poids du corps'],
+    ['haut', 'Haut du corps', 'Bras, pectoraux, épaules et dos'],
+    ['bas', 'Jambes et fessiers', 'Cuisses, fessiers et mollets'],
+    ['abdos', 'Abdos et gainage', 'Ceinture abdominale et dos solides'],
+    ['course', 'Pour la course', 'Renforcer ce qui sert à courir'],
+    ['mobilite', 'Souplesse et récup', 'Échauffement, étirements et mobilité']
   ];
+  const LEVELS = { 1: 'Débutant', 2: 'Intermédiaire', 3: 'Avancé' };
+  const P = (id, name, goal, level, intensity, prep, rest, rounds, roundRest, ex, desc) =>
+    ({ id: 'p-' + id, preset: true, name, goal, level, intensity, prep, rest, rounds, roundRest, exercises: EX(ex), desc });
+  const PRESETS = [
+    // Cardio
+    P('cardio-decouverte', 'Cardio découverte', 'cardio', 1, 'moderee', 10, 20, 3, 60, 'Marche sur place rapide:45|Jumping jacks:30|Montées de genoux:30|Pas chassés:45|Talons-fesses:30', 'Pour démarrer en douceur et faire monter le cœur sans sauter trop.'),
+    P('cardio-20', 'Cardio 20 minutes', 'cardio', 2, 'intense', 10, 15, 4, 60, 'Jumping jacks:45|Montées de genoux:45|Pas chassés:45|Squats:45|Mountain climbers:30|Corde à sauter imaginaire:45', 'Une séance continue pour travailler l\'endurance.'),
+    P('cardio-boxe', 'Cardio boxe', 'cardio', 2, 'intense', 10, 15, 3, 60, 'Directs rapides:40|Crochets:40|Uppercuts:40|Esquives et jeu de jambes:40|Directs rapides avec squat:40', 'Enchaînements de boxe dans le vide, épaules et cardio.'),
+    P('cardio-danse', 'Cardio sans saut', 'cardio', 1, 'moderee', 10, 15, 3, 45, 'Marche sur place rapide:45|Squats avec bras levés:40|Fentes arrière alternées:40|Genou-coude debout:40|Pas chassés:40', 'Idéal en appartement : aucun saut, aucun bruit pour les voisins.'),
+    P('cardio-endurance', 'Endurance 30 minutes', 'cardio', 3, 'intense', 10, 10, 5, 60, 'Jumping jacks:60|Montées de genoux:45|Burpees:30|Corde à sauter imaginaire:60|Mountain climbers:45|Squats sautés:30', 'Long et soutenu, pour aller plus loin en course ou à vélo.'),
+    P('escaliers', 'Escaliers', 'cardio', 2, 'intense', 10, 30, 4, 90, 'Montée d\'escaliers rapide:60|Montée 2 marches par 2 marches:45|Montées sur une marche:45', 'À faire dans une cage d\'escalier ou sur une marche.'),
+    // HIIT
+    P('hiit', 'HIIT express', 'hiit', 2, 'intense', 10, 15, 3, 60, 'Burpees:30|Squats sautés:30|Mountain climbers:30|Pompes:30', 'Court et intense : 10 minutes qui comptent.'),
+    P('tabata', 'Tabata', 'hiit', 3, 'intense', 10, 10, 8, 10, 'Squats sautés:20', '8 fois 20 secondes à fond et 10 secondes de repos. Le classique.'),
+    P('tabata-double', 'Tabata double', 'hiit', 3, 'intense', 10, 10, 4, 60, 'Burpees:20|Mountain climbers:20|Squats sautés:20|Jumping jacks:20', 'Quatre exercices façon Tabata, quatre fois.'),
+    P('hiit-debutant', 'HIIT débutant', 'hiit', 1, 'moderee', 10, 30, 3, 60, 'Jumping jacks:30|Squats:30|Montées de genoux:30|Pompes sur les genoux:30', 'Le principe du HIIT avec des pauses plus longues.'),
+    P('emom', 'Défi 10 minutes', 'hiit', 3, 'intense', 10, 15, 5, 30, 'Burpees:45|Fentes sautées:45', 'Deux exercices durs, cinq tours. Tiens le rythme jusqu\'au bout.'),
+    P('hiit-45-15', 'HIIT 45/15', 'hiit', 2, 'intense', 10, 15, 3, 60, 'Squats sautés:45|Pompes:45|Patineur:45|Mountain climbers:45|Burpees:45', '45 secondes d\'effort, 15 secondes de repos.'),
+    // Renforcement global
+    P('full-body', 'Full body', 'renfo', 2, 'intense', 10, 20, 3, 60, 'Squats:45|Pompes:40|Fentes alternées:45|Planche:40|Superman:40|Dips sur une chaise:40', 'Tout le corps en une séance.'),
+    P('full-body-debutant', 'Full body débutant', 'renfo', 1, 'moderee', 10, 30, 2, 60, 'Squats:40|Pompes sur les genoux:30|Pont fessier:40|Planche sur les genoux:30|Superman:30', 'Les bases du renforcement, à ton rythme.'),
+    P('full-body-avance', 'Full body avancé', 'renfo', 3, 'intense', 10, 15, 4, 60, 'Squats sautés:45|Pompes déclinées:40|Fentes bulgares gauche:40|Fentes bulgares droite:40|Planche avec toucher d\'épaule:45|Burpees:30', 'Pour ceux qui ont déjà une bonne base.'),
+    P('circuit-chaise', 'Circuit avec une chaise', 'renfo', 2, 'moderee', 10, 20, 3, 60, 'Montées sur une chaise:45|Dips sur une chaise:40|Pompes inclinées:40|Squats assis-debout:45|Planche avec mains sur la chaise:40', 'Une simple chaise suffit.'),
+    P('renfo-15', 'Renfo 15 minutes', 'renfo', 2, 'moderee', 10, 15, 3, 45, 'Squats:40|Pompes:30|Pont fessier:40|Gainage:40|Fentes alternées:40', 'Quand tu as peu de temps.'),
+    // Haut du corps
+    P('pompes-debutant', 'Pompes débutant', 'haut', 1, 'moderee', 10, 30, 3, 60, 'Pompes contre le mur:40|Pompes sur les genoux:30|Planche sur les genoux:30', 'Pour apprendre à faire des pompes pas à pas.'),
+    P('bras', 'Bras et épaules', 'haut', 2, 'moderee', 10, 20, 3, 60, 'Pompes:40|Dips sur une chaise:40|Pompes serrées:30|Cercles de bras:45|Planche avec toucher d\'épaule:40', 'Triceps, épaules et pectoraux.'),
+    P('pectoraux', 'Pectoraux', 'haut', 3, 'intense', 10, 20, 4, 60, 'Pompes:45|Pompes larges:40|Pompes déclinées:30|Pompes diamant:30', 'Toutes les variantes de pompes.'),
+    P('dos', 'Dos et posture', 'haut', 1, 'moderee', 10, 15, 3, 45, 'Superman:40|Nageur:40|Y-T-W allongé:45|Chat-vache:40|Planche inversée:30', 'Pour un dos solide et se tenir droit.'),
+    // Bas du corps
+    P('jambes', 'Jambes', 'bas', 2, 'intense', 10, 20, 3, 60, 'Squats:45|Fentes alternées:45|Chaise contre le mur:45|Montées sur pointes:45', 'Cuisses, fessiers et mollets.'),
+    P('fessiers', 'Fessiers', 'bas', 1, 'moderee', 10, 15, 3, 45, 'Pont fessier:45|Donkey kicks gauche:30|Donkey kicks droite:30|Squats sumo:45|Abductions couché gauche:30|Abductions couché droite:30', 'Pour des fessiers plus forts.'),
+    P('jambes-explosif', 'Jambes explosives', 'bas', 3, 'intense', 10, 20, 4, 75, 'Squats sautés:30|Fentes sautées:30|Sauts en longueur:30|Chaise contre le mur:45', 'Pour la puissance et la détente.'),
+    P('jambes-debutant', 'Jambes débutant', 'bas', 1, 'moderee', 10, 30, 2, 60, 'Squats assis-debout:40|Fentes arrière alternées:40|Pont fessier:40|Montées sur pointes:40', 'Des mouvements simples pour démarrer.'),
+    P('mollets', 'Mollets et chevilles', 'bas', 1, 'moderee', 10, 15, 3, 45, 'Montées sur pointes:45|Montées sur pointes une jambe gauche:30|Montées sur pointes une jambe droite:30|Petits sauts sur place:40', 'Utile pour la course et la marche.'),
+    // Abdos et gainage
+    P('gainage', 'Gainage', 'abdos', 2, 'moderee', 10, 15, 2, 45, 'Planche:45|Planche latérale gauche:30|Planche latérale droite:30|Superman:30|Crunchs:45', 'Le gainage de base.'),
+    P('abdos-debutant', 'Abdos débutant', 'abdos', 1, 'moderee', 10, 20, 2, 45, 'Crunchs:30|Relevés de jambes genoux pliés:30|Planche sur les genoux:30|Dead bug:40', 'Doux pour le dos, efficace pour les abdos.'),
+    P('abdos-10', 'Abdos 10 minutes', 'abdos', 2, 'moderee', 10, 15, 3, 30, 'Crunchs:40|Russian twist:40|Relevés de jambes:30|Planche:45|Bicycle crunch:40', 'Dix minutes pour toute la sangle abdominale.'),
+    P('gainage-avance', 'Gainage avancé', 'abdos', 3, 'intense', 10, 15, 3, 45, 'Planche:60|Planche avec toucher d\'épaule:45|Planche latérale avec rotation gauche:30|Planche latérale avec rotation droite:30|Hollow hold:30|Mountain climbers lents:45', 'Des positions tenues plus longtemps.'),
+    P('obliques', 'Obliques', 'abdos', 2, 'moderee', 10, 15, 3, 30, 'Russian twist:40|Bicycle crunch:40|Planche latérale gauche:30|Planche latérale droite:30|Genou-coude debout:40', 'Les côtés de la taille.'),
+    // Pour la course
+    P('coureur', 'Renfo du coureur', 'course', 2, 'moderee', 10, 15, 3, 60, 'Fentes alternées:45|Pont fessier une jambe gauche:30|Pont fessier une jambe droite:30|Montées sur pointes:45|Planche:45|Squats:45', 'Les muscles qui protègent des blessures en course.'),
+    P('gammes', 'Gammes athlétiques', 'course', 2, 'intense', 10, 20, 3, 60, 'Montées de genoux:30|Talons-fesses:30|Pas chassés:30|Petits sauts sur place:30|Foulées bondissantes sur place:30', 'Les éducatifs pour mieux courir. Idéal avant une sortie.'),
+    P('fractionne-30-30', 'Fractionné 30/30', 'course', 2, 'intense', 10, 30, 10, 30, 'Course rapide:30', 'À faire dehors : 30 secondes vite, 30 secondes de trot, 10 fois.'),
+    P('fractionne-1-1', 'Fractionné 1/1', 'course', 3, 'intense', 10, 60, 8, 60, 'Course rapide:60', 'À faire dehors : 1 minute vite, 1 minute de trot, 8 fois.'),
+    P('fractionne-court', 'Sprints courts', 'course', 3, 'intense', 10, 45, 8, 45, 'Sprint:15', 'À faire dehors : 15 secondes de sprint, récupération en marchant.'),
+    // Souplesse et récupération
+    P('echauffement', 'Échauffement', 'mobilite', 1, 'moderee', 10, 10, 1, 0, 'Montées de genoux:40|Jumping jacks:40|Rotations des bras:30|Squats:40|Fentes alternées:40|Talons-fesses:40', 'À faire avant une sortie ou une séance.'),
+    P('etirements', 'Étirements', 'mobilite', 1, 'etirements', 5, 5, 1, 0, 'Quadriceps gauche:30|Quadriceps droit:30|Ischio-jambiers:40|Mollets:40|Fessiers:40|Dos et épaules:40', 'Après l\'effort, pour récupérer.'),
+    P('etirements-coureur', 'Étirements après la course', 'mobilite', 1, 'etirements', 5, 5, 1, 0, 'Mollets gauche:30|Mollets droit:30|Quadriceps gauche:30|Quadriceps droit:30|Ischio-jambiers:40|Psoas gauche:30|Psoas droit:30|Fessiers:40', 'Les étirements clés pour les jambes.'),
+    P('mobilite', 'Mobilité du matin', 'mobilite', 1, 'etirements', 5, 5, 1, 0, 'Rotations de la tête:30|Rotations des épaules:30|Chat-vache:45|Rotations du bassin:30|Fente avec rotation gauche:30|Fente avec rotation droite:30|Squat profond tenu:40', 'Pour se réveiller et dérouiller les articulations.'),
+    P('dos-detente', 'Détente du dos', 'mobilite', 1, 'etirements', 5, 5, 1, 0, 'Chat-vache:45|Posture de l\'enfant:45|Torsion couché gauche:40|Torsion couché droite:40|Genoux contre la poitrine:45', 'Quand le dos tire après une longue journée.'),
+    P('souplesse', 'Souplesse complète', 'mobilite', 2, 'etirements', 5, 5, 1, 0, 'Ischio-jambiers:45|Papillon:45|Grand écart facial progressif:45|Fente basse gauche:40|Fente basse droite:40|Pectoraux contre le mur:40|Triceps:30|Posture de l\'enfant:45', 'Pour gagner en souplesse petit à petit.')
+  ];
+  // Conseils affichés pendant la séance (les variantes « gauche/droite » utilisent le conseil du mouvement)
+  const TIPS = {
+    'Squats': 'Pieds largeur d\'épaules, descends les fesses en arrière, dos droit, genoux dans l\'axe des pieds.',
+    'Squats sautés': 'Descends en squat puis saute en poussant fort, atterris en douceur.',
+    'Squats sumo': 'Pieds très écartés, pointes vers l\'extérieur, descends en gardant le buste droit.',
+    'Squats assis-debout': 'Assieds-toi sur une chaise puis relève-toi sans t\'aider des mains.',
+    'Squats avec bras levés': 'Squat classique, les bras tendus au-dessus de la tête.',
+    'Squat profond tenu': 'Descends le plus bas possible, talons au sol, et reste en position.',
+    'Pompes': 'Corps bien droit de la tête aux pieds, descends la poitrine près du sol.',
+    'Pompes sur les genoux': 'Comme une pompe, mais les genoux au sol. Garde le dos droit.',
+    'Pompes contre le mur': 'Mains contre le mur, recule les pieds, plie les bras.',
+    'Pompes inclinées': 'Mains sur une chaise ou un banc : plus facile qu\'au sol.',
+    'Pompes déclinées': 'Pieds sur une chaise, mains au sol : plus difficile.',
+    'Pompes larges': 'Mains plus écartées que les épaules, pour les pectoraux.',
+    'Pompes serrées': 'Mains sous les épaules, coudes le long du corps, pour les triceps.',
+    'Pompes diamant': 'Mains jointes sous la poitrine, index et pouces en losange.',
+    'Planche': 'Sur les avant-bras, corps aligné, serre les abdos et les fessiers. Respire.',
+    'Planche sur les genoux': 'Comme la planche, mais genoux au sol.',
+    'Planche latérale': 'Sur un avant-bras, hanches hautes, corps bien aligné.',
+    'Planche latérale avec rotation': 'En planche latérale, passe le bras sous le corps puis ouvre vers le ciel.',
+    'Planche avec toucher d\'épaule': 'En haut d\'une pompe, touche une épaule puis l\'autre sans bouger le bassin.',
+    'Planche avec mains sur la chaise': 'Planche bras tendus, mains sur la chaise.',
+    'Planche inversée': 'Assis, mains derrière toi, monte le bassin pour aligner le corps.',
+    'Gainage': 'Tiens la planche, corps aligné, sans creuser le dos.',
+    'Hollow hold': 'Allongé sur le dos, bras et jambes tendus et décollés, bas du dos plaqué au sol.',
+    'Superman': 'À plat ventre, lève bras et jambes en même temps, tiens 2 secondes, repose.',
+    'Nageur': 'À plat ventre, bras et jambes décollés, bats des pieds et des bras comme en nageant.',
+    'Y-T-W allongé': 'À plat ventre, lève les bras en Y, puis en T, puis en W, omoplates serrées.',
+    'Crunchs': 'Allongé, genoux pliés, enroule le haut du dos sans tirer sur la nuque.',
+    'Bicycle crunch': 'Coude vers le genou opposé, en alternant, comme un pédalage.',
+    'Russian twist': 'Assis, buste incliné en arrière, tourne les épaules d\'un côté à l\'autre.',
+    'Relevés de jambes': 'Allongé, jambes tendues, monte-les à la verticale puis redescends lentement.',
+    'Relevés de jambes genoux pliés': 'Allongé, genoux pliés, ramène-les vers la poitrine.',
+    'Dead bug': 'Sur le dos, bras et jambes en l\'air, descends un bras et la jambe opposée.',
+    'Genou-coude debout': 'Debout, monte un genou vers le coude opposé, en alternant.',
+    'Mountain climbers': 'En position de pompe, ramène vite les genoux vers la poitrine en alternant.',
+    'Mountain climbers lents': 'Comme les mountain climbers, mais lentement et sans bouger le bassin.',
+    'Burpees': 'Accroupi, jette les pieds en arrière, reviens et saute bras en l\'air.',
+    'Jumping jacks': 'Saute en écartant bras et jambes, puis reviens.',
+    'Montées de genoux': 'Cours sur place en montant les genoux à hauteur de hanches.',
+    'Talons-fesses': 'Cours sur place en touchant les fesses avec les talons.',
+    'Pas chassés': 'Déplace-toi sur le côté en pas chassés, puis reviens.',
+    'Marche sur place rapide': 'Marche sur place vite, en balançant les bras.',
+    'Corde à sauter imaginaire': 'Petits sauts sur les pointes en faisant tourner les poignets.',
+    'Petits sauts sur place': 'Sauts légers sur les pointes, genoux souples.',
+    'Patineur': 'Saute d\'un pied sur l\'autre sur le côté, comme un patineur.',
+    'Fentes alternées': 'Grand pas en avant, descends le genou arrière près du sol, reviens et change.',
+    'Fentes arrière alternées': 'Grand pas en arrière, descends, reviens et change de jambe.',
+    'Fentes sautées': 'En fente, saute et change de jambe en l\'air.',
+    'Fentes bulgares': 'Pied arrière sur une chaise, descends sur la jambe avant.',
+    'Chaise contre le mur': 'Dos au mur, cuisses à l\'horizontale, comme assis sur une chaise.',
+    'Montées sur pointes': 'Monte sur la pointe des pieds, puis redescends lentement.',
+    'Montées sur pointes une jambe': 'Sur un pied, monte sur la pointe puis redescends.',
+    'Montées sur une chaise': 'Monte sur une chaise stable avec une jambe, puis l\'autre.',
+    'Montées sur une marche': 'Monte et descends une marche en alternant le pied de départ.',
+    'Pont fessier': 'Allongé, genoux pliés, monte le bassin en serrant les fessiers.',
+    'Pont fessier une jambe': 'Pont fessier avec une jambe tendue en l\'air.',
+    'Donkey kicks': 'À quatre pattes, pousse un talon vers le plafond, genou plié.',
+    'Abductions couché': 'Allongé sur le côté, monte la jambe du dessus tendue.',
+    'Dips sur une chaise': 'Mains sur le bord d\'une chaise, descends en pliant les coudes vers l\'arrière.',
+    'Cercles de bras': 'Bras tendus sur les côtés, fais des petits cercles.',
+    'Directs rapides': 'Garde haute, envoie des coups de poing droits en alternant.',
+    'Directs rapides avec squat': 'Deux directs puis un squat, et ainsi de suite.',
+    'Crochets': 'Coups de poing en arc de cercle, en tournant le buste.',
+    'Uppercuts': 'Coups de poing de bas en haut, en fléchissant les jambes.',
+    'Esquives et jeu de jambes': 'Sautille sur les pointes et esquive en fléchissant les jambes.',
+    'Sauts en longueur': 'Saute le plus loin possible à pieds joints, reviens en marchant.',
+    'Foulées bondissantes sur place': 'Grands bonds d\'un pied sur l\'autre, bras actifs.',
+    'Course rapide': 'Cours vite mais en contrôle, à une allure que tu peux tenir tout le temps de l\'effort.',
+    'Sprint': 'Cours le plus vite possible.',
+    'Montée d\'escaliers rapide': 'Monte les marches vite, redescends en marchant.',
+    'Montée 2 marches par 2 marches': 'Monte en prenant deux marches à la fois.',
+    'Rotations des bras': 'Grands cercles avec les bras, vers l\'avant puis vers l\'arrière.',
+    'Rotations des épaules': 'Monte les épaules et fais-les rouler vers l\'arrière.',
+    'Rotations de la tête': 'Lentement, menton vers la poitrine puis d\'une épaule à l\'autre.',
+    'Rotations du bassin': 'Mains sur les hanches, grands cercles avec le bassin.',
+    'Chat-vache': 'À quatre pattes, arrondis le dos puis creuse-le lentement.',
+    'Posture de l\'enfant': 'À genoux, fesses sur les talons, bras tendus devant, front au sol.',
+    'Torsion couché': 'Sur le dos, ramène un genou de l\'autre côté, épaules au sol.',
+    'Genoux contre la poitrine': 'Sur le dos, serre les genoux contre toi et respire.',
+    'Quadriceps': 'Debout, attrape ton pied derrière toi, genoux serrés.',
+    'Ischio-jambiers': 'Jambes tendues, penche-toi en avant dos droit, vers tes pieds.',
+    'Mollets': 'Mains au mur, une jambe tendue derrière, talon au sol.',
+    'Fessiers': 'Sur le dos, cheville sur le genou opposé, tire la cuisse vers toi.',
+    'Dos et épaules': 'Bras croisé devant toi, tire le coude vers l\'épaule opposée.',
+    'Psoas': 'En fente, genou arrière au sol, avance le bassin.',
+    'Papillon': 'Assis, plantes des pieds collées, laisse les genoux descendre.',
+    'Grand écart facial progressif': 'Jambes écartées, descends doucement sans forcer.',
+    'Fente basse': 'Grande fente, genou arrière au sol, bassin vers l\'avant.',
+    'Fente avec rotation': 'En fente, tourne le buste vers la jambe avant.',
+    'Pectoraux contre le mur': 'Avant-bras contre le mur, tourne doucement le buste à l\'opposé.',
+    'Triceps': 'Main dans le dos par-dessus l\'épaule, pousse le coude avec l\'autre main.'
+  };
+  const tipFor = name => TIPS[name] || TIPS[String(name).replace(/ (gauche|droite|droit)$/, '')] || '';
   const allWorkouts = () => PRESETS.concat(store.get(K_WORKOUTS, []));
   const esc = str => String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const plural = (n, w) => n + ' ' + w + (n > 1 ? 's' : '');
@@ -1850,20 +2184,29 @@
   const totalSec = w => expand(w).reduce((a, x) => a + x.sec, 0);
   const estKcal = w => expand(w).reduce((a, x) => a + (x.type === 'work' ? (W_MET[w.intensity] || 3.8) : REST_MET) * weightKg() * 0.0175 * x.sec / 60, 0);
 
-  // Liste des séances : chaque séance est une plaque du poteau, avec sa durée
-  const RYS = [-12, 8, -5, 13, -8, 10, -4, 12];
+  // Liste des séances : filtres par objectif, puis des cartes
+  const wCard = w => '<button class="wc" type="button" data-w="' + esc(w.id) + '"><span class="wc-l"><b>' + esc(w.name) + '</b><small>' +
+    (w.level ? '<i class="lv lv' + w.level + '">' + LEVELS[w.level] + '</i>' : '') + plural(w.exercises.length, 'exercice') + ', ' + plural(w.rounds, 'tour') + '</small></span>' +
+    '<span class="wc-r"><b class="num">' + fmtMin(totalSec(w)) + '</b><small>' + nf0.format(estKcal(w)) + ' kcal</small></span></button>';
   function renderSeances() {
-    const ws = allWorkouts(), log = store.get(K_WLOG, []);
-    let h = '<button class="newbtn" id="wNew" type="button">Créer une séance</button><div class="post wpost"><div class="pole" aria-hidden="true"></div>';
-    h += '<button class="po wplate navplate" type="button" data-nav="1" style="--ry:-10deg"><span class="plate"><span class="back"></span><span class="face">' +
-      '<span class="lbl"><b>Test navette</b><small>Luc Léger, de plus en plus vite</small></span><span class="val num">' + navCfg().dist + ' m</span></span></span></button>';
-    ws.forEach((w, i) => {
-      h += '<button class="po wplate" type="button" data-w="' + esc(w.id) + '" style="--ry:' + RYS[(i + 1) % RYS.length] + 'deg"><span class="plate"><span class="back"></span><span class="face">' +
-        '<span class="lbl"><b>' + esc(w.name) + '</b><small>' + plural(w.exercises.length, 'exercice') + ', ' + plural(w.rounds, 'tour') + '</small></span>' +
-        '<span class="val num">' + fmtMin(totalSec(w)) + '</span></span></span></button>';
+    const ws = allWorkouts(), log = store.get(K_WLOG, []), mine = store.get(K_WORKOUTS, []);
+    const f = settings.wGoal || 'tout';
+    let h = '<div class="chips" role="group" aria-label="Objectif">' + [['tout', 'Tout']].concat(mine.length ? [['mes', 'Mes séances']] : [], GOALS_W.map(g => [g[0], g[1]]))
+      .map(([k, l]) => '<button type="button" class="chip" data-goal="' + k + '" aria-pressed="' + (f === k) + '">' + l + '</button>').join('') + '</div>';
+    h += '<button class="newbtn" id="wNew" type="button">+ Créer ma séance</button>';
+    const groups = [];
+    if ((f === 'tout' || f === 'mes') && mine.length) groups.push(['Mes séances', '', mine]);
+    if (f === 'tout' || f === 'cardio') groups.push(['nav']);
+    GOALS_W.forEach(([k, l, d]) => { if (f === 'tout' || f === k) groups.push([l, d, ws.filter(w => w.goal === k)]); });
+    groups.forEach(g => {
+      if (g[0] === 'nav') {
+        h += '<button class="wc wc-nav" type="button" data-nav="1"><span class="wc-l"><b>Test navette</b><small>Luc Léger : va-et-vient de plus en plus vite, mesure ta VO2max</small></span><span class="wc-r"><b class="num">' + navCfg().dist + ' m</b><small>navette</small></span></button>';
+        return;
+      }
+      h += '<h3 class="wgh">' + esc(g[0]) + (g[1] ? '<small>' + esc(g[1]) + '</small>' : '') + '</h3>' + g[2].map(wCard).join('');
     });
-    h += '</div><div class="block wplog"><div class="bh">Dernières séances</div>';
-    if (!log.length) h += '<p class="empty">Aucune séance terminée pour l\'instant. Choisis une séance sur le poteau pour commencer.</p>';
+    h += '<div class="block wplog"><div class="bh">Dernières séances</div>';
+    if (!log.length) h += '<p class="empty">Aucune séance terminée pour l\'instant. Choisis une séance ci-dessus pour commencer.</p>';
     else {
       const n = log.filter(l => l.date >= weekStart(Date.now())).length;
       h += '<p class="streak">Cette semaine : <b>' + plural(n, 'séance') + '</b></p>';
@@ -1880,6 +2223,7 @@
     $('seances').innerHTML = h + '</div>';
   }
   $('seances').addEventListener('click', e => {
+    const gc = e.target.closest('[data-goal]'); if (gc) { settings.wGoal = gc.dataset.goal; saveSettings(); renderSeances(); return; }
     if (e.target.closest('#wNew')) { openEditor(null); return; }
     if (e.target.closest('[data-nav]')) { openNav(); return; }
     const p = e.target.closest('[data-w]'); if (p) openWorkout(p.dataset.w);
@@ -1891,8 +2235,8 @@
     const w = allWorkouts().find(x => x.id === id); if (!w) return;
     wsel = w; wDelArmed = false;
     $('wsTitle').textContent = w.name;
-    $('wsBody').innerHTML = '<p class="wmeta">' + fmtMin(totalSec(w)) + ', ' + plural(w.rounds, 'tour') + ', intensité ' + W_INT[w.intensity].toLowerCase() + '</p>' +
-      '<ol class="exlist">' + w.exercises.map(e => '<li><span>' + esc(e.name) + '</span><b>' + fmtSec(e.sec) + '</b></li>').join('') + '</ol>' +
+    $('wsBody').innerHTML = (w.desc ? '<p class="wdesc">' + esc(w.desc) + '</p>' : '') + '<p class="wmeta">' + (w.level ? '<i class="lv lv' + w.level + '">' + LEVELS[w.level] + '</i>' : '') + fmtMin(totalSec(w)) + ', ' + plural(w.rounds, 'tour') + ', intensité ' + W_INT[w.intensity].toLowerCase() + '</p>' +
+      '<ol class="exlist">' + w.exercises.map(e => '<li><span>' + esc(e.name) + (tipFor(e.name) ? '<small>' + esc(tipFor(e.name)) + '</small>' : '') + '</span><b>' + fmtSec(e.sec) + '</b></li>').join('') + '</ol>' +
       '<div class="sum">' + cell('Repos entre exercices', w.exercises.length > 1 ? fmtSec(w.rest) : '–') + cell('Repos entre tours', w.rounds > 1 ? fmtSec(w.roundRest) : '–') +
       cell('Préparation', fmtSec(w.prep)) + cell('Calories estimées', nf0.format(estKcal(w)) + ' kcal') + '</div>';
     $('wsEdit').textContent = w.preset ? 'Modifier une copie' : 'Modifier';
@@ -2062,6 +2406,7 @@
     pl.classList.remove('ph-work', 'ph-rest', 'ph-prep'); pl.classList.add('ph-' + st.type);
     $('plPhase').textContent = st.type === 'work' ? 'Effort' : st.type === 'rest' ? (st.roundEnd ? 'Repos entre les tours' : 'Repos') : 'Préparation';
     $('plName').textContent = st.type === 'work' ? st.name : st.type === 'rest' ? 'Repos' : 'Prépare-toi';
+    { const tipEx = st.type === 'work' ? st : nxt && nxt.type === 'work' ? nxt : null; $('plTip').textContent = tipEx && tipFor(tipEx.name) ? (st.type === 'work' ? '' : 'Ensuite : ') + tipFor(tipEx.name) : ''; }
     $('plNext').textContent = nxt ? nxt.name + ' (' + fmtSec(nxt.sec) + ')' : 'Fin de la séance';
     $('plTitle').textContent = WK.w.name;
     $('plRound').textContent = (st.round && WK.w.rounds > 1 ? 'Tour ' + st.round + ' sur ' + WK.w.rounds : '');
@@ -2918,7 +3263,7 @@
     if (!hasExtrusion && vec) {
       try {
         map.addLayer({ id: 'p-batiments', type: 'fill-extrusion', source: vec, 'source-layer': 'building', minzoom: 14,
-          paint: { 'fill-extrusion-color': '#d5dbe6', 'fill-extrusion-opacity': 0.85,
+          paint: { 'fill-extrusion-color': '#3a3e47', 'fill-extrusion-opacity': 0.85,
                    'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 6],
                    'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0] } });
       } catch (e) {}
@@ -2928,9 +3273,9 @@
     if (!map.getSource('route')) map.addSource('route', { type: 'geojson', data: routeData() });
     if (!map.getSource('replay')) map.addSource('replay', { type: 'geojson', data: empty });
     map.addLayer({ id: 'route-bord', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#f4f6fb', 'line-width': lw(5, 14) } });
-    map.addLayer({ id: 'route-coeur', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#e5322d', 'line-width': lw(2.2, 7) } });
+    map.addLayer({ id: 'route-coeur', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff5a1f', 'line-width': lw(2.2, 7) } });
     map.addLayer({ id: 'replay-bord', type: 'line', source: 'replay', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#f4f6fb', 'line-width': lw(6, 16) } });
-    map.addLayer({ id: 'replay-coeur', type: 'line', source: 'replay', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#e5322d', 'line-width': lw(2.8, 8) } });
+    map.addLayer({ id: 'replay-coeur', type: 'line', source: 'replay', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff5a1f', 'line-width': lw(2.8, 8) } });
     mapRouteDirty = true; flushRoute(); mapOnFix(true);
   }
   function flushRoute() {
@@ -3088,15 +3433,15 @@
       float lineThin = 1.0 - smoothstep(0.35, 1.15, dd);
       float lineIdx = 1.0 - smoothstep(0.9, 1.9, dd);
       float l = mix(lineThin * 0.55, lineIdx * 0.95, idx) * (1.0 - smoothstep(22.0, 46.0, vDepth)) * (1.0 - smoothstep(0.3, 0.8, fw));
-      vec3 base = mix(vec3(0.090, 0.137, 0.224), vec3(0.149, 0.216, 0.333), clamp(vH / 3.2, 0.0, 1.0));
-      vec3 lineCol = mix(vec3(0.373, 0.498, 0.659), vec3(0.616, 0.718, 0.851), idx);
+      vec3 base = mix(vec3(0.047, 0.051, 0.062), vec3(0.098, 0.102, 0.118), clamp(vH / 3.2, 0.0, 1.0));
+      vec3 lineCol = mix(vec3(0.200, 0.208, 0.235), vec3(0.420, 0.300, 0.250), idx);
       vec3 col = mix(base, lineCol, l);
       float tx = abs(vW.x - trailX(vW.y));
       float tfw = fwidth(vW.x) * 1.2;
       float edge = 1.0 - smoothstep(0.17 - tfw, 0.17 + tfw, tx);
       float core = 1.0 - smoothstep(0.085 - tfw, 0.085 + tfw, tx);
-      col = mix(col, vec3(0.957, 0.965, 0.984), edge * 0.92 * uRise);
-      col = mix(col, vec3(0.898, 0.196, 0.176), core * uRise);
+      col = mix(col, vec3(1.000, 0.353, 0.122), edge * 0.95 * uRise);
+      col = mix(col, vec3(1.000, 0.780, 0.600), core * uRise);
       col = mix(col, uFog, smoothstep(12.0, 52.0, vDepth));
       gl_FragColor = vec4(col, 1.0);
     }`;
@@ -3115,7 +3460,7 @@
     const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 90);
     const geo = new THREE.PlaneGeometry(38, 66, 150, 260);
     geo.rotateX(-Math.PI / 2); geo.translate(0, 0, -25);
-    const uniforms = { uTravel: { value: 0 }, uRise: { value: 0 }, uFog: { value: new THREE.Color('#1b2a46') } };
+    const uniforms = { uTravel: { value: 0 }, uRise: { value: 0 }, uFog: { value: new THREE.Color('#0b0c0f') } };
     const mesh = new THREE.Mesh(geo, new THREE.ShaderMaterial({ uniforms, vertexShader: VERT, fragmentShader: FRAG }));
     mesh.frustumCulled = false;
     scene.add(mesh);
@@ -3262,7 +3607,7 @@
   if (saved && saved.status && saved.status !== 'idle' && Array.isArray(saved.track)) {
     S = Object.assign(fresh(), saved);
     if (S.status === 'running') { S.activeMs += Math.max(0, (S.savedAt || Date.now()) - S.resumedAt); S.status = 'paused'; }
-    banner('Ta sortie en cours a été récupérée. Touche le bouton rouge pour la reprendre, ou « Terminer la sortie » pour l\'enregistrer.', 'info', 'OK');
+    banner('Ta sortie en cours a été récupérée. Touche le bouton orange pour la reprendre, ou « Terminer la sortie » pour l\'enregistrer.', 'info', 'OK');
   } else if (!window.isSecureContext && !isNative) banner(INSECURE, 'err');
 
   const post = $('post');
@@ -3288,7 +3633,7 @@
       fillVoiceSelect();
     }).catch(() => {});
   }
-  window.__parcours = { healthApply, healthPending, healthSend, openMeal, classifyPhoto, renderRepas, loadFoodAI, get MS() { return MS; }, get state() { return S; }, get kmh() { return curKmh; }, get relief() { return relief; }, get map() { return map; },
+  window.__parcours = { go, healthApply, healthPending, healthSend, openMeal, classifyPhoto, renderRepas, loadFoodAI, get MS() { return MS; }, get state() { return S; }, get kmh() { return curKmh; }, get relief() { return relief; }, get map() { return map; },
     go, stepLenM, stepWalkM, stepRunM, kcalPerMin, bikeMet, cadence, settings, computeRecords, makeShareImage, exportGpx, startReplay, openDetail,
     get replaying() { return !!replayState; }, wk: WK, startWorkout, expand, allWorkouts, totalSec, estKcal, nv: NV, navSchedule, navVo2, navStart, beep, speak, voiceList, get actx() { return actx; }, ac: AC, openAccueil, goalStats, goCard, get silentEl() { return silentEl; },
     feed(lat, lon, alt, speed, acc) { onPos({ timestamp: Date.now(), coords: { latitude: lat, longitude: lon, accuracy: acc || 5, altitude: alt, altitudeAccuracy: alt == null ? null : 5, speed: speed == null ? null : speed, heading: null } }); } };
