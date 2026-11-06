@@ -5,7 +5,9 @@
   "description": "Applis Android et iPhone de Parcours (Capacitor)",
   "scripts": {
     "build:www": "node build-www.mjs",
-    "sync": "npm run build:www && npx cap sync"
+    "sync": "npm run build:www && npx cap sync",
+    "ios": "npm run build:www && npx cap sync ios && npx cap open ios",
+    "ios:gratuit": "node scripts/ios-gratuit.mjs && npm run ios"
   },
   "dependencies": {
     "@capacitor-community/background-geolocation": "^1.3.1",

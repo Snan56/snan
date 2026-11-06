@@ -54,3 +54,18 @@ Il n'y a pas besoin de Mac : [Codemagic](https://codemagic.io) construit l'appli
 6. Lance le workflow **Parcours iPhone (TestFlight)** sur la branche `appli-android`. Environ 15 minutes plus tard, l'appli arrive dans **TestFlight** (app gratuite de l'App Store) sur ton iPhone.
 
 Au premier lancement, accepte la position (« Toujours » pour l'écran verrouillé), puis active **Réglages → Apple Santé → Connecter à Apple Santé**.
+
+### Sans compte payant (compte Apple gratuit, avec un Mac)
+
+Tu peux installer l'appli sur ton iPhone gratuitement depuis un Mac. Apple refuse alors l'accès direct à Santé : dans l'appli, l'envoi vers Santé passe par les raccourcis, comme sur le site. Le GPS écran verrouillé marche. L'appli s'arrête au bout de **7 jours** : il suffit de la réinstaller depuis le Mac (tes données restent).
+
+1. Installe **Xcode** (App Store du Mac) et **Node.js** LTS (https://nodejs.org).
+2. Dans Terminal :
+   ```sh
+   git clone -b appli-android https://github.com/Snan56/snan.git parcours
+   cd parcours && npm ci && PARCOURS_WEB=web npm run ios:gratuit
+   ```
+3. Dans Xcode : Settings → Accounts → ajoute ton identifiant Apple. Clique sur **App** → **Signing & Capabilities** → Team : ton nom (Personal Team).
+4. Branche l'iPhone, choisis-le en haut, appuie sur ▶️. Sur l'iPhone, active **Réglages → Confidentialité et sécurité → Mode développeur**, puis dans **Réglages → Général → VPN et gestion de l'appareil**, fais confiance à ton identifiant.
+
+Tous les 7 jours, ou pour une nouvelle version : `cd parcours && git pull && PARCOURS_WEB=web npm run ios:gratuit`, puis ▶️ dans Xcode.

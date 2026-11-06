@@ -2725,7 +2725,7 @@
   // Un site web ne peut ni lire ni écrire dans Santé. Parcours ouvre donc des raccourcis créés par l'utilisateur :
   // « Parcours vers Santé » reçoit les chiffres en texte, « Santé vers Parcours » copie les pas et le poids dans le presse-papiers.
   const SC_OUT = 'Parcours vers Santé', SC_IN = 'Santé vers Parcours';
-  if (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) { $('hTitle').hidden = true; $('hBox').hidden = true; } // appli Android : pas d'Apple Santé
+  if (isNative && !(Cap.getPlatform && Cap.getPlatform() === 'ios')) { $('hTitle').hidden = true; $('hBox').hidden = true; } // appli Android : pas d'Apple Santé
   const runShortcut = (name, text) => { location.href = 'shortcuts://run-shortcut?name=' + encodeURIComponent(name) + (text != null ? '&input=text&text=' + encodeURIComponent(text) : ''); };
   function healthPending() {
     if (!settings.healthOn) return null;
@@ -2749,6 +2749,7 @@
   }
   let hbarMode = '';
   function healthBar(mode) {
+    if (NH) { nativeHealthSync(); return; } // appli iPhone : envoi automatique, pas de barre
     if (mode === 'paste') { hbarMode = 'paste'; $('hbarTxt').textContent = 'Le raccourci a copié tes données Santé.'; $('hbarGo').textContent = 'Importer'; $('hbar').classList.remove('hidden'); return; }
     if (hbarMode === 'paste') return;
     const p = healthPending();
@@ -2775,7 +2776,7 @@
     settings.healthOn = e.target.checked;
     if (settings.healthOn && !settings.healthSince) settings.healthSince = Date.now();
     saveSettings();
-    if (settings.healthOn) { $('hbar').classList.add('hidden'); toast('Crée d\'abord le raccourci « ' + SC_OUT + ' » (guide ci-dessous)'); }
+    if (settings.healthOn && !NH) { $('hbar').classList.add('hidden'); toast('Crée d\'abord le raccourci « ' + SC_OUT + ' » (guide ci-dessous)'); }
     else { $('hbar').classList.add('hidden'); hbarMode = ''; }
   });
   $('hResend').addEventListener('click', () => { if (settings.healthLast) runShortcut(SC_OUT, JSON.stringify(settings.healthLast)); });
@@ -2801,6 +2802,81 @@
   }
   $('hPaste').addEventListener('click', healthPaste);
   setTimeout(() => healthBar(), 1500);
+
+  // Appli iPhone : connexion directe à Apple Santé (HealthKit), automatique, sans raccourci
+  // settings.healthNoHK : appli installée avec un compte Apple gratuit (Santé refusé par Apple) → on passe par les raccourcis
+  let NH = isNative && Cap.getPlatform && Cap.getPlatform() === 'ios' && !settings.healthNoHK ? plugin('Health') : null;
+  const NH_READ = ['steps', 'weight'], NH_WRITE = ['calories', 'steps', 'distance', 'distanceCycling', 'dietaryEnergyConsumed'];
+  let nhBusy = false;
+  async function nativeHealthSync() {
+    if (!NH || !settings.healthOn || nhBusy) return;
+    nhBusy = true;
+    try {
+      const since = Math.max(settings.healthSince || 0, Date.now() - 7 * 864e5), iso = t => new Date(t).toISOString();
+      const save = (dataType, value, a, b) => value > 0 ? NH.saveSample({ dataType, value, startDate: iso(a), endDate: iso(Math.max(b, a + 1000)) }) : Promise.resolve();
+      for (const key of [K_HIST, K_WLOG, K_MEALS]) {
+        const arr = store.get(key, []); let changed = false;
+        for (const x of arr) {
+          if (x.hs || !(x.date >= since)) continue;
+          const end = x.date + (x.durationMs || 0);
+          try {
+            if (key === K_MEALS) await save('dietaryEnergyConsumed', x.kcal || 0, x.date, x.date);
+            else {
+              await save('calories', Math.round(x.kcal || 0), x.date, end);
+              if (key === K_HIST && x.activity !== 'velo') { await save('steps', x.steps || 0, x.date, end); await save('distance', x.distanceM || 0, x.date, end); }
+              if (key === K_HIST && x.activity === 'velo') await save('distanceCycling', x.distanceM || 0, x.date, end);
+              if (x.kind === 'navette') await save('distance', x.distanceM || 0, x.date, end);
+            }
+            x.hs = 1; changed = true;
+          } catch (e) { break; }
+        }
+        if (changed) store.set(key, arr);
+      }
+      // lecture : pas de toute la journée et dernier poids
+      const d0 = new Date(); d0.setHours(0, 0, 0, 0);
+      const msg = [];
+      try {
+        const r = await NH.queryAggregated({ dataType: 'steps', startDate: d0.toISOString(), endDate: new Date().toISOString(), bucket: 'day', aggregation: 'sum' });
+        const v = (r.samples || []).reduce((a, s) => a + (s.value || 0), 0);
+        settings.healthSteps = { day: dayKey(Date.now()), v: Math.round(v) }; msg.push(nf0.format(Math.round(v)) + ' pas aujourd\'hui');
+      } catch (e) {}
+      try {
+        const r = await NH.readSamples({ dataType: 'weight', startDate: new Date(Date.now() - 365 * 864e5).toISOString(), endDate: new Date().toISOString(), limit: 1 });
+        const w = r.samples && r.samples[0] && r.samples[0].value;
+        if (w >= 30 && w <= 250) { settings.weight = Math.round(w * 10) / 10; $('weight').value = settings.weight; msg.push('poids ' + String(settings.weight).replace('.', ',') + ' kg'); }
+      } catch (e) {}
+      settings.healthSyncAt = Date.now(); saveSettings();
+      $('hImpInfo').textContent = 'Dernière synchronisation : ' + new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' }).format(new Date()) + (msg.length ? ' (' + msg.join(', ') + ')' : '');
+      if (currentView === 5) renderRepas();
+    } finally { nhBusy = false; }
+  }
+  const hLabelWeb = document.querySelector('label[for=healthOn]').innerHTML;
+  function nhToShortcuts() {
+    $('hTitle').textContent = 'Apple Santé (iPhone)'; document.querySelector('label[for=healthOn]').innerHTML = hLabelWeb;
+    ['hImport', 'hPaste'].forEach(id => { $(id).hidden = false; }); $('hResend').hidden = !settings.healthLast;
+    document.querySelector('.hguide').hidden = false; $('hImport').parentElement.hidden = false;
+    $('hImpInfo').textContent = "Tes pas du jour (ceux de l'iPhone et de la montre) et ton dernier poids";
+  }
+  if (NH) {
+    $('hTitle').textContent = 'Apple Santé';
+    document.querySelector('label[for=healthOn]').innerHTML = 'Connecter à Apple Santé<small>Automatique : tes sorties, séances et repas sont ajoutés dans Santé, et tes pas et ton poids sont récupérés à chaque ouverture de l\'appli</small>';
+    ['hImport', 'hPaste', 'hResend'].forEach(id => { $(id).hidden = true; });
+    document.querySelector('.hguide').hidden = true; $('hImport').parentElement.hidden = true;
+    $('hImpInfo').textContent = settings.healthOn ? 'Connecté' : 'Pas encore connecté';
+    $('healthOn').addEventListener('change', async e => {
+      if (!e.target.checked) return;
+      try { await NH.requestAuthorization({ read: NH_READ, write: NH_WRITE }); nativeHealthSync(); }
+      catch (err) {
+        if (/entitlement|not authorized|missing|HealthKit/i.test(String(err && (err.message || err)))) {
+          // compte Apple gratuit : pas de HealthKit, on garde les raccourcis
+          settings.healthNoHK = true; saveSettings(); NH = null; nhToShortcuts();
+          toast('Cette version de l\'appli n\'a pas accès direct à Santé : utilise les raccourcis (guide ci-dessous).');
+        } else toast("Santé n'a pas pu être connecté. Vérifie dans Réglages > Santé > Accès aux données.");
+      }
+    });
+    document.addEventListener('visibilitychange', () => { if (NH && document.visibilityState === 'visible') nativeHealthSync(); });
+    setTimeout(nativeHealthSync, 2000);
+  }
   // ---------- Carte 3D (MapLibre + OpenFreeMap) ----------
   let map = null, mapLoading = false, styleLoaded = false, styleFellBack = false, meMarker = null, mapFollow = true, mapRouteDirty = true, lastRouteFlush = 0;
   function mapMsg(t) { const m = $('mapMsg'); m.textContent = t; m.classList.toggle('hidden', !t); }
