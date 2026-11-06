@@ -2553,7 +2553,7 @@
     const img = await ai.T.RawImage.fromBlob(blob);
     const { image_embeds } = await ai.vis(await ai.proc(img));
     const v = Array.from(image_embeds.data), n = Math.hypot(...v);
-    const sims = ai.data.foods.map(f => { let s = 0; for (let k = 0; k < v.length; k++) s += f.vec[k] * v[k]; return s / n; });
+    const sims = ai.data.foods.map(f => { let s = 0; for (let k = 0; k < v.length; k++) s += f.vec[k] * v[k]; return s / n - (f.b || 0); }); // b : correction pour les plats que l'IA voit partout
     const mx = Math.max(...sims), ex = sims.map(s => Math.exp(100 * (s - mx))), sum = ex.reduce((a, b) => a + b, 0); // échelle du modèle CLIP
     return ai.data.foods.map((f, i) => ({ f, p: ex[i] / sum })).sort((a, b) => b.p - a.p);
   }
