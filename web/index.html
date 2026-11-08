@@ -529,6 +529,10 @@
   .ac-form label{display:block;font-size:13px;color:var(--gris);font-weight:600;margin:12px 0 4px}
   .ac-form input{width:100%}
   .ac-form .ed-grid{gap:0 12px}
+  .ac-chips{margin:2px 0 4px!important;padding:0!important}
+  #acMail{padding:9px 10px;font-family:inherit;font-size:16px;color:var(--blanc);width:100%;box-sizing:border-box}
+  .ac-form label .opt{font-weight:400}
+  .ac-step .ac-chips .chip{font-size:14px;padding:9px 14px}
   .ac-hello{width:100%;text-align:left}
   .ac-hint{font-size:14px;color:var(--gris);margin:6px 0 0;min-height:1.4em}
   .carousel{position:relative;width:100%;height:340px;perspective:1100px;perspective-origin:50% 40%;margin:10px 0 2px;touch-action:pan-y;user-select:none;-webkit-user-select:none;flex:none}
@@ -655,8 +659,8 @@
   .bh{font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-stretch:90%;color:var(--blanc)}
   .set-title{text-transform:uppercase;letter-spacing:.08em;font-size:12px}
   .row,.rec,.run,.meal,.mrow,.wlog,.hguide,.splits td{border-top-color:var(--ligne)!important}
-  input[type=number],input[type=text],select{background:var(--nuit-3);border:1px solid transparent;border-radius:12px;color:var(--blanc)}
-  input[type=number]:focus,input[type=text]:focus,select:focus{border-color:var(--rouge);outline:none}
+  input[type=number],input[type=text],input[type=email],select{background:var(--nuit-3);border:1px solid transparent;border-radius:12px;color:var(--blanc)}
+  input[type=number]:focus,input[type=text]:focus,input[type=email]:focus,select:focus{border-color:var(--rouge);outline:none}
   .switch span{background:#2e323b}
   .linkbtn{color:var(--rouge)}
   .goal-bar{height:8px;border-radius:4px;overflow:hidden;background:rgba(255,255,255,.08)}
@@ -850,7 +854,7 @@
     <h2 class="h-title">Réglages</h2>
     <div class="set-title">Ton profil</div>
     <div class="set">
-      <div class="row"><label for="pname">Ton prénom<small>Pour te dire bonjour sur l'accueil</small></label><input id="pname" type="text" maxlength="24" autocomplete="given-name" style="width:150px"></div>
+      <div class="row"><label for="pname">Ton pseudo<small>Pour te dire bonjour sur l'accueil</small></label><input id="pname" type="text" maxlength="24" autocomplete="given-name" style="width:150px"></div>
       <div class="row"><label for="height">Ta taille<small>Sert à calculer la longueur de tes pas</small></label><span class="unitfield"><input id="height" type="number" min="100" max="230" step="1" inputmode="numeric" placeholder="170"> cm</span></div>
       <div class="row"><label for="weight">Ton poids<small>Sert à calculer les calories dépensées</small></label><span class="unitfield"><input id="weight" type="number" min="30" max="250" step="1" inputmode="numeric" placeholder="70"> kg</span></div>
       <div class="row"><label for="age">Ton âge<small>Sert à calculer tes besoins en calories (et ta VO2max au test navette)</small></label><span class="unitfield"><input id="age" type="number" min="6" max="99" step="1" inputmode="numeric"> ans</span></div>
@@ -1171,18 +1175,29 @@
     <button class="ac-cta" type="button" data-ac="profil">Commencer</button>
   </section>
   <section class="ac-step hidden" id="acProfil">
-    <h2 class="ac-h2">Présente-toi</h2>
-    <p class="ac-sub">Ces infos servent à calculer tes pas, tes calories et ta VO2max. Elles restent sur ton téléphone.</p>
+    <h2 class="ac-h2">Ton profil</h2>
+    <p class="ac-sub">Ces infos servent à calculer tes pas, tes calories et tes besoins. Elles restent sur ton téléphone.</p>
     <div class="ac-form">
-      <label for="acName">Prénom</label><input id="acName" type="text" maxlength="24" autocomplete="given-name" placeholder="Ton prénom">
+      <label for="acName">Pseudo</label><input id="acName" type="text" maxlength="24" autocomplete="nickname" placeholder="Ton pseudo">
       <div class="ed-grid">
         <div><label for="acHeight">Taille (cm)</label><input id="acHeight" type="number" min="100" max="230" inputmode="numeric" placeholder="170"></div>
-        <div><label for="acWeight">Poids (kg)</label><input id="acWeight" type="number" min="30" max="250" inputmode="numeric" placeholder="70"></div>
-        <div><label for="acAge">Âge</label><input id="acAge" type="number" min="6" max="99" inputmode="numeric"></div>
+        <div><label for="acWeight">Poids (kg)</label><input id="acWeight" type="number" min="30" max="250" inputmode="decimal" placeholder="70"></div>
+        <div><label for="acAge">Âge</label><input id="acAge" type="number" min="6" max="99" inputmode="numeric" placeholder="25"></div>
       </div>
+      <label>Sexe</label><div class="chips cp-wrap ac-chips" data-acq="sex"></div>
+      <label for="acMail">Adresse e-mail <small class="opt">(facultatif)</small></label><input id="acMail" type="email" maxlength="80" autocomplete="email" placeholder="toi@exemple.fr">
+      <label>Ta journée (hors sport)</label><div class="chips cp-wrap ac-chips" data-acq="life"></div>
+      <label>Ta pratique sportive aujourd'hui</label><div class="chips cp-wrap ac-chips" data-acq="sport"></div>
     </div>
-    <button class="ac-cta" type="button" data-ac="goals">Suivant</button>
+    <button class="ac-cta" type="button" data-ac="quiz">Suivant</button>
     <button class="ac-link" type="button" data-ac="goals">Passer cette étape</button>
+  </section>
+  <section class="ac-step hidden" id="acQuiz">
+    <h2 class="ac-h2">Tes objectifs</h2>
+    <p class="ac-sub">Quelques questions pour régler l'appli pour toi.</p>
+    <div class="ac-form" id="acQuizBody"></div>
+    <button class="ac-cta" type="button" data-ac="goals">Voir mes objectifs</button>
+    <button class="ac-link" type="button" data-ac="back">Retour</button>
   </section>
   <section class="ac-step hidden" id="acMain">
     <div class="ac-hello"><h2 class="ac-h2" id="acHello">Bonjour</h2><p class="ac-sub" id="acDate"></p><p class="ac-hint" id="acHint"></p></div>
@@ -2999,7 +3014,7 @@
   const AC = { mode: 'view', cur: 0, n: 0, rot: 0, step: 0, R: 0, drag: null, cards: [] };
   const CA_G = 2 * Math.PI * 54, CB_G = 2 * Math.PI * 46;
   const dfDay = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
-  function acShow(id) { ['acIntro', 'acProfil', 'acMain'].forEach(x => $(x).classList.toggle('hidden', x !== id)); $('accueil').scrollTop = 0; }
+  function acShow(id) { ['acIntro', 'acProfil', 'acQuiz', 'acMain'].forEach(x => $(x).classList.toggle('hidden', x !== id)); $('accueil').scrollTop = 0; }
   function openAccueil(step) {
     acOpen = true; document.body.classList.add('ac-open');
     $('accueil').classList.remove('hidden');
@@ -3014,18 +3029,69 @@
     if (currentView === 1) { relief.stop(); if (map) map.resize(); }
     if (currentView === 3) renderProgress();
   }
+  const SPORT_LV = [['Pas de sport'], ['1 à 2 fois par semaine'], ['3 à 4 fois par semaine'], ['5 fois ou plus']];
+  const MAIN_GOALS = [['lose', 'Perdre du poids'], ['fit', 'Garder la forme'], ['muscle', 'Prendre du muscle'], ['endur', 'Améliorer mon endurance']];
+  const AQ = {};
+  function acChips(key, arr, cur, multi) {
+    return arr.map((a, i) => { const v = a.length > 1 && typeof a[0] === 'string' && key !== 'life' && key !== 'sport' && key !== 'pace' && key !== 'freq' ? a[0] : i;
+      const on = multi ? (cur || []).includes(v) : cur === v;
+      return '<button type="button" class="chip" data-aq="' + key + '" data-v="' + v + '" aria-pressed="' + on + '">' + (multi && on ? '✓ ' : '') + (a.length > 1 && typeof a[1] === 'string' ? a[1] : a[0]) + '</button>'; }).join('');
+  }
+  function acProfilRender() {
+    document.querySelector('[data-acq="sex"]').innerHTML = acChips('sex', [['m', 'Homme'], ['f', 'Femme']], AQ.sex);
+    document.querySelector('[data-acq="life"]').innerHTML = acChips('life', LIFE, AQ.life);
+    document.querySelector('[data-acq="sport"]').innerHTML = acChips('sport', SPORT_LV, AQ.sport);
+  }
+  function acQuizRender() {
+    let h = '<label>Ton objectif principal</label><div class="chips cp-wrap ac-chips">' + acChips('goal', MAIN_GOALS, AQ.goal) + '</div>';
+    if (AQ.goal === 'lose') h += '<label>À quel rythme ?</label><div class="chips cp-wrap ac-chips">' + acChips('pace', [['Doucement (−300 kcal/jour)'], ['Normal (≈ 0,5 kg par semaine)']], AQ.pace) + '</div>';
+    h += '<label>Combien de fois par semaine veux-tu bouger ?</label><div class="chips cp-wrap ac-chips">' + acChips('freq', [['2 fois'], ['3 fois'], ['4 fois'], ['5 fois ou plus']], AQ.freq) + '</div>';
+    h += '<label>Ce que tu veux faire <small class="opt">(plusieurs choix)</small></label><div class="chips cp-wrap ac-chips">' + acChips('sports', [['marche', 'Marche'], ['course', 'Course'], ['velo', 'Vélo'], ['muscu', 'Musculation']], AQ.sports, true) + '</div>';
+    $('acQuizBody').innerHTML = h;
+  }
+  $('accueil').addEventListener('click', e => {
+    const b = e.target.closest('[data-aq]'); if (!b) return;
+    const k = b.dataset.aq, raw = b.dataset.v, v = /^\d+$/.test(raw) ? +raw : raw;
+    if (k === 'sports') { AQ.sports = AQ.sports || []; const i = AQ.sports.indexOf(v); if (i >= 0) AQ.sports.splice(i, 1); else AQ.sports.push(v); }
+    else AQ[k] = v;
+    if (['sex', 'life', 'sport'].includes(k)) acProfilRender(); else acQuizRender();
+  });
   function acProfilFill() {
-    $('acName').value = settings.name || ''; $('acHeight').value = settings.height || ''; $('acWeight').value = settings.weight || ''; $('acAge').value = settings.age || '';
-    acShow('acProfil');
+    $('acName').value = settings.name || ''; $('acHeight').value = settings.height || ''; $('acWeight').value = settings.weight || ''; $('acAge').value = settings.age || ''; $('acMail').value = settings.email || '';
+    AQ.sex = settings.sex; AQ.life = settings.lifeAct != null ? settings.lifeAct : 1; AQ.sport = settings.sportLv != null ? settings.sportLv : null;
+    AQ.goal = settings.mainGoal || null; AQ.pace = settings.wPace != null ? settings.wPace : 1; AQ.freq = settings.goalSessions ? Math.min(3, Math.max(0, settings.goalSessions - 2)) : null; AQ.sports = (settings.sports || []).slice();
+    acProfilRender(); acShow('acProfil');
   }
   function acProfilSave() {
-    const num = (id, a, b) => { const v = parseInt($(id).value, 10); return v >= a && v <= b ? v : null; };
+    const num = (id, a, b) => { const v = parseFloat(String($(id).value).replace(',', '.')); return v >= a && v <= b ? v : null; };
     settings.name = $('acName').value.trim().slice(0, 24);
     const h = num('acHeight', 100, 230), w = num('acWeight', 30, 250), a = num('acAge', 6, 99);
-    if (h) { if (h !== settings.height) settings.measuredStep = null; settings.height = h; }
-    if (w) settings.weight = w;
-    settings.age = a;
-    saveSettings(); syncSettingsForm(); updateStepInfo();
+    if (h) { if (Math.round(h) !== settings.height) settings.measuredStep = null; settings.height = Math.round(h); }
+    if (w) settings.weight = Math.round(w * 10) / 10;
+    if (a) settings.age = Math.round(a);
+    const mail = $('acMail').value.trim();
+    if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)) { toast('Cette adresse e-mail ne semble pas valide.'); return false; }
+    settings.email = mail;
+    if (AQ.sex) settings.sex = AQ.sex;
+    if (AQ.life != null) settings.lifeAct = AQ.life;
+    if (AQ.sport != null) settings.sportLv = AQ.sport;
+    saveSettings(); syncSettingsForm(); updateStepInfo(); return true;
+  }
+  function acQuizSave() {
+    if (AQ.goal) {
+      settings.mainGoal = AQ.goal;
+      settings.weightGoal = AQ.goal === 'lose' ? -1 : AQ.goal === 'muscle' ? 1 : 0;
+      if (AQ.goal === 'lose') settings.wPace = AQ.pace != null ? AQ.pace : 1;
+    }
+    const sp = AQ.sports || []; settings.sports = sp.slice();
+    const act = ['course', 'marche', 'velo'].find(x => sp.includes(x)); if (act) settings.activity = act;
+    const on = Object.assign({}, settings.goalsOn);
+    if (AQ.freq != null) { settings.goalSessions = AQ.freq + 2; on.sessions = true; }
+    on.steps = true;
+    if (AQ.goal === 'endur' || sp.includes('course') || sp.includes('velo')) { on.km = true; settings.goalKm = Math.max(5, (AQ.freq != null ? AQ.freq + 2 : 3) * (sp.includes('velo') ? 15 : sp.includes('course') ? 5 : 3)); }
+    if (AQ.goal === 'lose') { on.kcal = true; settings.goalKcal = Math.max(1000, (AQ.freq != null ? AQ.freq + 2 : 3) * 400); }
+    if (AQ.goal === 'endur') on.navette = true;
+    settings.goalsOn = on; saveSettings(); syncSettingsForm();
   }
   function syncSettingsForm() {
     $('pname').value = settings.name || ''; $('height').value = settings.height || ''; $('weight').value = settings.weight || ''; $('age').value = settings.age || '';
@@ -3034,7 +3100,9 @@
   document.querySelectorAll('[data-ac]').forEach(b => b.addEventListener('click', () => {
     const to = b.dataset.ac;
     if (to === 'profil') acProfilFill();
-    if (to === 'goals') { if (b.classList.contains('ac-cta')) acProfilSave(); acMain('edit'); }
+    if (to === 'quiz') { if (!acProfilSave()) return; acQuizRender(); acShow('acQuiz'); }
+    if (to === 'back') acShow('acProfil');
+    if (to === 'goals') { if (b.closest('#acQuiz')) acQuizSave(); acMain('edit'); }
   }));
   // Carrousel 3D : chaque objectif est une carte posée sur un cylindre qui tourne
   function acMain(mode) {
