@@ -587,7 +587,10 @@
   .speed-num .unit{font-style:normal;color:var(--rouge);font-weight:800;text-transform:uppercase;font-size:18px;letter-spacing:.04em}
   .speed-bar{height:6px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,.08);width:100%}
   .speed-bar i{background:var(--accent-grad);border-radius:3px}
-  .post{padding-left:0;perspective:none;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start;margin-top:16px}
+  .post{padding-left:0;perspective:none;display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start;margin-top:16px;flex:none}
+  #v-sortie{overflow-y:auto}
+  #v-sortie .hint{flex:none;align-self:stretch;max-width:none;margin:12px 0 10px}
+  body:not(.on-map) .maplibregl-control-container{display:none}
   .post .pole{display:none}
   .po{height:auto;margin:0;transform:none;width:auto}
   .post.intro .po{animation:cardIn .7s cubic-bezier(.2,1.2,.4,1) both;animation-delay:calc(var(--i) * 70ms + 250ms)}
