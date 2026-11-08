@@ -377,6 +377,7 @@
   .hs-body{padding:0 14px 12px;border-top:1px solid var(--ligne)}
   .macs{margin:4px 0 14px}.mac{display:grid;grid-template-columns:76px 1fr auto;align-items:center;gap:10px;margin:6px 0;font-size:13px}.mac span{color:var(--gris)}.mac b{font-size:13px}
   .mac-bar{height:8px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}.mac-bar i{display:block;height:100%;border-radius:4px}
+  .ydhead{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}.ydhead .tfield{width:150px}
   .mac-note{margin:6px 0 0;font-size:12px;color:var(--gris)}
   .my-open{display:block;margin:8px auto 0;text-align:center}
   .my-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.my-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
@@ -4279,19 +4280,24 @@
       (pg ? '<p class="mac-note">Objectif protéines : ' + pg.per.toString().replace('.', ',') + ' g par kg de poids' + (pg.per >= 1.8 ? ' (prise de muscle)' : pg.per >= 1.6 ? ' (pour garder tes muscles en perdant du poids)' : '') + '. Valeurs estimées.</p>' : '') + '</div>';
   }
   // ---------- Refaire un repas d'hier ----------
+  let copyDay = null; // jour choisi pour recopier un repas (par défaut : hier)
   function yesterdayHtml() {
-    const y = dayKey(Date.now() - 864e5), meals = store.get(K_MEALS, []).map((m, i) => [m, i]).filter(([m]) => dayKey(m.date) === y);
-    if (!meals.length) return '';
-    return '<div class="block"><div class="bh">Refaire un repas d\'hier</div>' + meals.map(([m, i]) =>
-      '<div class="frow"><button type="button" class="fadd" data-yday="' + i + '"><b>' + MEAL_TYPES[m.type] + ' d\'hier</b><small>' + esc((m.items || []).map(x => x.fr).join(', ')) + '</small></button>' +
+    const yk = dayKey(Date.now() - 864e5), key = copyDay || yk, today = dayKey(Date.now());
+    const meals = store.get(K_MEALS, []).map((m, i) => [m, i]).filter(([m]) => dayKey(m.date) === key);
+    const label = key === yk ? 'd\'hier' : 'du ' + new Date(key + 'T12:00').toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    let h = '<div class="block"><div class="ydhead"><div class="bh">Refaire un repas</div><input type="date" id="copyDate" class="tfield" value="' + key + '" max="' + today + '" aria-label="Choisir le jour du repas à recopier"></div>';
+    if (!meals.length) return h + '<p class="empty">Aucun repas noté ' + label + '. Choisis un autre jour dans le calendrier.</p></div>';
+    return h + meals.map(([m, i]) =>
+      '<div class="frow"><button type="button" class="fadd" data-yday="' + i + '"><b>' + MEAL_TYPES[m.type] + ' ' + label + '</b><small>' + esc((m.items || []).map(x => x.fr).join(', ')) + '</small></button>' +
       '<span class="num fk">' + nf0.format(m.kcal) + ' kcal</span><button type="button" class="fbtn" data-yday="' + i + '" aria-label="Refaire ce repas aujourd\'hui">+</button><span></span></div>').join('') + '</div>';
   }
+  $('repas').addEventListener('change', e => { if (e.target.id === 'copyDate') { copyDay = e.target.value || null; renderRepas(); } });
   $('repas').addEventListener('click', e => {
     const b = e.target.closest('[data-yday]'); if (!b) return;
     const all = store.get(K_MEALS, []), m = all[+b.dataset.yday]; if (!m) return;
     const now = Date.now();
     all.unshift({ date: now, type: m.type, items: (m.items || []).map(x => Object.assign({}, x)), kcal: m.kcal, thumb: m.thumb || '' });
-    store.set(K_MEALS, all.slice(0, 300)); renderRepas(); toast(MEAL_TYPES[m.type] + ' refait aujourd\'hui (' + nf0.format(m.kcal) + ' kcal)'); try { healthChanged(); } catch (err) {}
+    store.set(K_MEALS, all.slice(0, 300)); renderRepas(); toast(MEAL_TYPES[m.type] + ' recopié aujourd\'hui (' + nf0.format(m.kcal) + ' kcal)'); try { healthChanged(); } catch (err) {}
   });
   let mealDelArmed = -1;
   function renderRepas() {
