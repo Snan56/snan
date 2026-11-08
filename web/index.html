@@ -1030,6 +1030,7 @@
       <div class="row"><label for="remMeals">Noter mes repas<small>Un rappel après le déjeuner et après le dîner</small></label><span class="switch"><input id="remMeals" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="remLunchAt">Heure du rappel du déjeuner</label><input id="remLunchAt" type="time" value="13:30" class="tfield"></div>
       <div class="row"><label for="remDinnerAt">Heure du rappel du dîner</label><input id="remDinnerAt" type="time" value="20:30" class="tfield"></div>
+      <div class="row"><label for="remSteps">Activer les pas du jour<small>Chaque matin à 6 h : un rappel pour lancer le compteur de pas</small></label><span class="switch"><input id="remSteps" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="remWeek">Bilan de la semaine<small>Le dimanche à 20 h : tes sorties, séances, calories et ton poids de la semaine</small></label><span class="switch"><input id="remWeek" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="remWeigh">Me peser<small>Une fois par semaine</small></label><span class="switch"><input id="remWeigh" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="remWeighDay">Jour de la pesée</label><select id="remWeighDay" class="tfield"><option value="2">Lundi</option><option value="3">Mardi</option><option value="4">Mercredi</option><option value="5">Jeudi</option><option value="6">Vendredi</option><option value="7">Samedi</option><option value="1">Dimanche</option></select></div>
@@ -3541,11 +3542,11 @@
 
   // ---------- Rappels (notifications du téléphone) ----------
   async function remindersApply(fromUser) {
-    const LN = plugin('LocalNotifications'), any = settings.remWalk || settings.remMeals || settings.remWeigh || settings.remWeek;
+    const LN = plugin('LocalNotifications'), any = settings.remWalk || settings.remMeals || settings.remWeigh || settings.remWeek || settings.remSteps !== false;
     if (!LN) { if (fromUser && any) toast('Les rappels marchent dans l\'appli installée sur ton téléphone.'); return; }
     try {
       if (any) { const p = await LN.requestPermissions(); if (p.display !== 'granted') { toast('Autorise les notifications de Parcours dans les Réglages de l\'iPhone.'); return; } }
-      await LN.cancel({ notifications: [1, 2, 3, 4, 5].map(id => ({ id })) });
+      await LN.cancel({ notifications: [1, 2, 3, 4, 5, 6].map(id => ({ id })) });
       const hm = (v, d) => String(v || d).split(':').map(Number), [hh, mm] = hm(settings.remWalkAt, '18:00'), [lh, lm] = hm(settings.remLunchAt, '13:30'), [dh, dm] = hm(settings.remDinnerAt, '20:30'), [wh, wm] = hm(settings.remWeighAt, '09:00'), N = [];
       if (settings.remWalk) N.push({ id: 1, title: 'Parcours', body: 'C\'est l\'heure de ta marche ! Même 20 minutes, ça compte.', schedule: { on: { hour: hh, minute: mm }, repeats: true, allowWhileIdle: true } });
       if (settings.remMeals) {
@@ -3554,6 +3555,7 @@
       }
       if (settings.remWeigh) N.push({ id: 4, title: 'Parcours', body: 'C\'est le jour de ta pesée : note ton poids du matin.', schedule: { on: { weekday: +settings.remWeighDay || 1, hour: wh, minute: wm }, repeats: true } });
       if (settings.remWeek) N.push({ id: 5, title: 'Parcours · ton bilan de la semaine', body: weekSummaryText(), schedule: { on: { weekday: 1, hour: 20, minute: 0 }, repeats: true } });
+      if (settings.remSteps !== false) N.push({ id: 6, title: 'Parcours · bonjour !', body: 'Active tes pas de la journée : ouvre Parcours pour lancer le compteur.', schedule: { on: { hour: 6, minute: 0 }, repeats: true, allowWhileIdle: true } });
       if (N.length) await LN.schedule({ notifications: N });
       if (fromUser) toast(N.length ? 'Rappels programmés' : 'Rappels désactivés');
     } catch (e) { if (fromUser) toast('Les rappels n\'ont pas pu être programmés.'); }
@@ -3566,6 +3568,9 @@
     $(id).value = settings[id] || d;
     $(id).addEventListener('change', e => { settings[id] = e.target.value || d; saveSettings(); remindersApply(true); try { renderProgress(); } catch (err) {} });
   });
+  $('remSteps').checked = settings.remSteps !== false;
+  $('remSteps').addEventListener('change', e => { settings.remSteps = e.target.checked; saveSettings(); remindersApply(true); });
+  if (!settings.remStepsInit) { settings.remStepsInit = 1; saveSettings(); setTimeout(() => remindersApply(false), 1500); }
   $('remTest').addEventListener('click', async () => {
     const LN = plugin('LocalNotifications'), info = t => { $('remInfo').textContent = t; };
     if (!LN) { info("Module de notifications absent : réinstalle l'appli depuis Xcode (▶️)."); return; }
@@ -3618,7 +3623,7 @@
     $('rHead').innerHTML = '<span class="ravatar">' + esc((nm[0] || 'P').toUpperCase()) + '</span><span class="rtx"><b>' + esc(nm) + '</b><small>' + (parts.join(' · ') || 'Touche pour remplir ton profil') + (settings.email ? '<br>' + esc(settings.email) : '') + '</small></span><i class="rchev">›</i>';
     set('profil', 'Pseudo, taille, poids, âge');
     set('obj', nf0.format(settings.goalSteps || 0) + ' pas par jour · ' + nf0.format(settings.goalKm || 0) + ' km par semaine');
-    const n = ['remWalk', 'remMeals', 'remWeigh', 'remWeek'].filter(k => settings[k]).length;
+    const n = ['remWalk', 'remMeals', 'remWeigh', 'remWeek'].filter(k => settings[k]).length + (settings.remSteps !== false ? 1 : 0);
     set('rappels', n ? n + ' rappel' + (n > 1 ? 's' : '') + ' activé' + (n > 1 ? 's' : '') : 'Aucun rappel activé');
     set('voix', settings.voice ? 'Voix activée' + (settings.beeps !== false ? ', bips activés' : '') : 'Voix désactivée');
     set('aff', 'Animations, pause automatique en véhicule');
