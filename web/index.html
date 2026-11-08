@@ -335,6 +335,9 @@
   .wremind span{flex:1;font-weight:800;font-size:15px}.wremind i{font-style:normal;color:#fff;font-size:22px}
   .row.flash{animation:rowflash 1.6s ease}
   @keyframes rowflash{0%,60%{background:rgba(255,90,31,.22)}100%{background:transparent}}
+  .hgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 4px}.hgrid div{background:var(--nuit-3);border-radius:14px;padding:10px 12px}
+  .hgrid span{display:block;font-size:12px;color:var(--gris)}.hgrid b{font-size:28px;font-weight:900;color:#ff5a5f}.hgrid b i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:6px;vertical-align:middle}.hgrid small{margin-left:4px;color:var(--gris)}
+  .hz{display:grid;grid-template-columns:12px 1fr auto;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--ligne);font-size:14px}.hz i{width:12px;height:12px;border-radius:4px}.hz b{font-size:15px}
   .wverdict{margin:8px 0 0;font-weight:600;color:var(--gris)}.wverdict.ok{color:#4ade80}
   .frow{display:grid;grid-template-columns:1fr auto 40px 32px;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--ligne)}
   .fadd{background:none;border:0;color:inherit;font:inherit;text-align:left;padding:0;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -937,7 +940,8 @@
           <li>Ajoute <b>Rechercher des échantillons de santé</b> : type <b>Pas</b>, date de début <b>aujourd'hui</b>.</li>
           <li>Ajoute <b>Calculer des statistiques</b> : <b>Somme</b> des échantillons.</li>
           <li>Ajoute encore <b>Rechercher des échantillons de santé</b> : type <b>Poids</b>, trier par <b>date de début</b>, <b>le plus récent d'abord</b>, limite <b>1</b>.</li>
-          <li>Ajoute <b>Texte</b> et écris : <b>PARCOURS pas=</b> puis insère « Résultat des statistiques », puis <b> poids=</b> et insère les échantillons de poids.</li>
+          <li><i>Pour le pouls de ta montre :</i> ajoute <b>Rechercher des échantillons de santé</b> : type <b>Fréquence cardiaque</b>, le plus récent d'abord, limite <b>1</b>. Puis la même chose avec le type <b>Fréquence cardiaque au repos</b>. Puis encore <b>Fréquence cardiaque</b>, date de début <b>aujourd'hui</b>, suivi de <b>Calculer des statistiques</b> : <b>Moyenne</b>, et une deuxième fois : <b>Maximum</b>.</li>
+          <li>Ajoute <b>Texte</b> et écris : <b>PARCOURS pas=</b> puis insère « Résultat des statistiques » (les pas), puis <b> poids=</b> et les échantillons de poids, puis <b> fc=</b> (dernière fréquence cardiaque), <b> fcrepos=</b> (au repos), <b> fcmoy=</b> (moyenne) et <b> fcmax=</b> (maximum). Les valeurs de pouls sont facultatives.</li>
           <li>Ajoute <b>Copier dans le presse-papiers</b>.</li>
           <li>Nomme-le <b>Santé vers Parcours</b>. Ensuite, reviens dans Parcours et touche <b>Coller les données de Santé</b>.</li>
         </ol>
@@ -2053,7 +2057,7 @@
   }
   function renderProgress(highlightFirst) {
     const hist = store.get(K_HIST, []), box = $('progress');
-    let html = weightHtml() + goalsHtml();
+    let html = weightHtml() + heartHtml() + goalsHtml();
     if (!hist.length) {
       box.innerHTML = html + '<div class="block"><div class="bh">Tes sorties</div><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>';
       return;
@@ -3302,6 +3306,36 @@
   });
   try { bkInfo(); } catch (e) {}
 
+  // ---------- Cœur : BPM de la montre (via Santé et le raccourci), FC max et zones ----------
+  const K_HR = 'parcours.heart';
+  function heartZones() {
+    const age = +settings.age; if (!age) return null;
+    const max = Math.round(208 - 0.7 * age); // formule de Tanaka
+    return { max, zones: [['Récupération', 0.5, 0.6, '#60a5fa'], ['Endurance (brûle les graisses)', 0.6, 0.7, '#4ade80'], ['Cardio', 0.7, 0.8, '#facc15'], ['Seuil', 0.8, 0.9, '#fb923c'], ['Effort maximal', 0.9, 1, '#ef4444']]
+      .map(([n, a, b, c]) => ({ n, lo: Math.round(max * a), hi: Math.round(max * b) - (b < 1 ? 1 : 0), c })) };
+  }
+  function heartHtml() {
+    const H = store.get(K_HR, null), z = heartZones();
+    let h = '<div class="block hbox"><div class="bh">Mon cœur</div>';
+    if (H && (H.last || H.rest || H.avg)) {
+      const zf = v => { if (!z || !v) return ''; const k = z.zones.find(x => v >= x.lo && v < x.hi + 1); return k ? '<i style="background:' + k.c + '"></i>' : ''; };
+      h += '<div class="hgrid">' +
+        (H.last ? '<div><span>Dernier pouls</span><b class="num">' + Math.round(H.last) + '</b><small>BPM</small></div>' : '') +
+        (H.rest ? '<div><span>Au repos</span><b class="num">' + Math.round(H.rest) + '</b><small>BPM</small></div>' : '') +
+        (H.avg ? '<div><span>Moyenne du jour</span><b class="num">' + Math.round(H.avg) + '</b><small>BPM</small></div>' : '') +
+        (H.max ? '<div><span>Maximum du jour</span><b class="num">' + Math.round(H.max) + zf(H.max) + '</b><small>BPM</small></div>' : '') + '</div>' +
+        '<p class="about" style="margin:6px 0 0">Mesuré par ta montre, récupéré le ' + new Date(H.t).toLocaleDateString('fr-FR') + ' à ' + new Date(H.t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + '.' +
+        (H.rest ? ' ' + (H.rest < 60 ? 'Pouls au repos bas : signe d\'une bonne forme.' : H.rest <= 80 ? 'Pouls au repos normal (60 à 80).' : 'Pouls au repos un peu élevé : le sport régulier aide à le faire baisser. Parles-en à un médecin s\'il reste au-dessus de 100.') : '') + '</p>';
+    } else h += '<p class="empty">Récupère le pouls mesuré par ton Apple Watch : dernier pouls, pouls au repos, moyenne et maximum du jour.</p>';
+    h += '<button type="button" class="wremind" data-hr="1"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg><span>Récupérer le pouls de ma montre</span><i>›</i></button>';
+    if (z) {
+      h += '<div class="cp-t" style="margin-top:14px">Tes zones d\'entraînement</div><p class="about" style="margin:0 0 8px">Fréquence cardiaque maximale estimée : <b>' + z.max + ' BPM</b> (formule de Tanaka avec ton âge).</p>' +
+        z.zones.map(x => '<div class="hz"><i style="background:' + x.c + '"></i><span>' + x.n + '</span><b class="num">' + x.lo + '–' + x.hi + '</b></div>').join('');
+    } else h += '<p class="about">Indique ton âge dans les Réglages pour voir tes zones d\'entraînement.</p>';
+    return h + '</div>';
+  }
+  $('progress').addEventListener('click', e => { if (e.target.closest('[data-hr]')) { awaitPaste = true; runShortcut(SC_IN); } });
+
   // ---------- Suivi du poids ----------
   const K_WEIGHTS = 'parcours.weights';
   function weightTrack(force) {
@@ -3872,6 +3906,7 @@
     if (settings.sex) L.push('Sexe : ' + (settings.sex === 'f' ? 'femme' : 'homme'));
     if (settings.height) L.push('Taille : ' + settings.height + ' cm');
     if (settings.weight) L.push('Poids : ' + settings.weight + ' kg');
+    try { const H = store.get(K_HR, null), z = heartZones(); if (H && H.rest) L.push('Pouls au repos (montre) : ' + Math.round(H.rest) + ' BPM'); if (H && H.last) L.push('Dernier pouls : ' + Math.round(H.last) + ' BPM'); if (z) L.push('FC max estimée : ' + z.max + ' BPM ; zone endurance ' + z.zones[1].lo + '-' + z.zones[1].hi + ' BPM'); } catch (e) {}
     L.push('Objectif de poids : ' + ['perdre du poids', 'garder son poids', 'prendre du poids'][(settings.weightGoal || 0) + 1]);
     try {
       const en = dayEnergy(today), n = kcalNeed(Math.round(en.burned));
@@ -4145,14 +4180,22 @@
   function healthApply(txt) {
     const num = re => { const m = txt.match(re); return m ? parseFloat(m[1].replace(/[\s  ]/g, '').replace(',', '.')) : NaN; };
     const pas = num(/pas\s*=\s*([\d\s  .,]*\d)/i), poids = num(/poids\s*=\s*(\d+(?:[.,]\d+)?)/i);
+    const fc = num(/\bfc\s*=\s*(\d+(?:[.,]\d+)?)/i), fcr = num(/fcrepos\s*=\s*(\d+(?:[.,]\d+)?)/i), fcm = num(/fcmoy\s*=\s*(\d+(?:[.,]\d+)?)/i), fcx = num(/fcmax\s*=\s*(\d+(?:[.,]\d+)?)/i);
+    const okHr = v => v >= 25 && v <= 230;
+    if (/PARCOURS/i.test(txt) && [fc, fcr, fcm, fcx].some(okHr)) {
+      store.set(K_HR, { t: Date.now(), last: okHr(fc) ? fc : null, rest: okHr(fcr) ? fcr : null, avg: okHr(fcm) ? fcm : null, max: okHr(fcx) ? fcx : null });
+      if (isNaN(pas) && isNaN(poids)) { $('hbar').classList.add('hidden'); hbarMode = ''; toast('Pouls importé : ' + (okHr(fc) ? Math.round(fc) + ' BPM' : 'données du jour')); if (currentView === 3) renderProgress(); return; }
+    }
     if (!/PARCOURS/i.test(txt) || (isNaN(pas) && isNaN(poids))) { toast('Pas de données Santé dans le presse-papiers. Relance le raccourci « ' + SC_IN + ' ».'); return; }
     const msg = [];
     if (!isNaN(pas)) { settings.healthSteps = { day: dayKey(Date.now()), v: Math.round(pas) }; msg.push(nf0.format(Math.round(pas)) + ' pas'); }
     if (!isNaN(poids) && poids >= 30 && poids <= 250) { settings.weight = Math.round(poids * 10) / 10; $('weight').value = settings.weight; msg.push('poids ' + String(settings.weight).replace('.', ',') + ' kg'); }
     saveSettings(); $('hbar').classList.add('hidden'); hbarMode = '';
     $('hImpInfo').textContent = 'Dernier import : ' + msg.join(', ');
+    if ([fc, fcr, fcm, fcx].some(okHr)) msg.push('pouls');
     toast('Importé depuis Santé : ' + msg.join(', '));
     if (currentView === 5) renderRepas();
+    if (currentView === 3) renderProgress();
   }
   async function healthPaste() {
     let txt = '';
