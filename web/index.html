@@ -871,7 +871,7 @@
   .wcard{flex-direction:column}
   .banner.info{background:#1c1f25;border-color:rgba(255,90,31,.45);color:var(--blanc)}
   .banner button{border-radius:10px}
-.pg-sec{margin:22px 4px 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.pgtabs{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;margin:0 0 14px;border-radius:16px;background:rgba(20,20,24,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08)}.pgtabs button{border:0;border-radius:12px;padding:10px 4px;background:none;color:rgba(255,255,255,.55);font:inherit;font-weight:700;font-size:13.5px;cursor:pointer;transition:background .2s,color .2s}.pgtabs button[aria-selected="true"]{background:linear-gradient(135deg,#ff5a1f,#ff8a50);color:#fff;box-shadow:0 4px 14px rgba(255,90,31,.35)}.pgtabs i{font-style:normal;font-size:11px;opacity:.8;margin-left:2px}
 </style>
 </head>
 <body>
@@ -2148,22 +2148,25 @@
       svg + '<div class="period"><span>' + (statMode === 'week' ? 'Cette semaine' : 'Ce mois-ci') + ' :</span><span><b>' + nf1.format(c.m / 1000) + '</b> km</span><span><b>' + c.n + '</b> sortie' + (c.n > 1 ? 's' : '') + '</span><span><b>' + nf0.format(c.k) + '</b> kcal</span><span><b>' + nf0.format(c.up) + '</b> m de montée</span></div></div>';
   }
   function renderProgress(highlightFirst) {
+    if (highlightFirst) window.__pgTab = 'hist';
     const hist = store.get(K_HIST, []), box = $('progress');
-    const sec = t => '<div class="pg-sec">' + t + '</div>';
-    if (!hist.length) {
-      box.innerHTML = goalsHtml() + sec('Corps') + weightHtml() + sec('Récompenses') + badgesHtml() + sec('Historique') + '<div class="block"><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>';
-      return;
-    }
+    const T = [['res', 'Résumé'], ['corps', 'Poids'], ['badges', 'Badges'], ['hist', 'Sorties']];
+    let tab = window.__pgTab || 'res';
+    let html = '<div class="pgtabs" role="tablist">' + T.map(([k, l]) => '<button type="button" role="tab" data-pgtab="' + k + '" aria-selected="' + (k === tab) + '">' + l + (k === 'hist' && hist.length ? ' <i>' + hist.length + '</i>' : '') + '</button>').join('') + '</div>';
     let totalM = 0, totalKcal = 0;
     hist.forEach(h => { totalM += h.distanceM || 0; totalKcal += h.kcal || 0; });
-    let html = '<div class="total"><div class="po"><div class="plate"><div class="back"></div><div class="face">' +
-      '<span class="lbl">' + hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + '<br>' + nf0.format(totalKcal) + ' kcal</span>' +
-      '<span class="val num">' + nf2.format(totalM / 1000) + '<small>km</small></span></div></div></div></div>';
-    html += sec('Cette semaine') + weekBilanHtml(hist) + goalsHtml();
-    html += sec('Performances') + statsHtml(hist) + recordsHtml(hist);
-    html += sec('Corps') + weightHtml();
-    html += sec('Récompenses') + badgesHtml();
-    html += sec('Historique') + '<ul class="runs">';
+    if (tab === 'res') {
+      if (hist.length) html += '<div class="total"><div class="po"><div class="plate"><div class="back"></div><div class="face">' +
+        '<span class="lbl">' + hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + '<br>' + nf0.format(totalKcal) + ' kcal</span>' +
+        '<span class="val num">' + nf2.format(totalM / 1000) + '<small>km</small></span></div></div></div></div>' + weekBilanHtml(hist);
+      html += goalsHtml();
+      if (hist.length) html += statsHtml(hist) + recordsHtml(hist);
+      box.innerHTML = html; return;
+    }
+    if (tab === 'corps') { box.innerHTML = html + weightHtml(); return; }
+    if (tab === 'badges') { box.innerHTML = html + badgesHtml(); return; }
+    if (!hist.length) { box.innerHTML = html + '<div class="block"><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>'; return; }
+    html += '<ul class="runs">';
     hist.forEach((h, i) => {
       const act = ACT_LABEL[h.activity] || 'Sortie';
       html += '<li><button type="button" class="run' + (highlightFirst && i === 0 ? ' new' : '') + '" data-i="' + i + '">' + thumbSvg(h.track) +
@@ -2176,6 +2179,7 @@
     box.innerHTML = html + '</ul>';
   }
   $('progress').addEventListener('click', e => {
+    const pt = e.target.closest('[data-pgtab]'); if (pt) { window.__pgTab = pt.dataset.pgtab; renderProgress(); return; }
     if (e.target.closest('[data-open-goals]')) { openAccueil('edit'); return; }
     const mode = e.target.closest('[data-mode]');
     if (mode) { statMode = mode.dataset.mode; renderProgress(); return; }
