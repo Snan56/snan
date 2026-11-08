@@ -314,6 +314,10 @@
   .wtile svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-bottom:auto;color:var(--rouge)}
   .wtile b{font-size:16px;font-weight:800;line-height:1.15}.wtile small{font-size:12px;color:var(--gris)}
   .wtile.main{background:linear-gradient(135deg,#ff7a2f,#ff4a1f);border:0}.wtile.main svg,.wtile.main small{color:#fff}.wtile.main small{opacity:.9}
+  .wlogb{display:flex;align-items:center;gap:10px;width:100%;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+  .wlogb .wlog{flex:1}
+  .wedit{color:var(--gris);font-size:22px;padding-top:4px}
+  #gDel{width:100%;margin-top:6px}
   .wmore{display:block;margin:6px auto 0;text-align:center}
   .wgrp{margin-bottom:10px;border:1px solid var(--ligne);border-radius:18px;background:var(--carte);padding:0 12px}
   .wgrp summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 4px;cursor:pointer}
@@ -1034,6 +1038,7 @@
     <div class="btns">
       <button id="gSave" class="sbtn save" type="button">Enregistrer la séance</button>
       <button id="gCancel" class="sbtn cancel" type="button">Annuler</button>
+      <button id="gDel" class="danger-btn hidden" type="button">Supprimer la séance</button>
     </div>
   </div>
 </div>
@@ -2407,7 +2412,10 @@
     '<span class="wc-r"><b class="num">' + fmtMin(totalSec(w)) + '</b><small>' + nf0.format(estKcal(w)) + ' kcal</small></span></button>';
   const wOpen = new Set(); // catégories de séances dépliées
   let wLogAll = false;
-  function wLogRow(l) {
+  function wLogRow(l, i) {
+    return '<button type="button" class="wlogb" data-wl="' + i + '" aria-label="Modifier ou supprimer cette séance">' + wLogInner(l) + '<span class="wedit" aria-hidden="true">›</span></button>';
+  }
+  function wLogInner(l) {
     if (l.kind === 'muscu') return '<div class="wlog"><div>' + esc(l.name) + '<small>' + cap(df.format(new Date(l.date))) + ', ' + (l.exercises && l.exercises.length ? l.exercises.length + ' exercice' + (l.exercises.length > 1 ? 's' : '') + ', ' : '') + 'intensité ' + esc((l.intensity || '').toLowerCase()) + '</small></div>' +
       '<b>' + fmtClock(l.durationMs) + '<small>' + nf0.format(l.kcal) + ' kcal</small></b></div>';
     if (l.kind === 'navette') return '<div class="wlog"><div>Test navette<small>' + cap(df.format(new Date(l.date))) + ', ' + navScore(l) + ', ' + nf1.format(l.speed) + ' km/h</small></div>' +
@@ -2427,7 +2435,7 @@
     h += '<div class="block wplog"><div class="bh">Mes séances</div>';
     if (!log.length) h += '<p class="empty">Aucune séance pour l\'instant. Note ta séance de musculation ou lance une séance guidée ci-dessous.</p>';
     else {
-      h += '<p class="streak">Cette semaine : <b>' + plural(n, 'séance') + '</b></p>' + log.slice(0, wLogAll ? 12 : 3).map(wLogRow).join('');
+      h += '<p class="streak">Cette semaine : <b>' + plural(n, 'séance') + '</b></p>' + log.slice(0, wLogAll ? 12 : 3).map((l, i) => wLogRow(l, i)).join('');
       if (log.length > 3) h += '<button type="button" class="linkbtn wmore" data-wlog="1">' + (wLogAll ? 'Voir moins' : 'Voir tout') + '</button>';
     }
     h += '</div>';
@@ -2442,6 +2450,15 @@
   $('seances').addEventListener('toggle', e => { const d = e.target.closest && e.target.closest('.wgrp'); if (d) { if (d.open) wOpen.add(d.dataset.wg); else wOpen.delete(d.dataset.wg); } }, true);
   $('seances').addEventListener('click', e => {
     if (e.target.closest('[data-wlog]')) { wLogAll = !wLogAll; renderSeances(); return; }
+    const wl = e.target.closest('[data-wl]');
+    if (wl) {
+      const i = +wl.dataset.wl, l = store.get(K_WLOG, [])[i]; if (!l) return;
+      if (l.kind === 'muscu') { openGym(l, i); return; }
+      if (confirm('Supprimer la séance « ' + (l.kind === 'navette' ? 'Test navette' : l.name) + ' » du ' + df.format(new Date(l.date)) + ' ?')) {
+        const log = store.get(K_WLOG, []); log.splice(i, 1); store.set(K_WLOG, log); renderSeances(); toast('Séance supprimée');
+      }
+      return;
+    }
     if (e.target.closest('#wNew')) { openEditor(null); return; }
     if (e.target.closest('#gNew')) { openGym(); return; }
     if (e.target.closest('[data-nav]')) { openNav(); return; }
@@ -2482,7 +2499,7 @@
         });
       }
     }
-    h += '<div class="cp-t">3. Durée de la séance</div><div class="chips cp-wrap">' + [30, 45, 60, 75, 90, 120].map(d => '<button type="button" class="chip" data-gd="' + d + '" aria-pressed="' + (G.dur === d) + '">' + (d < 60 ? d + ' min' : Math.floor(d / 60) + ' h' + (d % 60 ? ' ' + (d % 60) : '')) + '</button>').join('') + '</div>';
+    h += '<div class="cp-t">3. Durée de la séance</div><div class="chips cp-wrap">' + [...new Set([30, 45, 60, 75, 90, 120, G.dur])].sort((a, b) => a - b).map(d => '<button type="button" class="chip" data-gd="' + d + '" aria-pressed="' + (G.dur === d) + '">' + (d < 60 ? d + ' min' : Math.floor(d / 60) + ' h' + (d % 60 ? ' ' + (d % 60) : '')) + '</button>').join('') + '</div>';
     h += '<div class="cp-t">4. Intensité</div><div class="chips cp-wrap">' + GINT.map((g, i) => '<button type="button" class="chip cp-por" data-gi="' + i + '" aria-pressed="' + (G.int === i) + '"><span>' + g[0] + '</span><b>' + g[1] + '</b></button>').join('') + '</div>';
     const vol = G.ex.reduce((a, e) => a + e.sets * e.reps * (e.kg || 0), 0), sets = G.ex.reduce((a, e) => a + e.sets, 0);
     h += '<div class="gsum"><div><span>Calories dépensées</span><b class="num">' + nf0.format(gymKcal()) + '</b><small>kcal</small></div>' +
@@ -2491,7 +2508,18 @@
     $('gBody').innerHTML = h;
     $('gSave').disabled = !G.mus.length;
   }
-  function openGym() { G.def = store.get('parcours.gymDef', [4, 10]); G.mus = []; G.ex = []; G.dur = 60; G.int = 1; $('gsheet').classList.remove('hidden'); renderGym(); }
+  function openGym(edit, idx) {
+    G.editIdx = edit ? idx : -1;
+    $('gTitle').textContent = edit ? 'Modifier la séance' : 'Séance de musculation';
+    $('gSave').textContent = edit ? 'Enregistrer les modifications' : 'Enregistrer la séance';
+    $('gDel').classList.toggle('hidden', !edit);
+    if (edit) {
+      G.def = store.get('parcours.gymDef', [4, 10]); G.mus = (edit.muscles || []).slice();
+      G.ex = (edit.exercises || []).map(e => ({ name: e.name, m: (MUSCLES.find(m => m[2].includes(e.name) && G.mus.includes(m[0])) || MUSCLES.find(m => m[2].includes(e.name)) || [''])[0], sets: e.sets, reps: e.reps, kg: e.kg || 0 }));
+      G.dur = Math.round((edit.durationMs || 3600000) / 60000); G.int = Math.max(0, GINT.findIndex(g => g[0] === edit.intensity));
+      $('gsheet').classList.remove('hidden'); renderGym(); return;
+    }
+    G.def = store.get('parcours.gymDef', [4, 10]); G.mus = []; G.ex = []; G.dur = 60; G.int = 1; $('gsheet').classList.remove('hidden'); renderGym(); }
   $('gBody').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.gm) { const k = b.dataset.gm, i = G.mus.indexOf(k); if (i >= 0) { G.mus.splice(i, 1); G.ex = G.ex.filter(x => x.m !== k); } else G.mus.push(k); }
@@ -2512,14 +2540,20 @@
   });
   $('gClose').addEventListener('click', () => $('gsheet').classList.add('hidden'));
   $('gCancel').addEventListener('click', () => $('gsheet').classList.add('hidden'));
+  $('gDel').addEventListener('click', () => {
+    if (G.editIdx < 0 || !confirm('Supprimer cette séance de musculation ?')) return;
+    const log = store.get(K_WLOG, []); log.splice(G.editIdx, 1); store.set(K_WLOG, log);
+    $('gsheet').classList.add('hidden'); renderSeances(); toast('Séance supprimée');
+  });
   $('gSave').addEventListener('click', () => {
     if (!G.mus.length) return;
     const names = MUSCLES.filter(m => G.mus.includes(m[0])).map(m => m[1]);
-    const log = store.get(K_WLOG, []);
-    log.unshift({ kind: 'muscu', date: Date.now() - G.dur * 60000, name: 'Musculation : ' + names.join(', '), muscles: G.mus.slice(), exercises: G.ex.map(e => ({ name: e.name, sets: e.sets, reps: e.reps, kg: e.kg })),
+    const log = store.get(K_WLOG, []), old = G.editIdx >= 0 ? log[G.editIdx] : null;
+    const entry = ({ kind: 'muscu', date: old ? old.date : Date.now() - G.dur * 60000, name: 'Musculation : ' + names.join(', '), muscles: G.mus.slice(), exercises: G.ex.map(e => ({ name: e.name, sets: e.sets, reps: e.reps, kg: e.kg })),
       durationMs: G.dur * 60000, kcal: gymKcal(), intensity: GINT[G.int][0], done: G.ex.length, total: G.ex.length });
+    if (old) log[G.editIdx] = entry; else log.unshift(entry);
     store.set(K_WLOG, log.slice(0, 300)); store.set('parcours.gymDef', G.def);
-    $('gsheet').classList.add('hidden'); renderSeances(); toast('Séance de musculation enregistrée'); try { healthChanged(); } catch (e) {}
+    $('gsheet').classList.add('hidden'); renderSeances(); toast(old ? 'Séance modifiée' : 'Séance de musculation enregistrée'); try { healthChanged(); } catch (e) {}
   });
 
   // Fiche d'une séance
