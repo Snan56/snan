@@ -2361,8 +2361,34 @@
     const x = cv.getContext('2d');
     const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0b0c0f'); g.addColorStop(1, '#1c1f25');
     x.fillStyle = g; x.fillRect(0, 0, W, H);
-    // courbes de niveau
-    for (let k = 0; k < 28; k++) {
+    // vraie carte en fond : la même carte que l'appli (OpenFreeMap / OpenStreetMap), dessinée hors écran
+    const tr0 = h.track || [];
+    let mapP = null;
+    if (tr0.length >= 2) {
+      let host = null, m = null;
+      try {
+        if (typeof maplibregl === 'undefined') await loadScript(MAPLIBRE_URL);
+        host = document.createElement('div');
+        host.style.cssText = 'position:fixed;left:-3000px;top:0;width:540px;height:600px;pointer-events:none;opacity:0';
+        document.body.appendChild(host);
+        let lo0 = 180, lo1 = -180, la0 = 90, la1 = -90;
+        tr0.forEach(p => { la0 = Math.min(la0, p[0]); la1 = Math.max(la1, p[0]); lo0 = Math.min(lo0, p[1]); lo1 = Math.max(lo1, p[1]); });
+        m = new maplibregl.Map({ container: host, style: STYLE_URL, interactive: false, attributionControl: false, preserveDrawingBuffer: true, pixelRatio: 2, fadeDuration: 0,
+          bounds: [[lo0, la0], [lo1, la1]], fitBoundsOptions: { padding: { top: 90, bottom: 110, left: 50, right: 50 }, maxZoom: 16.5 } });
+        await new Promise((res, rej) => { const t = setTimeout(() => rej(new Error('timeout')), 12000); m.once('idle', () => { clearTimeout(t); res(); }); m.on('error', e => { if (e && e.error && /style/i.test(String(e.error.message))) { clearTimeout(t); rej(e.error); } }); });
+        x.drawImage(m.getCanvas(), 0, 0, 1080, 1200);
+        x.fillStyle = 'rgba(8,9,12,.42)'; x.fillRect(0, 0, W, 1200); // assombrit pour que le tracé ressorte
+        const fade = x.createLinearGradient(0, 880, 0, 1200); fade.addColorStop(0, 'rgba(14,15,19,0)'); fade.addColorStop(1, 'rgba(14,15,19,1)');
+        x.fillStyle = fade; x.fillRect(0, 880, W, 320);
+        const top = x.createLinearGradient(0, 0, 0, 280); top.addColorStop(0, 'rgba(11,12,15,.9)'); top.addColorStop(1, 'rgba(11,12,15,0)');
+        x.fillStyle = top; x.fillRect(0, 0, W, 280);
+        const mm = m; mapP = p => { const q = mm.project([p[1], p[0]]); return [q.x * 2, q.y * 2 - 60]; }; // -60 : le reste du dessin est décalé de 60 px (translate du titre)
+        x.getImageData(0, 0, 1, 1); // vérifie que l'image reste exportable
+      } catch (e) { mapP = null; x.fillStyle = g; x.fillRect(0, 0, W, H); }
+      finally { if (!mapP && m) { try { m.remove(); } catch (e) {} } if (!mapP && host) host.remove(); window.__shareMapCleanup = () => { try { m && m.remove(); } catch (e) {} if (host) host.remove(); }; }
+    }
+    // courbes de niveau (si pas de carte)
+    if (!mapP) for (let k = 0; k < 28; k++) {
       x.strokeStyle = k % 5 === 0 ? 'rgba(255,120,60,.22)' : 'rgba(200,205,215,.10)'; x.lineWidth = k % 5 === 0 ? 3 : 2;
       x.beginPath();
       for (let a = 0; a <= Math.PI * 2 + 0.06; a += 0.05) {
@@ -2382,7 +2408,7 @@
       tr.forEach(p => { a = Math.min(a, p[0]); b = Math.max(b, p[0]); c = Math.min(c, p[1]); d = Math.max(d, p[1]); });
       const k = Math.cos(rad((a + b) / 2)), ww = Math.max((d - c) * k, 1e-6), hh = Math.max(b - a, 1e-6);
       const bx = 110, by = 210, bw = 860, bh = 900, s = Math.min(bw / ww, bh / hh), ox = bx + (bw - ww * s) / 2, oy = by + (bh - hh * s) / 2;
-      const P = p => [(p[1] - c) * k * s + ox, (b - p[0]) * s + oy];
+      const P = mapP || (p => [(p[1] - c) * k * s + ox, (b - p[0]) * s + oy]);
       x.lineJoin = 'round'; x.lineCap = 'round';
       [['#f4f6fb', 28], ['#ff5a1f', 13]].forEach(([col, lw]) => {
         x.strokeStyle = col; x.lineWidth = lw; x.beginPath();
@@ -2413,6 +2439,8 @@
       while (x.measureText(v).width > 295 && fs > 30) { fs -= 2; setFont(x, 800, fs, true); } // la valeur doit tenir dans sa colonne
       x.fillStyle = '#f4f6fb'; x.fillText(v, cx, cy + 70);
     });
+    try { window.__shareMapCleanup && window.__shareMapCleanup(); } catch (e) {}
+    if (mapP) { setFont(x, 500, 22, false); x.fillStyle = 'rgba(200,205,215,.45)'; x.textAlign = 'right'; x.fillText('© OpenStreetMap · OpenFreeMap', W - 30, H - 30); x.textAlign = 'left'; }
     return new Promise((res, rej) => cv.toBlob(bl => bl ? res(bl) : rej(new Error('toBlob')), 'image/png'));
   }
 
