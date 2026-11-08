@@ -298,6 +298,9 @@
   .cp-open{width:100%;margin-top:10px}
   .cp{margin-top:12px;padding:12px 14px;border:1px solid rgba(200,205,215,.18);border-radius:16px}
   .cp-t{font-weight:700;font-size:14px;margin:10px 0 6px}
+  .chips.cp-wrap{flex-wrap:wrap;overflow:visible;margin:0 0 6px;padding:2px 0 6px}
+  .need{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 10px}.need span{display:block;font-size:13px;color:var(--gris)}.need b{font-size:28px}.need small{margin-left:4px;color:var(--gris)}
+  .need-left{margin:8px 0 0;font-weight:600}
   .cp-g{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris);margin:8px 0 4px}
   .cp .chips{flex-wrap:wrap;overflow:visible}
   .cp .chip{padding:8px 12px;font-size:13px}
@@ -3371,6 +3374,50 @@
     if (S.status !== 'idle' && dayKey(S.startTime) === key) burned += S.kcal || 0;
     return { eaten, burned };
   }
+  // ---------- Besoin en calories (Mifflin-St Jeor) et objectif de poids ----------
+  const LIFE = [['Assis toute la journée', 1.2], ['Un peu actif', 1.375], ['Debout / travail physique', 1.55]];
+  const WGOAL = [['Perdre du poids', -1], ['Garder mon poids', 0], ['Prendre du poids', 1]];
+  const PACE = [['Doucement', 300], ['Normal', 500]]; // kcal par jour : 500 ≈ 0,5 kg par semaine
+  function kcalNeed(burnedToday) {
+    if (!settings.height || !settings.weight || !settings.age || !settings.sex) return null;
+    const bmr = 10 * settings.weight + 6.25 * settings.height - 5 * settings.age + (settings.sex === 'f' ? -161 : 5);
+    const base = bmr * (LIFE[settings.lifeAct != null ? settings.lifeAct : 1] || LIFE[1])[1];
+    const g = settings.wGoal || 0, minor = settings.age < 18, pace = (PACE[settings.wPace || 1] || PACE[1])[1];
+    let delta = g < 0 ? -pace : g > 0 ? 300 : 0;
+    if (minor && g < 0) delta = 0; // pas de déficit pour un mineur : avis d'un médecin
+    const floor = settings.sex === 'f' ? 1200 : 1500;
+    const target = Math.max(g < 0 ? floor : 0, base + burnedToday + delta);
+    return { bmr, base, delta, target, minor, floor, floored: g < 0 && target === floor };
+  }
+  function needHtml(en) {
+    const chips = (key, arr, cur) => '<div class="chips cp-wrap">' + arr.map((a, i) => '<button type="button" class="chip" data-need="' + key + ':' + i + '" aria-pressed="' + (cur === i) + '">' + a[0] + '</button>').join('') + '</div>';
+    let h = '<div class="block"><div class="bh">Ton objectif calories</div>';
+    if (!settings.height || !settings.weight || !settings.age) return h + '<p class="empty">Indique ta taille, ton poids et ton âge dans les Réglages pour calculer ce que tu dois manger chaque jour.</p><button type="button" class="linkbtn" data-need="reglages">Ouvrir les Réglages</button></div>';
+    h += '<div class="cp-t">Tu es</div>' + chips('sex', [['Un homme'], ['Une femme']], settings.sex === 'm' ? 0 : settings.sex === 'f' ? 1 : -1);
+    if (!settings.sex) return h + '</div>';
+    h += '<div class="cp-t">Ta journée (hors sport)</div>' + chips('life', LIFE, settings.lifeAct != null ? settings.lifeAct : 1);
+    h += '<div class="cp-t">Ton objectif</div>' + chips('goal', WGOAL, (settings.wGoal || 0) + 1);
+    if ((settings.wGoal || 0) < 0) h += '<div class="cp-t">Rythme</div>' + chips('pace', [['Doucement (−300 kcal/j)'], ['Normal (−500 kcal/j, ≈ 0,5 kg/semaine)']], settings.wPace != null ? settings.wPace : 1);
+    const n = kcalNeed(Math.round(en.burned)), left = Math.round(n.target - en.eaten), pct = Math.min(100, en.eaten / n.target * 100);
+    h += '<div class="need"><div><span>Pour garder ton poids</span><b class="num">' + nf0.format(Math.round(n.base + en.burned)) + '</b><small>kcal</small></div>' +
+      '<div><span>' + (n.delta < 0 ? 'Ton objectif (en déficit)' : n.delta > 0 ? 'Ton objectif (en surplus)' : 'Ton objectif') + '</span><b class="num">' + nf0.format(Math.round(n.target)) + '</b><small>kcal</small></div></div>' +
+      '<div class="goal-bar"><i style="width:' + pct.toFixed(0) + '%' + (left < 0 ? ';background:var(--rouge)' : '') + '"></i></div>' +
+      '<p class="need-left">' + (left >= 0 ? 'Il te reste <b class="num">' + nf0.format(left) + ' kcal</b> à manger aujourd\'hui.' : 'Tu as dépassé ton objectif de <b class="num">' + nf0.format(-left) + ' kcal</b> aujourd\'hui.') + '</p>' +
+      '<p class="about" style="margin-top:8px">Calcul : métabolisme de base (formule de Mifflin-St Jeor) × ta journée, + les calories de tes sorties et séances du jour' + (n.delta ? (n.delta < 0 ? ', − ' : ', + ') + Math.abs(n.delta) + ' kcal pour ton objectif' : '') + '.' +
+      (n.floored ? ' Ton objectif ne descend pas sous ' + n.floor + ' kcal : manger moins serait mauvais pour ta santé.' : '') +
+      (n.minor && (settings.wGoal || 0) < 0 ? ' Avant 18 ans, l\'appli ne propose pas de déficit : parles-en d\'abord à un médecin.' : '') + ' C\'est une estimation, pas un avis médical.</p></div>';
+    return h;
+  }
+  $('repas').addEventListener('click', e => {
+    const b = e.target.closest('[data-need]'); if (!b) return;
+    const v = b.dataset.need; if (v === 'reglages') { go(4); return; }
+    const [k, i] = v.split(':'), n = +i;
+    if (k === 'sex') settings.sex = n === 0 ? 'm' : 'f';
+    if (k === 'life') settings.lifeAct = n;
+    if (k === 'goal') settings.wGoal = n - 1;
+    if (k === 'pace') settings.wPace = n;
+    saveSettings(); renderRepas();
+  });
   let mealDelArmed = -1;
   function renderRepas() {
     const today = dayKey(Date.now()), en = dayEnergy(today), meals = store.get(K_MEALS, []);
@@ -3383,6 +3430,7 @@
       '<div class="mbtns"><label class="mbig"><input id="mCameraP" type="file" accept="image/*" capture="environment" hidden>Prendre une photo du repas</label>' +
       '<label class="mbig alt"><input id="mGalleryP" type="file" accept="image/*" hidden>Choisir une photo</label>' +
       '<button class="linkbtn" type="button" id="mNoPhotoP">Ajouter un repas sans photo</button></div></div>';
+    h += needHtml(en);
     h += '<div class="block"><div class="bh">Repas du jour</div>';
     if (!todays.length) h += '<p class="empty">Aucun repas enregistré aujourd\'hui. Prends ton assiette en photo : l\'appli propose les aliments et estime les calories.</p>';
     todays.forEach(([m, i]) => {
