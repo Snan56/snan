@@ -153,6 +153,8 @@
   .rec:first-of-type{border-top:0}
   .rec small{display:block;color:var(--gris);font-size:12px}
   .rec .v{font-size:24px;font-variant-numeric:tabular-nums;font-stretch:70%;font-weight:800;white-space:nowrap;text-align:right}
+  .rgrp .mright{display:flex;flex-direction:row;align-items:baseline;gap:4px}.rgrp .mright .mdel{margin-left:6px}
+  .rgrp .meal{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center}.rgrp .meal img,.rgrp .mthumb{width:44px;height:44px;border-radius:10px;object-fit:cover}
   .seg{display:inline-flex;background:var(--nuit);border-radius:999px;padding:3px;flex:none}
   .seg button{border:0;background:none;color:var(--gris);padding:6px 12px;border-radius:999px;font-weight:700;font-size:13px;cursor:pointer}
   .seg button[aria-pressed="true"]{background:var(--blanc);color:var(--encre)}
@@ -387,6 +389,22 @@
   .offf{display:flex;gap:8px;margin-top:10px}.offf .msearch{margin:0;flex:1}.offf .sbtn{width:auto;flex:none;padding:10px 14px}
   .offl{display:flex;flex-direction:column;gap:6px;margin-top:8px}.offr{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:1px solid var(--ligne);border-radius:12px;background:var(--nuit-3);color:var(--blanc);font:inherit;text-align:left;cursor:pointer}
   .offr span{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.offr b{font-size:14px}.offr small{font-size:12px;color:var(--gris)}.offr i{font-style:normal;width:30px;height:30px;border-radius:50%;background:var(--rouge);color:#fff;display:grid;place-items:center;font-size:20px;font-weight:700}
+  .rhero{position:relative;display:flex;flex-direction:column;align-items:center;padding-top:18px}
+  .rring{width:190px;height:190px;transform:rotate(-90deg)}.rring circle{fill:none;stroke-width:14;stroke-linecap:round}.rr-t{stroke:rgba(255,255,255,.08)}.rr-a{stroke:url(#none);stroke:#ff6a2a;transition:stroke-dashoffset .8s ease}.rr-a.over{stroke:#ef4444}
+  .rcenter{position:absolute;top:18px;width:190px;height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center}.rcenter b{font-size:40px;font-weight:900;line-height:1}.rcenter span{font-size:13px;color:var(--gris);margin-top:4px}
+  .rstats{display:grid;grid-template-columns:1fr 1fr 1fr;width:100%;margin:12px 0 4px;text-align:center}.rstats b{display:block;font-size:20px;font-weight:800}.rstats span{font-size:12px;color:var(--gris)}
+  .rhero .macs{width:100%}
+  .radd{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:10px;margin:12px 0}
+  .rtile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:86px;border-radius:18px;border:1px solid var(--ligne);background:var(--carte);color:var(--blanc);font:inherit;cursor:pointer}
+  .rtile svg{width:26px;height:26px;fill:none;stroke:var(--rouge);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.rtile b{font-size:14px}
+  .rtile.main{background:linear-gradient(135deg,#ff7a2f,#ff4a1f);border:0}.rtile.main svg{stroke:#fff}
+  .rgrp{border-top:1px solid var(--ligne);padding:8px 0}.rgrp:first-of-type{border-top:0}
+  .rgh{display:flex;align-items:center;gap:10px}.rgh b{flex:1;font-size:15px}.rgh span{font-size:13px;color:var(--gris)}
+  .radd1{width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,90,31,.5);background:rgba(255,90,31,.12);color:var(--rouge);font-size:18px;font-weight:700;cursor:pointer;line-height:1}
+  .rgrp .meal{border-top:0;padding:6px 0 0}.rgrp .meal b{font-size:14px;font-weight:600}
+  .seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:var(--nuit-3);margin-bottom:8px}
+  .seg button{border:0;border-radius:10px;padding:9px;background:none;color:var(--gris);font:inherit;font-weight:700;font-size:14px;cursor:pointer}.seg button[aria-pressed="true"]{background:var(--rouge);color:#fff}
+  .rquick .ydhead{margin-top:4px}.rquick .ydhead .bh:empty{display:none}
   .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
   .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   body.on-map .chatfab,body.ac-open .chatfab{display:none}
@@ -4280,7 +4298,7 @@
       (pg ? '<p class="mac-note">Objectif protéines : ' + pg.per.toString().replace('.', ',') + ' g par kg de poids' + (pg.per >= 1.8 ? ' (prise de muscle)' : pg.per >= 1.6 ? ' (pour garder tes muscles en perdant du poids)' : '') + '. Valeurs estimées.</p>' : '') + '</div>';
   }
   // ---------- Refaire un repas d'hier ----------
-  let copyDay = null; // jour choisi pour recopier un repas (par défaut : hier)
+  let copyDay = null, quickTab = null; // jour choisi pour recopier un repas (par défaut : hier)
   function yesterdayHtml() {
     const yk = dayKey(Date.now() - 864e5), key = copyDay || yk, today = dayKey(Date.now());
     const meals = store.get(K_MEALS, []).map((m, i) => [m, i]).filter(([m]) => dayKey(m.date) === key);
@@ -4291,6 +4309,10 @@
       '<div class="frow"><button type="button" class="fadd" data-yday="' + i + '"><b>' + MEAL_TYPES[m.type] + ' ' + label + '</b><small>' + esc((m.items || []).map(x => x.fr).join(', ')) + '</small></button>' +
       '<span class="num fk">' + nf0.format(m.kcal) + ' kcal</span><button type="button" class="fbtn" data-yday="' + i + '" aria-label="Refaire ce repas aujourd\'hui">+</button><span></span></div>').join('') + '</div>';
   }
+  $('repas').addEventListener('click', e => {
+    const q = e.target.closest('[data-qt]'); if (q) { quickTab = q.dataset.qt; renderRepas(); return; }
+    const t = e.target.closest('[data-addtype]'); if (t) { openMeal(null).then(() => { $('mType').value = t.dataset.addtype; }); $('mType').value = t.dataset.addtype; }
+  });
   $('repas').addEventListener('change', e => { if (e.target.id === 'copyDate') { copyDay = e.target.value || null; renderRepas(); } });
   $('repas').addEventListener('click', e => {
     const b = e.target.closest('[data-yday]'); if (!b) return;
@@ -4305,25 +4327,39 @@
     const todays = meals.map((m, i) => [m, i]).filter(([m]) => dayKey(m.date) === today);
     const tf = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' });
     const nd = kcalNeed(Math.round(en.burned)), left = nd ? Math.round(nd.target - en.eaten) : null;
-    let h = '<div class="block"><div class="bh">Aujourd\'hui</div><div class="energy e3">' +
-      '<div><span>Mangées</span><b class="num">' + nf0.format(en.eaten) + '</b><small>kcal</small></div>' +
-      '<div><span>Dépensées</span><b class="num">' + nf0.format(Math.round(en.burned)) + '</b><small>kcal</small></div>' +
-      '<div><span>' + (left == null ? 'Objectif' : left >= 0 ? 'Reste' : 'Dépassé') + '</span><b class="num">' + (left == null ? '–' : nf0.format(Math.abs(left))) + '</b><small>' + (nd ? 'sur ' + nf0.format(Math.round(nd.target)) : 'à régler') + '</small></div></div>' +
-      (nd ? '<div class="goal-bar"><i style="width:' + Math.min(100, en.eaten / nd.target * 100).toFixed(0) + '%' + (left < 0 ? ';background:var(--rouge)' : '') + '"></i></div>' : '') +
-      macrosHtml(today) +
-      (settings.healthSteps && settings.healthSteps.day === today ? '<p class="hsteps">Pas aujourd\'hui selon Apple Santé : <b class="num">' + nf0.format(settings.healthSteps.v) + '</b></p>' : '') +
-      '<div class="mbtns"><label class="mbig"><input id="mCameraP" type="file" accept="image/*" capture="environment" hidden>Prendre une photo du repas</label>' +
-      '<label class="mbig alt"><input id="mGalleryP" type="file" accept="image/*" hidden>Choisir une photo</label>' +
-      '<button class="linkbtn" type="button" id="mNoPhotoP">Ajouter un repas sans photo</button></div></div>';
-    h += needHtml(en) + favsHtml() + yesterdayHtml();
-    h += '<div class="block"><div class="bh">Repas du jour</div>';
-    if (!todays.length) h += '<p class="empty">Aucun repas enregistré aujourd\'hui. Prends ton assiette en photo : l\'appli propose les aliments et estime les calories.</p>';
-    todays.forEach(([m, i]) => {
-      h += '<div class="meal">' + (m.thumb ? '<img src="' + m.thumb + '" alt="">' : '<span class="mthumb" aria-hidden="true"></span>') +
-        '<div><b>' + MEAL_TYPES[m.type] + '</b><small>' + tf.format(new Date(m.date)) + ', ' + esc(m.items.map(x => x.fr + (x.q !== 1 ? ' ×' + String(x.q).replace('.', ',') : '')).join(', ')) + '</small></div>' +
-        '<div class="mright"><b class="num">' + nf0.format(m.kcal) + '</b><small>kcal</small><button type="button" class="mdel" data-mdel="' + i + '" aria-label="Supprimer ce repas">' + (mealDelArmed === i ? 'Confirmer' : '×') + '</button></div></div>';
+    // 1. Le cercle du jour
+    const tgt = nd ? nd.target : 0, pct = tgt ? Math.min(1, en.eaten / tgt) : 0, R = 70, C = 2 * Math.PI * R;
+    let h = '<div class="block rhero"><svg class="rring" viewBox="0 0 170 170" aria-hidden="true"><circle cx="85" cy="85" r="' + R + '" class="rr-t"/><circle cx="85" cy="85" r="' + R + '" class="rr-a' + (left < 0 ? ' over' : '') + '" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"/></svg>' +
+      '<div class="rcenter"><b class="num">' + (left == null ? nf0.format(en.eaten) : nf0.format(Math.abs(left))) + '</b><span>' + (left == null ? 'kcal mangées' : left >= 0 ? 'kcal restantes' : 'kcal en trop') + '</span></div>' +
+      '<div class="rstats"><div><b class="num">' + nf0.format(en.eaten) + '</b><span>mangées</span></div><div><b class="num">' + (tgt ? nf0.format(Math.round(tgt)) : '–') + '</b><span>objectif</span></div><div><b class="num">' + nf0.format(Math.round(en.burned)) + '</b><span>sport</span></div></div>' +
+      macrosHtml(today) + '</div>';
+    // 2. Ajouter un repas
+    h += '<div class="radd"><label class="rtile main"><input id="mCameraP" type="file" accept="image/*" capture="environment" hidden><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><b>Photo</b></label>' +
+      '<label class="rtile"><input id="mGalleryP" type="file" accept="image/*" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg><b>Galerie</b></label>' +
+      '<button type="button" class="rtile" id="mNoPhotoP"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><b>Sans photo</b></button></div>';
+    // 3. Les repas du jour, par moment de la journée
+    h += '<div class="block"><div class="bh">Mes repas du jour</div>';
+    [0, 1, 2, 3, 4].forEach(t => {
+      const list = todays.filter(([m]) => m.type === t);
+      if (!list.length && t === 4) return;
+      const sub = list.reduce((a, [m]) => a + (m.kcal || 0), 0);
+      h += '<div class="rgrp"><div class="rgh"><b>' + MEAL_TYPES[t] + '</b><span class="num">' + (sub ? nf0.format(sub) + ' kcal' : '') + '</span><button type="button" class="radd1" data-addtype="' + t + '" aria-label="Ajouter au ' + MEAL_TYPES[t].toLowerCase() + '">+</button></div>';
+      list.forEach(([m, i]) => {
+        h += '<div class="meal">' + (m.thumb ? '<img src="' + m.thumb + '" alt="">' : '<span class="mthumb" aria-hidden="true"></span>') +
+          '<div><b>' + esc(m.items.map(x => x.fr + (x.q !== 1 ? ' ×' + String(x.q).replace('.', ',') : '')).join(', ')) + '</b><small>' + tf.format(new Date(m.date)) + '</small></div>' +
+          '<div class="mright"><b class="num">' + nf0.format(m.kcal) + '</b><small>kcal</small><button type="button" class="mdel" data-mdel="' + i + '" aria-label="Supprimer ce repas">' + (mealDelArmed === i ? 'Confirmer' : '×') + '</button></div></div>';
+      });
+      h += '</div>';
     });
     h += '</div>';
+    // 4. Ajouter rapidement : favoris ou recopier un autre jour
+    const fav = favsHtml(), hasFav = !!fav;
+    if (!quickTab) quickTab = hasFav ? 'fav' : 'copy';
+    h += '<div class="block rquick"><div class="seg"><button type="button" data-qt="fav" aria-pressed="' + (quickTab === 'fav') + '">☆ Favoris</button><button type="button" data-qt="copy" aria-pressed="' + (quickTab === 'copy') + '">↻ Recopier un jour</button></div>' +
+      (quickTab === 'fav' ? (hasFav ? fav.replace('<div class="block"><div class="bh">Mes repas favoris</div>', '<div>') : '<p class="empty">Pas encore de favori. Dans la fenêtre d\'un repas, touche « ☆ Enregistrer en favori » pour le retrouver ici en un appui.</p>') : yesterdayHtml().replace('<div class="block">', '<div>').replace('<div class="bh">Refaire un repas</div>', '<div class="bh"></div>')) + '</div>';
+    // 5. Objectif
+    h += needHtml(en);
+    if (settings.healthSteps && settings.healthSteps.day === today) h += '<p class="hsteps">Pas aujourd\'hui selon Apple Santé : <b class="num">' + nf0.format(settings.healthSteps.v) + '</b></p>';
     // 7 derniers jours
     const days = []; for (let k = 6; k >= 0; k--) { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - k); days.push(d); }
     const dfd = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric' });
