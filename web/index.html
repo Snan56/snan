@@ -295,8 +295,8 @@
   .mrow select{width:78px;padding:9px 6px} #mType{min-width:150px}
   .mrow{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(200,205,215,.14)}
   .mrow.off .mname,.mrow.off .mkcal{opacity:.5}
-  .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 14px);z-index:45;display:flex;align-items:center;gap:7px;padding:11px 16px;border:0;border-radius:999px;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
-  .chatfab svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
+  .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   body.on-map .chatfab{display:none}
   .csheet{display:flex;flex-direction:column;height:100%}
   .cmsgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:6px 0 10px;min-height:200px}
@@ -954,7 +954,7 @@
   </div>
 </div>
 
-<button id="chatBtn" class="chatfab" type="button" aria-label="Ouvrir le coach IA"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>Coach IA</button>
+<button id="chatBtn" class="chatfab" type="button" aria-label="Ouvrir le coach IA"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg></button>
 <!-- Coach IA -->
 <div id="csheet" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="chTitle">
   <div class="sheet csheet">
