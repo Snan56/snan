@@ -3121,7 +3121,7 @@
     $('mPhoto').classList.add('hidden'); $('mSearch').value = '';
     mealRows(); $('msheet').classList.remove('hidden');
     try { await loadFoods(); fillFoodSearch(); } catch (e) {}
-    if (!file) { mealStatus(''); $('mSearch').focus(); return; }
+    if (!file) { mealStatus(''); openComp(); return; } // sans photo : on guide directement (pas de clavier qui saute)
     let ph;
     try { ph = await prepPhoto(file); } catch (e) { mealStatus("Cette photo n'a pas pu être ouverte. Essaie avec une autre photo."); return; }
     MS.thumb = ph.thumb; $('mPhoto').src = ph.preview; $('mPhoto').classList.remove('hidden');
