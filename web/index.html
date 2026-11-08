@@ -304,6 +304,8 @@
   .cp .chips{margin:0 0 6px;padding:2px 0 6px}
   .cp-card{margin-top:12px;padding-top:10px;border-top:1px solid rgba(200,205,215,.14)}
   .cp-card .sbtn{width:100%;margin-top:8px}
+  .cp .chip.cp-por{display:flex;flex-direction:column;align-items:flex-start;gap:2px;border-radius:14px;line-height:1.2}
+  .cp .chip.cp-por b{font-size:12px;opacity:.85}
   .cp-h{display:flex;align-items:center;gap:10px;margin-bottom:6px}.cp-h b{flex:1}.cp-h .xbtn{width:32px;height:32px}
   #cpAdd{width:100%;margin-top:12px}
   .cp .linkbtn{display:block;margin:12px auto 0}
@@ -3293,7 +3295,7 @@
     'Dessert / goûter': ['yaourt-f', 'compote', 'cookie', 'glace', 'gateau', 'tarte', 'chocolat', 'banane', 'pomme']
   };
   const CP = { cuisine: '', group: '', sel: [] }; // sel : plusieurs aliments choisis en même temps
-  function portionsOf(x) { return x.t === 'plat' ? x.opts : x.t === 'piece' ? [['1', x.pg], ['2', x.pg * 2], ['3', x.pg * 3]] : PORTIONS[x.t]; }
+  function portionsOf(x) { const u = x.fr.toLowerCase().replace(/ \(.*\)/, ''), pl = u.split(' ').map((w, i) => i === 0 && !/[sx]$/.test(w) ? w + 's' : w).join(' '); return x.t === 'plat' ? x.opts : x.t === 'piece' ? [['1 ' + u, x.pg], ['2 ' + pl, x.pg * 2], ['3 ' + pl, x.pg * 3]] : PORTIONS[x.t]; }
   function compKcal(x, gi, ci) { if (x.t === 'plat') return x.opts[gi][1]; const g = portionsOf(x)[gi][1], oil = x.cook ? COOK[ci][1] * g / 100 : 0; return Math.round(x.k * g / 100 + oil * 9); }
   function renderComp() {
     const box = $('mComp'); if (box.classList.contains('hidden')) return;
@@ -3313,7 +3315,7 @@
       CP.sel.forEach((e, si) => {
         const x = e.x, P = portionsOf(x);
         h += '<div class="cp-card"><div class="cp-h"><b>' + esc(x.fr) + '</b><span class="num">' + nf0.format(compKcal(x, e.por, e.cook)) + ' kcal</span><button type="button" class="xbtn" data-rm="' + si + '" aria-label="Retirer ' + esc(x.fr) + '">×</button></div>' +
-          '<div class="chips">' + P.map((p, i) => '<button type="button" class="chip" data-por="' + si + ':' + i + '" aria-pressed="' + (e.por === i) + '">' + esc(p[0]) + (x.t === 'plat' ? '' : ' · ' + p[1] + (x.t === 'boisson' ? ' ml' : ' g')) + '</button>').join('') + '</div>';
+          '<div class="chips">' + P.map((p, i) => '<button type="button" class="chip cp-por" data-por="' + si + ':' + i + '" aria-pressed="' + (e.por === i) + '"><span>' + esc(p[0]) + (x.t === 'plat' ? '' : ' · ' + p[1] + (x.t === 'boisson' ? ' ml' : ' g')) + '</span><b>' + nf0.format(compKcal(x, i, e.cook)) + ' kcal</b></button>').join('') + '</div>';
         if (x.cook) h += '<div class="chips">' + COOK.map((c, i) => '<button type="button" class="chip" data-cook="' + si + ':' + i + '" aria-pressed="' + (e.cook === i) + '">' + c[0] + '</button>').join('') + '</div>';
         h += '</div>';
       });
