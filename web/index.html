@@ -2441,7 +2441,8 @@
   ];
   // MET « nets » : on enlève 1 MET (ce que le corps dépense au repos), déjà compté dans ton besoin de base de l'onglet Repas
   const GINT = [['Légère', 'Longues pauses, charges légères', 2.5], ['Normale', 'Pauses de 1 à 2 min', 3.5], ['Intense', 'Peu de repos, charges lourdes', 5]];
-  const G = { mus: [], ex: [], dur: 60, int: 1 };
+  const G = { mus: [], ex: [], dur: 60, int: 1, def: [4, 10] }; // def : séries × répétitions pour les nouveaux exercices
+  const GSR = [[3, 8], [3, 10], [3, 12], [4, 8], [4, 10], [4, 12], [5, 5]];
   function gymKcal() { const met = GINT[G.int][2] + (G.mus.includes('jambes') ? 0.5 : 0); return Math.round(met * weightKg() * G.dur / 60); } // ex. 80 kg, 1 h normale : 280 kcal
   function renderGym() {
     let h = '<div class="cp-t">1. Les muscles travaillés</div><div class="chips cp-wrap">' + MUSCLES.map(m => '<button type="button" class="chip" data-gm="' + m[0] + '" aria-pressed="' + G.mus.includes(m[0]) + '">' + (G.mus.includes(m[0]) ? '✓ ' : '') + m[1] + '</button>').join('') + '</div>';
@@ -2451,6 +2452,7 @@
         h += '<div class="cp-g">' + m[1] + '</div><div class="chips cp-wrap">' + m[2].map(n => '<button type="button" class="chip" data-gx="' + esc(n) + '" data-gxm="' + m[0] + '" aria-pressed="' + G.ex.some(e => e.name === n) + '">' + (G.ex.some(e => e.name === n) ? '✓ ' : '') + esc(n) + '</button>').join('') + '</div>';
       });
       if (G.ex.length) {
+        h += '<div class="cp-t">Séries × répétitions pour tous les exercices</div><div class="chips cp-wrap">' + GSR.map(([a, b]) => '<button type="button" class="chip" data-gsr="' + a + 'x' + b + '" aria-pressed="' + G.ex.every(e => e.sets === a && e.reps === b) + '">' + a + ' × ' + b + '</button>').join('') + '</div>';
         h += '<div class="gex-h"><span>Exercice</span><span>Séries</span><span>Répét.</span><span>Charge</span></div>';
         G.ex.forEach((e, i) => {
           h += '<div class="gex"><b>' + esc(e.name) + '</b>' +
@@ -2469,11 +2471,12 @@
     $('gBody').innerHTML = h;
     $('gSave').disabled = !G.mus.length;
   }
-  function openGym() { G.mus = []; G.ex = []; G.dur = 60; G.int = 1; $('gsheet').classList.remove('hidden'); renderGym(); }
+  function openGym() { G.def = store.get('parcours.gymDef', [4, 10]); G.mus = []; G.ex = []; G.dur = 60; G.int = 1; $('gsheet').classList.remove('hidden'); renderGym(); }
   $('gBody').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.gm) { const k = b.dataset.gm, i = G.mus.indexOf(k); if (i >= 0) { G.mus.splice(i, 1); G.ex = G.ex.filter(x => x.m !== k); } else G.mus.push(k); }
-    else if (b.dataset.gx) { const i = G.ex.findIndex(x => x.name === b.dataset.gx); if (i >= 0) G.ex.splice(i, 1); else G.ex.push({ name: b.dataset.gx, m: b.dataset.gxm, sets: 4, reps: 10, kg: 0 }); }
+    else if (b.dataset.gx) { const i = G.ex.findIndex(x => x.name === b.dataset.gx); if (i >= 0) G.ex.splice(i, 1); else G.ex.push({ name: b.dataset.gx, m: b.dataset.gxm, sets: G.def[0], reps: G.def[1], kg: 0 }); }
+    else if (b.dataset.gsr) { const [a, r] = b.dataset.gsr.split('x').map(Number); G.def = [a, r]; G.ex.forEach(e => { e.sets = a; e.reps = r; }); }
     else if (b.dataset.gd) G.dur = +b.dataset.gd;
     else if (b.dataset.gi) G.int = +b.dataset.gi;
     else return;
@@ -2495,7 +2498,7 @@
     const log = store.get(K_WLOG, []);
     log.unshift({ kind: 'muscu', date: Date.now() - G.dur * 60000, name: 'Musculation : ' + names.join(', '), muscles: G.mus.slice(), exercises: G.ex.map(e => ({ name: e.name, sets: e.sets, reps: e.reps, kg: e.kg })),
       durationMs: G.dur * 60000, kcal: gymKcal(), intensity: GINT[G.int][0], done: G.ex.length, total: G.ex.length });
-    store.set(K_WLOG, log.slice(0, 300));
+    store.set(K_WLOG, log.slice(0, 300)); store.set('parcours.gymDef', G.def);
     $('gsheet').classList.add('hidden'); renderSeances(); toast('Séance de musculation enregistrée'); try { healthChanged(); } catch (e) {}
   });
 
