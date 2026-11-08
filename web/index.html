@@ -3288,22 +3288,23 @@
     else return;
     store.set(K_WEIGHTS, L.slice(-400));
   }
+  try { weightTrack(); } catch (e) {} // premier point = poids du profil
   function weightHtml() {
     const L = store.get(K_WEIGHTS, []), w = +settings.weight || 0, g = +settings.weightGoal || 0;
     let h = '<div class="block wbox"><div class="bh">Mon poids</div>';
     h += '<div class="wnow"><div><b class="num">' + (w ? nf1.format(w) : '–') + '</b><small>kg</small></div>' +
       '<form id="wForm" class="wform"><input id="wIn" type="number" inputmode="decimal" step="0.1" min="30" max="250" placeholder="' + (w ? nf1.format(w) : '70') + '" aria-label="Mon poids aujourd\'hui en kg"><button class="sbtn save" type="submit">Noter</button></form></div>';
-    if (L.length >= 2) {
+    if (L.length >= 1) {
       const first = L[0], last = L[L.length - 1], diff = last.kg - first.kg;
       const m30 = L.filter(x => x.t >= Date.now() - 30 * 864e5), d30 = m30.length >= 2 ? m30[m30.length - 1].kg - m30[0].kg : null;
       const fmt = d => (d > 0 ? '+' : d < 0 ? '−' : '') + nf1.format(Math.abs(d)) + ' kg';
-      h += '<p class="wdiff">Depuis le ' + new Date(first.t).toLocaleDateString('fr-FR') + ' : <b>' + fmt(diff) + '</b>' + (d30 != null ? ' · sur 30 jours : <b>' + fmt(d30) + '</b>' : '') + '</p>';
+      h += L.length >= 2 ? '<p class="wdiff">Depuis le ' + new Date(first.t).toLocaleDateString('fr-FR') + ' : <b>' + fmt(diff) + '</b>' + (d30 != null ? ' · sur 30 jours : <b>' + fmt(d30) + '</b>' : '') + '</p>' : '<p class="wdiff">Première pesée le ' + new Date(first.t).toLocaleDateString('fr-FR') + '. Note ton poids chaque semaine (le matin à jeun) pour voir la courbe avancer.</p>';
       const W = 340, H = 130, pad = 8, t0 = first.t, t1 = Math.max(last.t, t0 + 864e5), lo = Math.min(...L.map(x => x.kg)) - 0.5, hi = Math.max(...L.map(x => x.kg)) + 0.5;
-      const X = t => pad + (t - t0) / (t1 - t0) * (W - 2 * pad), Y = k => pad + (hi - k) / (hi - lo) * (H - 2 * pad - 14);
+      const X = t => L.length === 1 ? W / 2 : pad + (t - t0) / (t1 - t0) * (W - 2 * pad), Y = k => pad + (hi - k) / (hi - lo) * (H - 2 * pad - 14);
       const pts = L.map(x => X(x.t).toFixed(1) + ',' + Y(x.kg).toFixed(1)).join(' ');
       h += '<svg class="wchart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Courbe de ton poids"><polyline points="' + pts + '" fill="none" stroke="var(--rouge)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>' +
         L.map(x => '<circle cx="' + X(x.t).toFixed(1) + '" cy="' + Y(x.kg).toFixed(1) + '" r="3.5" fill="var(--rouge)"/>').join('') +
-        '<text x="' + pad + '" y="' + (H - 2) + '">' + new Date(t0).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + '</text><text x="' + (W - pad) + '" y="' + (H - 2) + '" text-anchor="end">' + new Date(last.t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + '</text></svg>';
+        (L.length === 1 ? '<text x="' + (W / 2) + '" y="' + (H - 2) + '" text-anchor="middle">' + new Date(t0).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + '</text>' : '<text x="' + pad + '" y="' + (H - 2) + '">' + new Date(t0).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + '</text><text x="' + (W - pad) + '" y="' + (H - 2) + '" text-anchor="end">' + new Date(last.t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + '</text>') + '</svg>';
       if (g !== 0 && d30 != null && m30.length >= 2) {
         const ok = g < 0 ? d30 < 0 : d30 > 0;
         h += '<p class="wverdict ' + (ok ? 'ok' : '') + '">' + (ok ? (g < 0 ? '✓ Ton objectif marche : tu perds du poids.' : '✓ Ton objectif marche : tu prends du poids.') : (g < 0 ? 'Pas encore de baisse sur 30 jours : vérifie tes repas et bouge un peu plus.' : 'Pas encore de hausse sur 30 jours : mange un peu plus.')) + '</p>';
