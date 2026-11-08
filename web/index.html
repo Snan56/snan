@@ -3122,7 +3122,7 @@
       // moyenne de plusieurs vues = résultat plus stable
       const vs = [];
       for (const b of [ph.blob].concat(ph.views)) vs.push(await embedPhoto(b));
-      const avg = vs[0].map((_, k) => vs.reduce((a, v) => a + v[k], 0) / vs.length);
+      const avg0 = vs[0].map((_, k) => vs.reduce((a, v) => a + v[k], 0) / vs.length), an = Math.hypot(...avg0) || 1, avg = avg0.map(x => x / an);
       MS.vec = avg;
       const res = await classifyPhoto(null, avg);
       const top = res.slice(0, 6);
