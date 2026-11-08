@@ -3820,7 +3820,7 @@
     ['pilaf', 'Riz pilaf', 'feculent', 160, 0], ['pide', 'Pide (pain turc)', 'pain', 270, 0], ['aubergine', 'Aubergine', 'legume', 25, 1],
     ['cacik', 'Cacık (yaourt concombre)', 'sauce', 60, 0], ['ayran', 'Ayran', 'boisson', 35, 0], ['mercimek', 'Soupe de lentilles', 'soupe', 60, 0],
     ['dolma', 'Dolma (feuilles de vigne)', 'piece', 150, 0, 40], ['borek', 'Börek', 'dessert', 300, 0], ['baklava', 'Baklava', 'piece', 430, 0, 30],
-    ['lahmacun', 'Lahmacun', 'piece', 230, 0, 150]
+    ['lahmacun', 'Lahmacun', 'piece', 230, 0, 150], ['sucuk', 'Sucuk', 'viande', 450, 1], ['kasar', 'Kaşar (fromage)', 'fromage', 360, 0]
   ].map(a => ({ id: a[0], fr: a[1], t: a[2], k: a[3], cook: !!a[4], pg: a[5] || 0 }));
   // Plats complets : on choisit la taille, les calories sont celles du plat entier (sauces de base comprises)
   [['tacos', 'Tacos français', [['Taille M', 950], ['Taille L', 1300], ['Taille XL', 1800]]],
@@ -3834,6 +3834,7 @@
    ['sandwich', 'Sandwich jambon-beurre', [['½ baguette', 400], ['Baguette entière', 800]]],
    ['bowl', 'Poke bowl', [['Normal', 600], ['Grand', 850]]],
    ['sushis', 'Sushis / makis', [['6 pièces', 250], ['12 pièces', 500], ['18 pièces', 750]]],
+   ['tost-sucuk', 'Tost au sucuk', [['Normal', 500], ['Grand', 700], ['Double fromage', 650]]],
    ['pide-p', 'Pide garni', [['½ pide', 450], ['Pide entier', 900]]]
   ].forEach(a => INGR.push({ id: a[0], fr: a[1], t: 'plat', k: 0, cook: false, pg: 0, opts: a[2] }));
   const GROUPS = [['Plats', x => x.t === 'plat' || x.t === 'soupe' || ['lahmacun', 'dolma', 'borek'].includes(x.id)],
@@ -3846,12 +3847,12 @@
   const CUISINES = {
     'Française': ['sandwich', 'pdt', 'steak', 'poulet', 'haricots-v', 'puree', 'pain', 'beurre', 'camembert', 'salade'],
     'Fast-food': ['tacos', 'burger', 'cheese', 'kebab', 'pizza', 'wrap', 'panini', 'hotdog', 'nuggets', 'kebab-v', 'frites', 'pita', 'cheddar', 'blanche', 'algerienne', 'ketchup', 'mayo', 'bbq', 'salade', 'coca', 'zero', 'glace'],
-    'Turque': ['pide-p', 'kefta', 'pilaf', 'boulgour', 'pide', 'lahmacun', 'mercimek', 'dolma', 'borek', 'cacik', 'yaourt', 'aubergine', 'poivron', 'salade', 'tomate', 'ayran', 'baklava'],
+    'Turque': ['tost-sucuk', 'pide-p', 'kefta', 'sucuk', 'kasar', 'pilaf', 'boulgour', 'pide', 'lahmacun', 'mercimek', 'dolma', 'borek', 'cacik', 'yaourt', 'aubergine', 'poivron', 'salade', 'tomate', 'ayran', 'baklava'],
     'Italienne': ['pizza', 'pates', 's-tomate', 'parmesan', 'mozza', 'pesto', 'hache15', 'creme', 'lardons'],
     'Maghrébine': ['semoule', 'pois-ch', 'merguez', 'agneau', 'poulet', 'legumes', 'pain'],
     'Asiatique': ['sushis', 'bowl', 'riz', 'nouilles', 'poulet', 'crevettes', 'tofu', 'legumes', 'soja', 'oeuf'],
     'Mexicaine': ['tortilla', 'haricots-r', 'riz', 'hache15', 'avocat', 'cheddar', 'tomate', 'mais'],
-    'Petit-déjeuner': ['pain', 'beurre', 'confiture', 'pate-tart', 'cereales', 'lait', 'jus', 'croissant', 'oeuf', 'yaourt'],
+    'Petit-déjeuner': ['tost-sucuk', 'sucuk', 'pain', 'beurre', 'confiture', 'pate-tart', 'cereales', 'lait', 'jus', 'croissant', 'oeuf', 'yaourt'],
     'Dessert / goûter': ['yaourt-f', 'compote', 'cookie', 'glace', 'gateau', 'tarte', 'chocolat', 'banane', 'pomme']
   };
   const CP = { cuisine: '', group: '', sel: [] }; // sel : plusieurs aliments choisis en même temps
