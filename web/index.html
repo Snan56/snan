@@ -405,6 +405,17 @@
   .seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:var(--nuit-3);margin-bottom:8px}
   .seg button{border:0;border-radius:10px;padding:9px;background:none;color:var(--gris);font:inherit;font-weight:700;font-size:14px;cursor:pointer}.seg button[aria-pressed="true"]{background:var(--rouge);color:#fff}
   .rquick .ydhead{margin-top:4px}.rquick .ydhead .bh:empty{display:none}
+  .msheet2{padding-bottom:0}
+  .mtypes{display:flex;gap:6px;overflow-x:auto;margin:2px -20px 10px;padding:0 20px 2px;scrollbar-width:none}.mtypes::-webkit-scrollbar{display:none}.mtypes .chip{padding:8px 12px;font-size:13px}
+  .mplate{background:var(--nuit-3);border-radius:16px;padding:10px 12px;margin-bottom:12px}.mplate-h{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--gris)}
+  .mplate .mrow:first-child{border-top:0}.mplate .empty{margin:6px 0 2px;font-size:14px}
+  .mtabs{grid-template-columns:1fr 1fr 1fr}.mtabs button{font-size:13px;padding:9px 4px}
+  #mtComp #mComp{border:0;padding:0;margin-top:4px}#mComp #cpClose{display:none}
+  #mtCreate #myForm{border:0;padding:0;margin-top:4px}
+  .mphotos{justify-content:center;margin:10px 0 4px}
+  .mfoot{position:sticky;bottom:0;margin:10px -20px 0;padding:12px 20px calc(12px + var(--safe-b));display:flex;align-items:center;gap:10px;background:var(--nuit-2);border-top:1px solid var(--ligne);z-index:2}
+  .mfoot-t{flex:1;min-width:0}.mfoot .mtotal{margin:0;font-size:13px;line-height:1.3}.mfoot .mtotal b{font-size:18px;white-space:nowrap}.mfoot .sbtn{width:auto;flex:none;padding:12px 16px}
+  .mfav{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--ligne);background:var(--nuit-3);color:#facc15;font-size:22px;cursor:pointer}
   .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
   .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   body.on-map .chatfab,body.ac-open .chatfab{display:none}
@@ -1072,35 +1083,39 @@
 
 <!-- Repas : analyse de la photo -->
 <div id="msheet" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="mTitle">
-  <div class="sheet">
+  <div class="sheet msheet2">
     <div class="d-head"><h2 id="mTitle">Ton repas</h2><button id="mClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
+    <div class="mtypes" id="mTypes" role="group" aria-label="Moment du repas"></div>
+    <select id="mType" hidden><option value="0">Petit-déjeuner</option><option value="1">Déjeuner</option><option value="2">Goûter</option><option value="3">Dîner</option><option value="4">En-cas</option></select>
     <img id="mPhoto" class="mphoto hidden" alt="Photo du repas">
     <div id="mStatus" class="mstatus hidden" role="status"><span id="mStatusTxt"></span><div id="mBarBox" class="mbarbox hidden"><i id="mBar"></i></div></div>
-    <label class="mtype">Repas <select id="mType"><option value="0">Petit-déjeuner</option><option value="1">Déjeuner</option><option value="2">Goûter</option><option value="3">Dîner</option><option value="4">En-cas</option></select></label>
-    <div id="mList"></div>
-    <input id="mSearch" class="msearch" list="foodNames" placeholder="Ajouter un aliment (ex. : frites)" autocomplete="off" aria-label="Ajouter un aliment">
-    <datalist id="foodNames"></datalist>
-    <form id="offForm" class="offf"><input id="offQ" class="msearch" placeholder="Chercher un produit du commerce (ex. : Kinder Bueno mini)" autocomplete="off" aria-label="Chercher un produit du commerce"><button class="sbtn save" type="submit">Chercher</button></form>
-    <div id="offRes"></div>
-    <button id="myOpen" class="linkbtn my-open" type="button">+ Créer un aliment qui n'est pas dans la liste</button>
-    <div id="myForm" class="cp hidden">
-      <div class="cp-t">Nouvel aliment</div>
-      <input id="myName" class="msearch" placeholder="Nom (ex. : Mini Kinder Bueno)" maxlength="50" autocomplete="off">
-      <div class="my-grid"><label>Calories pour 1 portion<input id="myKcal" type="number" inputmode="numeric" min="1" max="3000" placeholder="kcal"></label>
-      <label>Une portion, c'est…<input id="myPortion" type="text" maxlength="30" placeholder="ex. : 1 barre"></label></div>
-      <div class="my-grid3"><label>Protéines (g)<input id="myP" type="number" inputmode="decimal" placeholder="–"></label><label>Glucides (g)<input id="myG" type="number" inputmode="decimal" placeholder="–"></label><label>Lipides (g)<input id="myL" type="number" inputmode="decimal" placeholder="–"></label></div>
-      <p class="mac-note">Astuce : les calories sont écrites sur l'emballage (tableau nutritionnel, « par portion » ou « par barre »). Protéines, glucides et lipides sont facultatifs.</p>
-      <button id="mySave" class="sbtn save" type="button">Ajouter l'aliment</button>
+    <div class="mplate"><div class="mplate-h">Dans ton assiette</div><div id="mList"></div></div>
+    <div class="seg mtabs" role="tablist"><button type="button" data-mt="comp" aria-pressed="true">🍽 Composer</button><button type="button" data-mt="search" aria-pressed="false">🔎 Rechercher</button><button type="button" data-mt="create" aria-pressed="false">＋ Créer</button></div>
+    <div id="mtComp"><div id="mComp" class="cp hidden"></div></div>
+    <div id="mtSearch" hidden>
+      <p class="mac-note" style="margin:0 0 6px">Cherche dans les plats de l'appli, tes aliments et tous les produits du commerce.</p>
+      <form id="offForm" class="offf"><input id="offQ" class="msearch" placeholder="Ex. : frites, Kinder Bueno mini…" autocomplete="off" aria-label="Chercher un aliment ou un produit"><button class="sbtn save" type="submit">Chercher</button></form>
+      <div id="localRes"></div>
+      <div id="offRes"></div>
     </div>
-    <button id="mCompBtn" class="sbtn cancel cp-open" type="button">Composer mon assiette (plus précis)</button>
-    <div id="mComp" class="cp hidden"></div>
-    <datalist id="ingNames"></datalist>
-    <div class="mphotos"><label class="linkbtn"><input id="mCamera" type="file" accept="image/*" capture="environment" hidden>Reprendre une photo</label><label class="linkbtn"><input id="mGallery" type="file" accept="image/*" hidden>Autre photo</label><button id="mNoPhoto" type="button" hidden></button></div>
-    <p id="mTotal" class="mtotal"></p>
-    <div class="btns">
+    <div id="mtCreate" hidden>
+      <div id="myForm" class="cp">
+        <input id="myName" class="msearch" placeholder="Nom (ex. : Mini Kinder Bueno)" maxlength="50" autocomplete="off">
+        <div class="my-grid"><label>Calories pour 1 portion<input id="myKcal" type="number" inputmode="numeric" min="1" max="3000" placeholder="kcal"></label>
+        <label>Une portion, c'est…<input id="myPortion" type="text" maxlength="30" placeholder="ex. : 1 barre"></label></div>
+        <div class="my-grid3"><label>Protéines (g)<input id="myP" type="number" inputmode="decimal" placeholder="–"></label><label>Glucides (g)<input id="myG" type="number" inputmode="decimal" placeholder="–"></label><label>Lipides (g)<input id="myL" type="number" inputmode="decimal" placeholder="–"></label></div>
+        <p class="mac-note">Les calories sont écrites sur l'emballage (« par portion » ou « par barre »). Protéines, glucides et lipides sont facultatifs.</p>
+        <button id="mySave" class="sbtn save" type="button">Créer et ajouter</button>
+      </div>
+    </div>
+    <input id="mSearch" hidden list="foodNames"><datalist id="foodNames"></datalist><datalist id="ingNames"></datalist>
+    <button id="myOpen" type="button" hidden></button><button id="mCompBtn" type="button" hidden></button>
+    <div class="mphotos"><label class="linkbtn"><input id="mCamera" type="file" accept="image/*" capture="environment" hidden>📷 Prendre une photo</label><label class="linkbtn"><input id="mGallery" type="file" accept="image/*" hidden>🖼 Choisir une photo</label><button id="mNoPhoto" type="button" hidden></button></div>
+    <div class="mfoot">
+      <div class="mfoot-t"><p id="mTotal" class="mtotal"></p></div>
+      <button id="rpFav" class="mfav" type="button" aria-label="Enregistrer en favori">☆</button>
       <button id="rpSave" class="sbtn save" type="button">Ajouter au journal</button>
-      <button id="rpFav" class="sbtn cancel" type="button">☆ Enregistrer en favori</button>
-      <button id="rpCancel" class="sbtn cancel" type="button">Annuler</button>
+      <button id="rpCancel" type="button" hidden></button>
     </div>
   </div>
 </div>
@@ -3715,7 +3730,7 @@
       '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + (it.mine ? 'Ajouté par toi, ' : it.mem ? 'Comme ton repas habituel, ' : it.z ? 'Aussi dans l\'assiette, ' : it.v ? 'Variante, ' : it.p != null ? (it.p >= 0.5 ? 'Très probable' : it.p >= 0.12 ? 'Probable' : 'Possible') + ', ' : '') + 'portion : ' + esc(it.f.portion) + '</small></div>' +
       '<select data-mq="' + i + '" aria-label="Nombre de portions de ' + esc(it.f.fr) + '">' + QTY.map(([q, l]) => '<option value="' + q + '"' + (q === it.q ? ' selected' : '') + '>× ' + l + '</option>').join('') + '</select>' +
       '<b class="mkcal num">' + nf0.format(Math.round(it.f.kcal * it.q)) + '</b></div>').join('')
-      : '<p class="empty">Ajoute les aliments de ton repas avec la recherche ci-dessous.</p>';
+      : '<p class="empty">Rien pour l\'instant : choisis tes aliments ci-dessous.</p>';
     const tot = MS.items.filter(x => x.on).reduce((a, x) => a + x.f.kcal * x.q, 0);
     $('mTotal').innerHTML = 'Total estimé : <b class="num">' + nf0.format(Math.round(tot)) + ' kcal</b>';
     $('rpSave').disabled = !MS.items.some(x => x.on);
@@ -3725,12 +3740,13 @@
     $('mBar').style.width = pct == null ? '0' : (pct * 100).toFixed(0) + '%'; $('mBarBox').classList.toggle('hidden', pct == null);
   }
   async function openMeal(file) {
-    MS.items = []; MS.thumb = ''; MS.date = Date.now(); MS.vec = null; CP.sel = []; $('myForm').classList.add('hidden'); $('offRes').innerHTML = ''; $('offQ').value = ''; $('mComp').classList.add('hidden'); $('mCompBtn').classList.remove('hidden');
+    MS.items = []; MS.thumb = ''; MS.date = Date.now(); MS.vec = null; CP.sel = []; $('offRes').innerHTML = ''; $('localRes').innerHTML = ''; $('offQ').value = ''; $('mComp').classList.add('hidden'); $('mCompBtn').classList.remove('hidden');
     $('mType').value = String(mealTypeFor(MS.date));
     $('mPhoto').classList.add('hidden'); $('mSearch').value = '';
     mealRows(); $('msheet').classList.remove('hidden');
     try { await loadFoods(); fillFoodSearch(); } catch (e) {}
-    if (!file) { mealStatus(''); openComp(); return; } // sans photo : on guide directement (pas de clavier qui saute)
+    renderTypes(); mSetTab('comp');
+    if (!file) { mealStatus(''); return; } // sans photo : on guide directement (pas de clavier qui saute)
     let ph;
     try { ph = await prepPhoto(file); } catch (e) { mealStatus("Cette photo n'a pas pu être ouverte. Essaie avec une autre photo."); return; }
     MS.thumb = ph.thumb; $('mPhoto').src = ph.preview; $('mPhoto').classList.remove('hidden');
@@ -3788,7 +3804,7 @@
     if (P != null || G != null || L != null) f.mac = [P || 0, G || 0, L || 0];
     const all = myFoods(); all.unshift(f); store.set(K_MYFOODS, all.slice(0, 200));
     MS.items.unshift({ f, p: null, q: 1, on: true, mine: true }); mealRows();
-    ['myName', 'myKcal', 'myPortion', 'myP', 'myG', 'myL'].forEach(id => $(id).value = ''); $('myForm').classList.add('hidden'); $('offRes').innerHTML = ''; $('offQ').value = '';
+    ['myName', 'myKcal', 'myPortion', 'myP', 'myG', 'myL'].forEach(id => $(id).value = '');
     $('foodNames').innerHTML = ''; fillFoodSearch();
     toast('« ' + f.fr + ' » ajouté et gardé dans tes aliments');
   });
@@ -3818,7 +3834,12 @@
     $('offRes').innerHTML = offList.length ? '<div class="offl">' + offList.map((x, i) => '<button type="button" class="offr" data-off="' + i + '"><span><b>' + esc(x.name) + '</b><small>' + esc(x.brand) + (x.brand ? ' · ' : '') + x.k + ' kcal / 100 g' + (x.sq ? ' · portion ' + esc(x.ss || x.sq + ' g') + ' = ' + Math.round(x.k * x.sq / 100) + ' kcal' : '') + '</small></span><i>+</i></button>').join('') + '</div><p class="mac-note">Source : Open Food Facts (base collaborative, vérifie l\'emballage si besoin).</p>'
       : '<p class="mac-note">Aucun produit trouvé. Essaie un autre nom, ou crée l\'aliment toi-même ci-dessous.</p>';
   }
-  $('offForm').addEventListener('submit', e => { e.preventDefault(); $('offQ').blur(); offRun($('offQ').value); });
+  $('offForm').addEventListener('submit', e => {
+    e.preventDefault(); $('offQ').blur(); const q = $('offQ').value.trim(); if (q.length < 2) return;
+    localList = localSearch(q);
+    $('localRes').innerHTML = localList.length ? '<div class="cp-g">Dans l\'appli</div><div class="offl">' + localList.map(([k, x], i) => '<button type="button" class="offr" data-loc="' + i + '"><span><b>' + esc(x.fr) + '</b><small>' + (k === 'my' ? 'Mon aliment · ' : '') + (k === 'ing' ? x.k + ' kcal / 100 ' + (['boisson', 'chaud', 'verre'].includes(x.t) ? 'ml' : 'g') : (x.portion ? esc(x.portion) + ' · ' : '') + nf0.format(x.kcal) + ' kcal') + '</small></span><i>+</i></button>').join('') + '</div><div class="cp-g">Produits du commerce</div>' : '';
+    offRun(q);
+  });
   $('offRes').addEventListener('click', e => {
     const b = e.target.closest('[data-off]'); if (!b) return;
     const x = offList[+b.dataset.off]; if (!x) return;
@@ -3828,6 +3849,32 @@
     MS.items.unshift({ f, p: null, q: 1, on: true, mine: true }); mealRows(); $('foodNames').innerHTML = ''; fillFoodSearch();
     $('offRes').innerHTML = ''; $('offQ').value = ''; toast('« ' + f.fr + ' » ajouté : règle la quantité à côté');
   });
+  let mTab = 'comp';
+  function mSetTab(t) {
+    mTab = t; document.querySelectorAll('[data-mt]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mt === t));
+    $('mtComp').hidden = t !== 'comp'; $('mtSearch').hidden = t !== 'search'; $('mtCreate').hidden = t !== 'create';
+    if (t === 'comp') openComp();
+  }
+  document.querySelectorAll('[data-mt]').forEach(b => b.addEventListener('click', () => mSetTab(b.dataset.mt)));
+  function renderTypes() {
+    const v = +$('mType').value;
+    $('mTypes').innerHTML = MEAL_TYPES.map((n, i) => '<button type="button" class="chip" data-mtype="' + i + '" aria-pressed="' + (v === i) + '">' + n + '</button>').join('');
+  }
+  $('mTypes').addEventListener('click', e => { const b = e.target.closest('[data-mtype]'); if (b) { $('mType').value = b.dataset.mtype; renderTypes(); } });
+  function localSearch(q) {
+    const nz = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''), qn = nz(q);
+    const L = myFoods().map(f => ['my', f]).concat(INGR.map(x => ['ing', x]), (foodsList ? foodsList.foods : []).map(f => ['db', f]));
+    return L.filter(([, x]) => nz(x.fr).includes(qn)).sort((a, b) => nz(a[1].fr).indexOf(qn) - nz(b[1].fr).indexOf(qn)).slice(0, 8);
+  }
+  let localList = [];
+  $('localRes').addEventListener('click', e => {
+    const b = e.target.closest('[data-loc]'); if (!b) return;
+    const [k, x] = localList[+b.dataset.loc];
+    if (k === 'ing') { mSetTab('comp'); pickIng(x, true); setTimeout(() => { const c = document.querySelector('#mComp .cp-card:last-of-type'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50); toast('Règle la quantité puis touche « Ajouter »'); return; }
+    const ex = MS.items.find(y => y.f.id === x.id);
+    if (ex) ex.on = true; else MS.items.unshift({ f: x, p: null, q: 1, on: true, mine: k === 'my' });
+    mealRows(); toast('« ' + x.fr + ' » ajouté');
+  });
   function fillFoodSearch() {
     if (!foodsList || $('foodNames').children.length) return;
     $('foodNames').innerHTML = myFoods().concat(foodsList.foods).map(f => '<option value="' + esc(f.fr) + '">').join('');
@@ -3836,7 +3883,7 @@
     const q = e.target.value.trim().toLowerCase(); if (!q || !foodsList) return;
     const nz = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ı/g, 'i'), qn = nz(q); // sans accents : « kofte » trouve « Köfte »
     const L = myFoods().concat(foodsList.foods), f = L.find(x => nz(x.fr) === qn) || L.find(x => nz(x.fr).startsWith(qn)) || L.find(x => nz(x.fr).includes(qn));
-    if (!f) { $('offQ').value = e.target.value.trim(); e.target.value = ''; offRun($('offQ').value); return; } // pas dans la liste : on cherche dans les produits du commerce
+    if (!f) { $('offQ').value = e.target.value.trim(); e.target.value = ''; mSetTab('search'); $('offForm').requestSubmit(); return; } // pas dans la liste : on cherche dans les produits du commerce
     const ex = MS.items.find(x => x.f.id === f.id);
     if (ex) ex.on = true; else MS.items.unshift({ f, p: null, q: 1, on: true });
     e.target.value = ''; mealRows();
@@ -4311,7 +4358,7 @@
   }
   $('repas').addEventListener('click', e => {
     const q = e.target.closest('[data-qt]'); if (q) { quickTab = q.dataset.qt; renderRepas(); return; }
-    const t = e.target.closest('[data-addtype]'); if (t) { openMeal(null).then(() => { $('mType').value = t.dataset.addtype; }); $('mType').value = t.dataset.addtype; }
+    const t = e.target.closest('[data-addtype]'); if (t) { openMeal(null).then(() => { $('mType').value = t.dataset.addtype; renderTypes(); }); $('mType').value = t.dataset.addtype; renderTypes(); }
   });
   $('repas').addEventListener('change', e => { if (e.target.id === 'copyDate') { copyDay = e.target.value || null; renderRepas(); } });
   $('repas').addEventListener('click', e => {
