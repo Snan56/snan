@@ -3984,7 +3984,7 @@
     // Le relief en volume (setTerrain) fait buguer la carte sur iPhone (zones noires, caméra dans le sol) : on garde seulement l'ombrage des pentes
     try { map.setTerrain(null); } catch (e) {}
     // les bâtiments 3D se mélangent mal avec le relief : on les cache quand le relief est actif
-    try { if (map.getLayer('p-batiments')) map.setLayoutProperty('p-batiments', 'visibility', on ? 'none' : 'visible'); } catch (e) {}
+    try { if (map.getLayer('p-batiments')) map.setLayoutProperty('p-batiments', 'visibility', 'visible'); } catch (e) {}
   }
   function flushRoute() {
     if (!map || !mapRouteDirty) return;
