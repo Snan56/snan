@@ -1750,14 +1750,14 @@
       S.track.length = Math.min(S.track.length, snap.seg + 1);
       S.activeMs = snap.ms;
     } else S.activeMs += Date.now() - S.resumedAt;
-    S.veh = true; S.vehCount = (S.vehCount || 0) + 1; VEH.steps = 0; VEH.stepHist = []; lastKcalAt = 0;
+    S.altSmooth = S.altAnchor = S.gradeAlt = null; S.grade = 0; S.veh = true; S.vehCount = (S.vehCount || 0) + 1; VEH.steps = 0; VEH.stepHist = []; lastKcalAt = 0;
     banner('Déplacement en véhicule détecté : l\'enregistrement est en pause. Il reprendra tout seul quand tu marcheras de nouveau.', 'info', 'OK', { tag: 'veh', label: 'Je ne suis pas en voiture', fn: () => { settings.vehPause = false; saveSettings(); vehExit(true); $('vehPause').checked = false; toast('Pause automatique désactivée pour l\'instant (Réglages)'); } });
     speak('Déplacement en véhicule détecté. Enregistrement en pause.');
     save(true); queueRender();
   }
   function vehExit(manual, fromPt) {
     if (!S.veh) return;
-    S.veh = false; S.resumedAt = Date.now(); lastKcalAt = Date.now();
+    S.veh = false; S.resumedAt = Date.now(); lastKcalAt = Date.now(); S.altSmooth = S.altAnchor = S.gradeAlt = null; S.grade = 0; 
     S.track.push([]); last = null; vehReset();
     // on compte la marche depuis le début de la fenêtre lente (elle a servi à détecter la sortie du véhicule)
     if (fromPt) { last = fromPt; S.lastPtMs = elapsed(); S.track[S.track.length - 1].push([r6(fromPt.lat), r6(fromPt.lon), null, Math.round((fromPt.ts - S.startTime) / 1000)]); }
@@ -1906,7 +1906,7 @@
     if (!window.isSecureContext && !isNative) banner(INSECURE, 'err'); else banner('');
     const resuming = S.status === 'paused';
     if (S.status === 'idle') { S = fresh(); S.startTime = Date.now(); M.g = null; M.f = 0; M.above = false; M.lastT = 0; mapRouteDirty = true; }
-    S.status = 'running'; S.resumedAt = Date.now(); lastKcalAt = Date.now(); S.veh = false; vehReset();
+    S.status = 'running'; S.resumedAt = Date.now(); lastKcalAt = Date.now(); S.veh = false; vehReset(); S.altSmooth = S.altAnchor = S.gradeAlt = null; S.grade = 0; 
     M.times = []; M.cadStart = 0;
     S.track.push([]); last = null; curKmh = 0; lastMoveTs = Date.now();
     startGeo(); if (!isNative) requestWake();
@@ -1962,7 +1962,9 @@
   // quand le calcul en direct a raté des minutes (écran verrouillé, GPS lent en montagne, pentes raides).
   function summaryKcal(h) {
     if (!h || h.activity === 'velo') return 0;
-    const run = h.activity === 'course', d = h.distanceM || 0, up = h.dplus || 0, down = h.dminus || 0, min = (h.durationMs || 0) / 60000;
+    const run = h.activity === 'course', d = h.distanceM || 0, min = (h.durationMs || 0) / 60000;
+    // garde-fous : on ne monte pas plus de ~900 m/h ni ne descend plus de ~1 200 m/h à pied, ni plus de 35 % de la distance
+    const up = Math.min(h.dplus || 0, min / 60 * 900, d * 0.35), down = Math.min(h.dminus || 0, min / 60 * 1200, d * 0.35);
     const vo2 = (run ? 0.2 : 0.1) * d + (run ? 0.9 : 1.8) * up + 0.5 * down + 3.5 * min; // ml O2 / kg sur toute la sortie
     const terrain = !run && d > 0 && up / d > 0.03 ? 1.15 : 1; // sentier de montagne
     return vo2 * terrain * weightKg() / 1000 * 5;
@@ -5185,7 +5187,7 @@
   } else post.classList.remove('intro');
   applyAnim();
   syncSettingsForm();
-  try { const H = store.get(K_HIST, []); let ch = 0; H.forEach(h => { if (h.kcalFix) return; const k = summaryKcal(h); if (k > (h.kcal || 0) * 1.1) { h.kcal = Math.round(k); ch = 1; } h.kcalFix = 1; }); if (ch || H.length) store.set(K_HIST, H); } catch (e) {}
+  try { const H = store.get(K_HIST, []); let ch = 0; H.forEach(h => { if (h.kcalFix2) return; const k = summaryKcal(h); if (k > (h.kcal || 0) * 1.1) { h.kcal = Math.round(k); ch = 1; } h.kcalFix2 = 1; }); if (ch || H.length) store.set(K_HIST, H); } catch (e) {}
   renderProgress();
   renderSeances();
   render();
