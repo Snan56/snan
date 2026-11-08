@@ -17,7 +17,7 @@
 	<key>NSMotionUsageDescription</key>
 	<string>Parcours compte tes pas avec les capteurs du téléphone.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Parcours prend en photo ton repas pour estimer les calories. La photo reste sur ton téléphone.</string>
+	<string>Parcours utilise la caméra pour photographier ton repas et scanner le code-barres des produits. Les images restent sur ton téléphone.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Parcours peut analyser une photo de repas de ta galerie. La photo reste sur ton téléphone.</string>
 	<key>UIBackgroundModes</key>
