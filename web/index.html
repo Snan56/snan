@@ -976,7 +976,7 @@
     </div>
     <div class="set-title">Objectifs</div>
     <div class="set">
-      <div class="row"><label for="goalSteps">Pas par jour<small>Compte les pas faits pendant tes sorties</small></label><span class="unitfield"><input id="goalSteps" type="number" min="500" max="60000" step="500" inputmode="numeric"></span></div>
+      <div class="row"><label for="goalSteps">Pas par jour<small>Tous tes pas de la journée, comptés par l'iPhone</small></label><span class="unitfield"><input id="goalSteps" type="number" min="500" max="60000" step="500" inputmode="numeric"></span></div>
       <div class="row"><label for="goalKm">Kilomètres par semaine<small>Du lundi au dimanche</small></label><span class="unitfield"><input id="goalKm" type="number" min="1" max="500" step="1" inputmode="numeric"> km</span></div>
       <div class="row"><button id="openGoals" class="linkbtn" type="button">Choisir et régler tous mes objectifs</button></div>
     </div>
@@ -1997,6 +1997,7 @@
     };
     entry.kcal = Math.round(Math.max(entry.kcal, summaryKcal(entry)));
     hist.unshift(entry);
+    setTimeout(() => { try { pedoAfterSave(entry.date); } catch (e) {} }, 800);
     let kept = hist.slice(0, 150);
     while (!store.set(K_HIST, kept) && kept.length > 10) kept = kept.slice(0, Math.floor(kept.length * 0.8)); // mémoire pleine : on garde les plus récentes
     const msr = measuredStepM();
@@ -2079,7 +2080,7 @@
   const dfLong = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
   // Les 6 objectifs que l'on peut se fixer
   const GOALS = [
-    { k: 'steps', key: 'goalSteps', title: 'Pas par jour', now: "Pas aujourd'hui", unit: 'pas', step: 500, min: 1000, max: 60000, desc: 'Les pas comptés pendant tes sorties à pied.', f: v => nf0.format(v),
+    { k: 'steps', key: 'goalSteps', title: 'Pas par jour', now: "Pas aujourd'hui", unit: 'pas', step: 500, min: 1000, max: 60000, desc: 'Tous tes pas de la journée, comptés par l\'iPhone (comme l\'app Santé).', f: v => nf0.format(v),
       left: d => 'Encore ' + nf0.format(d) + ' pas aujourd\'hui', ok: "Atteint aujourd'hui, bravo !" },
     { k: 'km', key: 'goalKm', title: 'Kilomètres par semaine', now: 'Kilomètres cette semaine', unit: 'km', step: 1, min: 1, max: 300, desc: 'Toutes tes sorties, du lundi au dimanche.', f: v => nf1.format(v),
       left: d => 'Encore ' + nf1.format(d) + ' km cette semaine', ok: 'Atteint cette semaine, bravo !' },
@@ -2102,6 +2103,7 @@
       if (h.date >= ws) { st.km += (h.distanceM || 0) / 1000; st.kcal += h.kcal || 0; }
       if (h.activity !== 'velo') st.longest = Math.max(st.longest, (h.distanceM || 0) / 1000);
     });
+    if (settings.pedoSteps && settings.pedoSteps.day === today) st.steps = Math.max(st.steps, settings.pedoSteps.v); // tous les pas du jour, puce de mouvement de l'iPhone
     if (settings.healthSteps && settings.healthSteps.day === today) st.steps = Math.max(st.steps, settings.healthSteps.v); // pas de toute la journée, si importés depuis Santé
     wlog.forEach(l => {
       if (l.date >= ws) { st.sessions++; st.kcal += l.kcal || 0; }
@@ -2444,6 +2446,48 @@
     return new Promise((res, rej) => cv.toBlob(bl => bl ? res(bl) : rej(new Error('toBlob')), 'image/png'));
   }
 
+
+  // ---------- Podomètre de l'iPhone : vrais pas, distance et étages, même quand l'appli dort ----------
+  const pedo = () => isNative && plugin('Pedometer');
+  async function pedoQuery(from, to) { const P = pedo(); if (!P) return null; try { return await P.query({ from, to }); } catch (e) { return null; } }
+  async function pedoToday() {
+    const d = new Date(); d.setHours(0, 0, 0, 0);
+    const r = await pedoQuery(d.getTime(), Date.now()); if (!r) return;
+    const today = dayKey(Date.now());
+    if (!settings.pedoSteps || settings.pedoSteps.day !== today || settings.pedoSteps.v !== r.steps) { settings.pedoSteps = { day: today, v: r.steps }; saveSettings(); if (currentView === 3) renderProgress(); }
+  }
+  // Corrige une sortie avec les mesures de l'iPhone : pas réels, distance si le GPS a décroché, dénivelé à pied (étages ≈ 3 m)
+  async function pedoFixEntry(h) {
+    const lastT = (h.track || []).reduce((m, p) => Math.max(m, p[3] || 0), 0);
+    const end = h.date + Math.max(h.durationMs || 0, lastT * 1000);
+    if (Date.now() - end > 7 * 864e5 - 3600e3 || end <= h.date) return false; // l'iPhone garde 7 jours
+    const r = await pedoQuery(h.date, end); if (!r) return false;
+    let ch = false;
+    if (h.activity !== 'velo' && r.steps > (h.steps || 0)) { h.steps = r.steps; h.stepsEstimated = false; ch = true; }
+    if (h.activity !== 'velo' && r.distance > (h.distanceM || 0) * 1.4 && r.distance > 500) { h.distanceM = Math.round(r.distance); h.distEst = 1; h.avgKmh = Math.round(h.distanceM / 1000 / Math.max(0.1, (h.durationMs || 1) / 3600e3) * 10) / 10; ch = true; }
+    if (r.floorsUp != null && h.activity !== 'velo') {
+      const up = Math.round(r.floorsUp * 3), down = Math.round((r.floorsDown || 0) * 3);
+      if ((h.dplus || 0) > up * 1.5 + 60) { h.dplus = up; ch = true; } // dénivelé gonflé (voiture, GPS) : on garde ce qui a été monté à pied
+      if ((h.dminus || 0) > down * 1.5 + 60 && down > 0) { h.dminus = down; ch = true; }
+    }
+    if (ch) { h.kcal = Math.round(summaryKcal(h)); h.pedoFix = 1; }
+    return ch;
+  }
+  async function pedoFixAll() {
+    if (!pedo()) return;
+    const H = store.get(K_HIST, []); let ch = 0;
+    for (const h of H.slice(0, 15)) { if (h.pedoFix || Date.now() - h.date > 8 * 864e5) continue; if (await pedoFixEntry(h)) ch++; else h.pedoFix = 1; }
+    store.set(K_HIST, H);
+    if (ch) { toast(ch + ' sortie' + (ch > 1 ? 's corrigées' : ' corrigée') + ' avec les pas de l\'iPhone'); if (currentView === 3) renderProgress(); }
+  }
+  async function pedoAfterSave(date) {
+    const H = store.get(K_HIST, []), h = H.find(x => x.date === date); if (!h) return;
+    if (await pedoFixEntry(h)) { store.set(K_HIST, H); if (currentView === 3) renderProgress(); }
+    pedoToday();
+  }
+  setTimeout(() => { pedoToday(); pedoFixAll(); }, 3000);
+  setInterval(() => { if (!document.hidden) pedoToday(); }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) pedoToday(); });
 
   // ---------- Photos pendant la sortie ----------
   const phSrc = f => f.d || (f.uri && window.Capacitor && Capacitor.convertFileSrc ? Capacitor.convertFileSrc(f.uri) : '');

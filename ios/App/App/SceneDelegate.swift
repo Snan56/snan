@@ -1,6 +1,7 @@
 import UIKit
 import Capacitor
 import AVFoundation
+import CoreMotion
 #if canImport(FoundationModels)
 import FoundationModels
 #endif
@@ -10,6 +11,7 @@ class ParcoursViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(CoachPlugin())
         bridge?.registerPluginInstance(ScannerPlugin())
+        bridge?.registerPluginInstance(PedometerPlugin())
     }
 }
 
@@ -61,6 +63,37 @@ public class CoachPlugin: CAPPlugin, CAPBridgedPlugin {
         }
         #endif
         call.reject("unavailable")
+    }
+}
+
+// Podomètre de l'iPhone (puce de mouvement, comme l'app Santé) : compte même quand l'appli dort, 7 jours d'historique
+@objc(PedometerPlugin)
+public class PedometerPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "PedometerPlugin"
+    public let jsName = "Pedometer"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "available", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "query", returnType: CAPPluginReturnPromise)
+    ]
+    private let pedo = CMPedometer()
+
+    @objc func available(_ call: CAPPluginCall) {
+        call.resolve(["steps": CMPedometer.isStepCountingAvailable(), "floors": CMPedometer.isFloorCountingAvailable(),
+                      "distance": CMPedometer.isDistanceAvailable(), "auth": CMPedometer.authorizationStatus().rawValue])
+    }
+
+    @objc func query(_ call: CAPPluginCall) {
+        guard let from = call.getDouble("from"), let to = call.getDouble("to"), to > from else { call.reject("dates"); return }
+        guard CMPedometer.isStepCountingAvailable() else { call.reject("unavailable"); return }
+        pedo.queryPedometerData(from: Date(timeIntervalSince1970: from / 1000), to: Date(timeIntervalSince1970: to / 1000)) { data, error in
+            if let e = error { call.reject(e.localizedDescription); return }
+            guard let d = data else { call.reject("nodata"); return }
+            var r: [String: Any] = ["steps": d.numberOfSteps.intValue]
+            if let x = d.distance { r["distance"] = x.doubleValue }
+            if let x = d.floorsAscended { r["floorsUp"] = x.intValue }
+            if let x = d.floorsDescended { r["floorsDown"] = x.intValue }
+            call.resolve(r)
+        }
     }
 }
 
