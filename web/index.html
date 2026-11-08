@@ -3548,14 +3548,14 @@
       if (any) { const p = await LN.requestPermissions(); if (p.display !== 'granted') { toast('Autorise les notifications de Parcours dans les Réglages de l\'iPhone.'); return; } }
       await LN.cancel({ notifications: [1, 2, 3, 4, 5, 6].map(id => ({ id })) });
       const hm = (v, d) => String(v || d).split(':').map(Number), [hh, mm] = hm(settings.remWalkAt, '18:00'), [lh, lm] = hm(settings.remLunchAt, '13:30'), [dh, dm] = hm(settings.remDinnerAt, '20:30'), [wh, wm] = hm(settings.remWeighAt, '09:00'), N = [];
-      if (settings.remWalk) N.push({ id: 1, title: 'Parcours', body: 'C\'est l\'heure de ta marche ! Même 20 minutes, ça compte.', schedule: { on: { hour: hh, minute: mm }, repeats: true, allowWhileIdle: true } });
+      if (settings.remWalk) N.push({ id: 1, title: 'Parcours · Marche', body: 'Votre séance de marche est prévue maintenant. 20 minutes suffisent pour progresser.', schedule: { on: { hour: hh, minute: mm }, repeats: true, allowWhileIdle: true } });
       if (settings.remMeals) {
-        N.push({ id: 2, title: 'Parcours', body: 'Pense à noter ton déjeuner.', schedule: { on: { hour: lh, minute: lm }, repeats: true } });
-        N.push({ id: 3, title: 'Parcours', body: 'Pense à noter ton dîner.', schedule: { on: { hour: dh, minute: dm }, repeats: true } });
+        N.push({ id: 2, title: 'Parcours · Repas', body: 'Enregistrez votre déjeuner pour suivre vos apports du jour.', schedule: { on: { hour: lh, minute: lm }, repeats: true } });
+        N.push({ id: 3, title: 'Parcours · Repas', body: 'Enregistrez votre dîner pour compléter votre bilan du jour.', schedule: { on: { hour: dh, minute: dm }, repeats: true } });
       }
-      if (settings.remWeigh) N.push({ id: 4, title: 'Parcours', body: 'C\'est le jour de ta pesée : note ton poids du matin.', schedule: { on: { weekday: +settings.remWeighDay || 1, hour: wh, minute: wm }, repeats: true } });
-      if (settings.remWeek) N.push({ id: 5, title: 'Parcours · ton bilan de la semaine', body: weekSummaryText(), schedule: { on: { weekday: 1, hour: 20, minute: 0 }, repeats: true } });
-      if (settings.remSteps !== false) N.push({ id: 6, title: 'Parcours · bonjour !', body: 'Active tes pas de la journée : ouvre Parcours pour lancer le compteur.', schedule: { on: { hour: 6, minute: 0 }, repeats: true, allowWhileIdle: true } });
+      if (settings.remWeigh) N.push({ id: 4, title: 'Parcours · Pesée', body: 'Jour de pesée : enregistrez votre poids du matin.', schedule: { on: { weekday: +settings.remWeighDay || 1, hour: wh, minute: wm }, repeats: true } });
+      if (settings.remWeek) N.push({ id: 5, title: 'Parcours · Bilan hebdomadaire', body: weekSummaryText(), schedule: { on: { weekday: 1, hour: 20, minute: 0 }, repeats: true } });
+      if (settings.remSteps !== false) N.push({ id: 6, title: 'Parcours · Suivi des pas', body: 'Bonjour. Ouvrez Parcours pour activer le suivi de vos pas de la journée.', schedule: { on: { hour: 6, minute: 0 }, repeats: true, allowWhileIdle: true } });
       if (N.length) await LN.schedule({ notifications: N });
       if (fromUser) toast(N.length ? 'Rappels programmés' : 'Rappels désactivés');
     } catch (e) { if (fromUser) toast('Les rappels n\'ont pas pu être programmés.'); }
@@ -3577,7 +3577,7 @@
     try {
       const p = await LN.requestPermissions();
       if (p.display !== 'granted') { info("Notifications refusées : Réglages de l'iPhone > Parcours > Notifications > Autoriser."); return; }
-      await LN.schedule({ notifications: [{ id: 99, title: 'Parcours', body: 'Test réussi : tes rappels marchent !', schedule: { at: new Date(Date.now() + 10000), allowWhileIdle: true } }] });
+      await LN.schedule({ notifications: [{ id: 99, title: 'Parcours', body: 'Notification de test : vos rappels sont correctement configurés.', schedule: { at: new Date(Date.now() + 10000), allowWhileIdle: true } }] });
       const pend = await LN.getPending();
       info('Rappel de test programmé. Verrouille ton iPhone ou quitte l\'appli : il arrive dans 10 s. Rappels prévus : ' + ((pend.notifications || []).length) + '.');
     } catch (e) { info('Erreur : ' + (e && e.message || e)); }
@@ -3703,7 +3703,7 @@
     const parts = [hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + ' (' + nf1.format(km) + ' km)', wlog.length + ' séance' + (wlog.length > 1 ? 's' : '') + (muscu ? ' dont ' + muscu + ' de muscu' : ''), nf0.format(Math.round(kcal)) + ' kcal dépensées'];
     if (W.length >= 2) { const d = W[W.length - 1].kg - W[0].kg; parts.push('poids ' + (d > 0 ? '+' : d < 0 ? '−' : '') + nf1.format(Math.abs(d)) + ' kg'); }
     const st = goalStats(); if (st.streak >= 2) parts.push(st.streak + ' jours d\'affilée');
-    return 'Ta semaine : ' + parts.join(', ') + '. ' + (hist.length + wlog.length ? 'Bravo, continue comme ça !' : 'Nouvelle semaine demain : on s\'y remet ?');
+    return 'Votre semaine : ' + parts.join(', ') + '. ' + (hist.length + wlog.length ? 'Belle régularité, poursuivez sur cette lancée.' : 'Aucune activité cette semaine. Une nouvelle semaine commence demain.');
   }
   window.__weekSummary = weekSummaryText;
 
