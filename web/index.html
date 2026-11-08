@@ -322,6 +322,18 @@
   .wgrp summary i{font-style:normal;font-weight:800;min-width:30px;height:30px;border-radius:15px;display:grid;place-items:center;background:var(--nuit-3);color:var(--gris);font-size:13px;transition:transform .2s}
   .wgrp[open] summary i{background:var(--rouge);color:#fff}
   .wgrp[open]{padding-bottom:10px}
+  .wnow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0}.wnow b{font-size:40px;font-weight:900}.wnow small{margin-left:4px;color:var(--gris)}
+  .wform{display:flex;gap:8px}.wform input{width:86px;font:inherit;font-size:16px;padding:10px;border-radius:12px;background:var(--nuit-3);color:var(--blanc);border:1px solid rgba(200,205,215,.22)}.wform .sbtn{width:auto;padding:10px 16px}
+  .wdiff{margin:6px 0;color:var(--gris);font-size:14px}.wdiff b{color:var(--blanc)}
+  .wchart{width:100%;height:auto;display:block;margin-top:6px}.wchart text{fill:var(--gris);font-size:11px;font-family:inherit}
+  .wverdict{margin:8px 0 0;font-weight:600;color:var(--gris)}.wverdict.ok{color:#4ade80}
+  .frow{display:grid;grid-template-columns:1fr auto 40px 32px;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--ligne)}
+  .fadd{background:none;border:0;color:inherit;font:inherit;text-align:left;padding:0;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+  .fadd b{font-size:15px}.fadd small{font-size:12px;color:var(--gris);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fk{font-size:13px;color:var(--gris)}
+  .fbtn{width:40px;height:40px;border-radius:50%;border:0;background:var(--rouge);color:#fff;font-size:24px;font-weight:700;cursor:pointer;line-height:1}
+  .fdel{width:32px;height:32px;border-radius:50%;border:1px solid var(--ligne);background:none;color:var(--gris);font-size:18px;cursor:pointer}
+  .tfield{font:inherit;font-size:16px;padding:9px 10px;border-radius:12px;background:var(--nuit-3);color:var(--blanc);border:1px solid rgba(200,205,215,.22);width:136px}
   .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
   .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   body.on-map .chatfab,body.ac-open .chatfab{display:none}
@@ -908,6 +920,13 @@
     <div class="set" id="apkBox" hidden><div class="row"><div class="rl">Appli Android<small>Avec l'appli, le suivi continue quand l'écran est verrouillé.</small></div></div>
       <a class="linkbtn" href="parcours.apk" download style="display:block;text-decoration:none">Télécharger l'appli Android</a></div>
     <div class="set" id="installBox" hidden><button id="installBtn" class="linkbtn" type="button">Installer l'appli sur l'écran d'accueil</button></div>
+    <div class="set-title">Rappels</div>
+    <div class="set">
+      <div class="row"><label for="remWalk">Aller marcher<small>Une notification chaque jour à l'heure choisie</small></label><span class="switch"><input id="remWalk" type="checkbox" role="switch"><span></span></span></div>
+      <div class="row"><label for="remWalkAt">Heure de la marche</label><input id="remWalkAt" type="time" value="18:00" class="tfield"></div>
+      <div class="row"><label for="remMeals">Noter mes repas<small>À 13 h 30 et 20 h 30</small></label><span class="switch"><input id="remMeals" type="checkbox" role="switch"><span></span></span></div>
+      <div class="row"><label for="remWeigh">Me peser<small>Le dimanche à 9 h</small></label><span class="switch"><input id="remWeigh" type="checkbox" role="switch"><span></span></span></div>
+    </div>
     <div class="set-title">Sauvegarde</div>
     <div class="set">
       <div class="row"><div class="rl">Sauvegarder mes données<small>Sorties, repas, séances, objectifs et réglages dans un fichier. Garde-le dans Fichiers ou iCloud Drive : si tu supprimes l'appli, tu pourras tout récupérer.</small></div></div>
@@ -986,6 +1005,7 @@
     <p id="mTotal" class="mtotal"></p>
     <div class="btns">
       <button id="rpSave" class="sbtn save" type="button">Ajouter au journal</button>
+      <button id="rpFav" class="sbtn cancel" type="button">☆ Enregistrer en favori</button>
       <button id="rpCancel" class="sbtn cancel" type="button">Annuler</button>
     </div>
   </div>
@@ -1211,7 +1231,7 @@
     goalsOn: { steps: true, km: true, sessions: false, kcal: false, longest: false, navette: false },
     sens: 'moyenne', maxAcc: 30, anim3d: !reduceMotion, map3d: true
   }, store.get(K_SET, {}));
-  const saveSettings = () => store.set(K_SET, settings);
+  const saveSettings = () => { store.set(K_SET, settings); try { weightTrack(); } catch (e) {} };
   const anim = () => !!settings.anim3d;
   const SENS = { faible: {hi: 1.9, lo: 0.4}, moyenne: {hi: 1.3, lo: 0.25}, forte: {hi: 0.85, lo: 0.15} };
   const ACT_LABEL = { marche: 'Marche', course: 'Course', velo: 'Vélo' };
@@ -1989,7 +2009,7 @@
   }
   function renderProgress(highlightFirst) {
     const hist = store.get(K_HIST, []), box = $('progress');
-    let html = goalsHtml();
+    let html = weightHtml() + goalsHtml();
     if (!hist.length) {
       box.innerHTML = html + '<div class="block"><div class="bh">Tes sorties</div><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>';
       return;
@@ -3156,6 +3176,105 @@
   });
   try { bkInfo(); } catch (e) {}
 
+  // ---------- Suivi du poids ----------
+  const K_WEIGHTS = 'parcours.weights';
+  function weightTrack(force) {
+    const w = +settings.weight; if (!(w >= 30 && w <= 250)) return;
+    const L = store.get(K_WEIGHTS, []), last = L[L.length - 1], today = dayKey(Date.now());
+    if (last && last.d === today) { if (last.kg === w && !force) return; last.kg = w; last.t = Date.now(); }
+    else if (!last || last.kg !== w || force) L.push({ d: today, t: Date.now(), kg: w });
+    else return;
+    store.set(K_WEIGHTS, L.slice(-400));
+  }
+  function weightHtml() {
+    const L = store.get(K_WEIGHTS, []), w = +settings.weight || 0, g = +settings.weightGoal || 0;
+    let h = '<div class="block wbox"><div class="bh">Mon poids</div>';
+    h += '<div class="wnow"><div><b class="num">' + (w ? nf1.format(w) : '–') + '</b><small>kg</small></div>' +
+      '<form id="wForm" class="wform"><input id="wIn" type="number" inputmode="decimal" step="0.1" min="30" max="250" placeholder="' + (w ? nf1.format(w) : '70') + '" aria-label="Mon poids aujourd\'hui en kg"><button class="sbtn save" type="submit">Noter</button></form></div>';
+    if (L.length >= 2) {
+      const first = L[0], last = L[L.length - 1], diff = last.kg - first.kg;
+      const m30 = L.filter(x => x.t >= Date.now() - 30 * 864e5), d30 = m30.length >= 2 ? m30[m30.length - 1].kg - m30[0].kg : null;
+      const fmt = d => (d > 0 ? '+' : d < 0 ? '−' : '') + nf1.format(Math.abs(d)) + ' kg';
+      h += '<p class="wdiff">Depuis le ' + new Date(first.t).toLocaleDateString('fr-FR') + ' : <b>' + fmt(diff) + '</b>' + (d30 != null ? ' · sur 30 jours : <b>' + fmt(d30) + '</b>' : '') + '</p>';
+      const W = 340, H = 130, pad = 8, t0 = first.t, t1 = Math.max(last.t, t0 + 864e5), lo = Math.min(...L.map(x => x.kg)) - 0.5, hi = Math.max(...L.map(x => x.kg)) + 0.5;
+      const X = t => pad + (t - t0) / (t1 - t0) * (W - 2 * pad), Y = k => pad + (hi - k) / (hi - lo) * (H - 2 * pad - 14);
+      const pts = L.map(x => X(x.t).toFixed(1) + ',' + Y(x.kg).toFixed(1)).join(' ');
+      h += '<svg class="wchart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Courbe de ton poids"><polyline points="' + pts + '" fill="none" stroke="var(--rouge)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>' +
+        L.map(x => '<circle cx="' + X(x.t).toFixed(1) + '" cy="' + Y(x.kg).toFixed(1) + '" r="3.5" fill="var(--rouge)"/>').join('') +
+        '<text x="' + pad + '" y="' + (H - 2) + '">' + new Date(t0).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + '</text><text x="' + (W - pad) + '" y="' + (H - 2) + '" text-anchor="end">' + new Date(last.t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + '</text></svg>';
+      if (g !== 0 && d30 != null && m30.length >= 2) {
+        const ok = g < 0 ? d30 < 0 : d30 > 0;
+        h += '<p class="wverdict ' + (ok ? 'ok' : '') + '">' + (ok ? (g < 0 ? '✓ Ton objectif marche : tu perds du poids.' : '✓ Ton objectif marche : tu prends du poids.') : (g < 0 ? 'Pas encore de baisse sur 30 jours : vérifie tes repas et bouge un peu plus.' : 'Pas encore de hausse sur 30 jours : mange un peu plus.')) + '</p>';
+      }
+    } else h += '<p class="empty">Note ton poids une fois par semaine, le matin à jeun : une courbe apparaîtra ici pour voir si ton objectif marche.</p>';
+    return h + '</div>';
+  }
+  $('progress').addEventListener('submit', e => {
+    if (e.target.id !== 'wForm') return; e.preventDefault();
+    const v = parseFloat(String($('wIn').value).replace(',', '.'));
+    if (!(v >= 30 && v <= 250)) { toast('Entre un poids entre 30 et 250 kg.'); return; }
+    settings.weight = Math.round(v * 10) / 10; $('weight').value = settings.weight; store.set(K_SET, settings); weightTrack(true);
+    renderProgress(); toast('Poids noté : ' + nf1.format(settings.weight) + ' kg');
+  });
+
+  // ---------- Repas favoris ----------
+  const K_FAV = 'parcours.mealFavs';
+  function favsHtml() {
+    const F = store.get(K_FAV, []);
+    if (!F.length) return '';
+    return '<div class="block"><div class="bh">Mes repas favoris</div>' + F.map((f, i) =>
+      '<div class="frow"><button type="button" class="fadd" data-fav="' + i + '"><b>' + esc(f.name) + '</b><small>' + esc(f.items.map(x => x.fr).join(', ')) + '</small></button>' +
+      '<span class="num fk">' + nf0.format(f.kcal) + ' kcal</span><button type="button" class="fbtn" data-fav="' + i + '" aria-label="Ajouter ' + esc(f.name) + ' au journal">+</button>' +
+      '<button type="button" class="fdel" data-fdel="' + i + '" aria-label="Supprimer le favori ' + esc(f.name) + '">×</button></div>').join('') +
+      '<p class="about" style="margin-top:6px">Touche + pour l\'ajouter à aujourd\'hui en un appui.</p></div>';
+  }
+  $('repas').addEventListener('click', e => {
+    const a = e.target.closest('[data-fav]'), d = e.target.closest('[data-fdel]'), F = store.get(K_FAV, []);
+    if (a) {
+      const f = F[+a.dataset.fav]; if (!f) return;
+      const meals = store.get(K_MEALS, []), now = Date.now();
+      meals.unshift({ date: now, type: mealTypeFor(now), items: f.items.map(x => ({ id: x.id, fr: x.fr, q: x.q, kcal: x.kcal })), kcal: f.kcal, thumb: '' });
+      store.set(K_MEALS, meals.slice(0, 300)); renderRepas(); toast(f.name + ' ajouté (' + nf0.format(f.kcal) + ' kcal)'); try { healthChanged(); } catch (err) {}
+    } else if (d) {
+      const i = +d.dataset.fdel; if (!F[i]) return;
+      if (!confirm('Supprimer le favori « ' + F[i].name + ' » ?')) return;
+      F.splice(i, 1); store.set(K_FAV, F); renderRepas();
+    }
+  });
+  $('rpFav').addEventListener('click', () => {
+    const items = MS.items.filter(x => x.on).map(x => ({ id: x.f.id, fr: x.f.fr, q: x.q, kcal: Math.round(x.f.kcal * x.q) }));
+    if (!items.length) { toast('Ajoute d\'abord des aliments.'); return; }
+    const name = (prompt('Nom du favori :', 'Mon ' + MEAL_TYPES[+$('mType').value].toLowerCase() + ' habituel') || '').trim(); if (!name) return;
+    const F = store.get(K_FAV, []); F.unshift({ name: name.slice(0, 40), items, kcal: items.reduce((a, x) => a + x.kcal, 0) }); store.set(K_FAV, F.slice(0, 30));
+    toast('« ' + name + ' » ajouté aux favoris');
+  });
+
+  // ---------- Rappels (notifications du téléphone) ----------
+  async function remindersApply(fromUser) {
+    const LN = plugin('LocalNotifications'), any = settings.remWalk || settings.remMeals || settings.remWeigh;
+    if (!LN) { if (fromUser && any) toast('Les rappels marchent dans l\'appli installée sur ton téléphone.'); return; }
+    try {
+      if (any) { const p = await LN.requestPermissions(); if (p.display !== 'granted') { toast('Autorise les notifications de Parcours dans les Réglages de l\'iPhone.'); return; } }
+      await LN.cancel({ notifications: [1, 2, 3, 4].map(id => ({ id })) });
+      const [hh, mm] = String(settings.remWalkAt || '18:00').split(':').map(Number), N = [];
+      if (settings.remWalk) N.push({ id: 1, title: 'Parcours', body: 'C\'est l\'heure de ta marche ! Même 20 minutes, ça compte.', schedule: { on: { hour: hh, minute: mm }, repeats: true, allowWhileIdle: true } });
+      if (settings.remMeals) {
+        N.push({ id: 2, title: 'Parcours', body: 'Pense à noter ton déjeuner.', schedule: { on: { hour: 13, minute: 30 }, repeats: true } });
+        N.push({ id: 3, title: 'Parcours', body: 'Pense à noter ton dîner.', schedule: { on: { hour: 20, minute: 30 }, repeats: true } });
+      }
+      if (settings.remWeigh) N.push({ id: 4, title: 'Parcours', body: 'C\'est dimanche : note ton poids du matin.', schedule: { on: { weekday: 1, hour: 9, minute: 0 }, repeats: true } });
+      if (N.length) await LN.schedule({ notifications: N });
+      if (fromUser) toast(N.length ? 'Rappels programmés' : 'Rappels désactivés');
+    } catch (e) { if (fromUser) toast('Les rappels n\'ont pas pu être programmés.'); }
+  }
+  [['remWalk', 'remWalk'], ['remMeals', 'remMeals'], ['remWeigh', 'remWeigh']].forEach(([id, k]) => {
+    $(id).checked = !!settings[k];
+    $(id).addEventListener('change', e => { settings[k] = e.target.checked; saveSettings(); remindersApply(true); });
+  });
+  $('remWalkAt').value = settings.remWalkAt || '18:00';
+  $('remWalkAt').addEventListener('change', e => { settings.remWalkAt = e.target.value || '18:00'; saveSettings(); remindersApply(true); });
+  remindersApply(false);
+
   // ---------- Navigation en cube 3D ----------
   const VIEWS = ['v-sortie', 'v-carte', 'v-seances', 'v-progres', 'v-reglages', 'v-repas'];
   let switching = false;
@@ -3737,7 +3856,7 @@
       '<div class="mbtns"><label class="mbig"><input id="mCameraP" type="file" accept="image/*" capture="environment" hidden>Prendre une photo du repas</label>' +
       '<label class="mbig alt"><input id="mGalleryP" type="file" accept="image/*" hidden>Choisir une photo</label>' +
       '<button class="linkbtn" type="button" id="mNoPhotoP">Ajouter un repas sans photo</button></div></div>';
-    h += needHtml(en);
+    h += needHtml(en) + favsHtml();
     h += '<div class="block"><div class="bh">Repas du jour</div>';
     if (!todays.length) h += '<p class="empty">Aucun repas enregistré aujourd\'hui. Prends ton assiette en photo : l\'appli propose les aliments et estime les calories.</p>';
     todays.forEach(([m, i]) => {
