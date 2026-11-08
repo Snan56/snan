@@ -416,6 +416,14 @@
   .mfoot{position:sticky;bottom:0;margin:10px -20px 0;padding:12px 20px calc(12px + var(--safe-b));display:flex;align-items:center;gap:10px;background:var(--nuit-2);border-top:1px solid var(--ligne);z-index:2}
   .mfoot-t{flex:1;min-width:0}.mfoot .mtotal{margin:0;font-size:13px;line-height:1.3}.mfoot .mtotal b{font-size:18px;white-space:nowrap}.mfoot .sbtn{width:auto;flex:none;padding:12px 16px}
   .mfav{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--ligne);background:var(--nuit-3);color:#facc15;font-size:22px;cursor:pointer}
+  .cp-step{display:flex;align-items:baseline;gap:8px;margin:16px 0 8px}.cp-step:first-child{margin-top:6px}
+  .cp-step i{font-style:normal;flex:none;align-self:center;width:22px;height:22px;border-radius:50%;background:var(--rouge);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+  .cp-step b{font-size:16px;font-weight:800}.cp-step small{font-size:12px;color:var(--gris)}
+  .mplate .mrow{grid-template-columns:auto 1fr auto auto;gap:10px}
+  .mplate .mname b{display:block;font-size:15px;line-height:1.25}.mplate .mname small{display:block;font-size:12px;color:var(--gris);margin-top:2px}
+  .mtag{display:inline-block;margin-top:4px;font-style:normal;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--gris)}.mtag:empty{display:none}.mtag.ok{background:rgba(74,222,128,.15);color:#4ade80}
+  .mplate .mkcal{text-align:right;font-size:16px;line-height:1.1;min-width:52px}.mplate .mkcal small{display:block;font-size:11px;color:var(--gris);font-weight:600}
+  .mfoot .mtotal span{display:block;font-size:12px;color:var(--gris)}.mfoot .mtotal b{font-size:20px}
   .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
   .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   body.on-map .chatfab,body.ac-open .chatfab{display:none}
@@ -1090,7 +1098,7 @@
     <img id="mPhoto" class="mphoto hidden" alt="Photo du repas">
     <div id="mStatus" class="mstatus hidden" role="status"><span id="mStatusTxt"></span><div id="mBarBox" class="mbarbox hidden"><i id="mBar"></i></div></div>
     <div class="mplate"><div class="mplate-h">Dans ton assiette</div><div id="mList"></div></div>
-    <div class="seg mtabs" role="tablist"><button type="button" data-mt="comp" aria-pressed="true">🍽 Composer</button><button type="button" data-mt="search" aria-pressed="false">🔎 Rechercher</button><button type="button" data-mt="create" aria-pressed="false">＋ Créer</button></div>
+    <div class="seg mtabs" role="tablist"><button type="button" data-mt="comp" aria-pressed="true">Composer</button><button type="button" data-mt="search" aria-pressed="false">Rechercher</button><button type="button" data-mt="create" aria-pressed="false">Créer</button></div>
     <div id="mtComp"><div id="mComp" class="cp hidden"></div></div>
     <div id="mtSearch" hidden>
       <p class="mac-note" style="margin:0 0 6px">Cherche dans les plats de l'appli, tes aliments et tous les produits du commerce.</p>
@@ -3727,12 +3735,12 @@
     $('mList').innerHTML = MS.items.length ? MS.items.map((it, i) =>
       '<div class="mrow' + (it.on ? '' : ' off') + '" data-i="' + i + '">' +
       '<label class="mchk"><input type="checkbox" data-mon="' + i + '"' + (it.on ? ' checked' : '') + ' aria-label="Garder ' + esc(it.f.fr) + '"><span></span></label>' +
-      '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + (it.mine ? 'Ajouté par toi, ' : it.mem ? 'Comme ton repas habituel, ' : it.z ? 'Aussi dans l\'assiette, ' : it.v ? 'Variante, ' : it.p != null ? (it.p >= 0.5 ? 'Très probable' : it.p >= 0.12 ? 'Probable' : 'Possible') + ', ' : '') + 'portion : ' + esc(it.f.portion) + '</small></div>' +
+      '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + esc(it.f.portion) + '</small>' + (it.mine ? '' : '<i class="mtag' + (it.mem ? ' ok' : '') + '">' + (it.mem ? 'Ton habitude' : it.z ? 'Vu sur la photo' : it.v ? 'Variante' : it.p != null ? 'IA · ' + (it.p >= 0.5 ? 'très probable' : it.p >= 0.12 ? 'probable' : 'possible') : '') + '</i>') + '</div>' +
       '<select data-mq="' + i + '" aria-label="Nombre de portions de ' + esc(it.f.fr) + '">' + QTY.map(([q, l]) => '<option value="' + q + '"' + (q === it.q ? ' selected' : '') + '>× ' + l + '</option>').join('') + '</select>' +
-      '<b class="mkcal num">' + nf0.format(Math.round(it.f.kcal * it.q)) + '</b></div>').join('')
+      '<b class="mkcal num">' + nf0.format(Math.round(it.f.kcal * it.q)) + '<small>kcal</small></b></div>').join('')
       : '<p class="empty">Rien pour l\'instant : choisis tes aliments ci-dessous.</p>';
     const tot = MS.items.filter(x => x.on).reduce((a, x) => a + x.f.kcal * x.q, 0);
-    $('mTotal').innerHTML = 'Total estimé : <b class="num">' + nf0.format(Math.round(tot)) + ' kcal</b>';
+    $('mTotal').innerHTML = '<span>Total du repas</span><b class="num">' + nf0.format(Math.round(tot)) + ' kcal</b>';
     $('rpSave').disabled = !MS.items.some(x => x.on);
   }
   function mealStatus(txt, pct) {
@@ -4033,8 +4041,8 @@
   function compKcal(x, gi, ci) { if (x.t === 'plat') return x.opts[gi][1]; const g = portionsOf(x)[gi][1], oil = x.cook ? COOK[ci][1] * g / 100 : 0; return Math.round(x.k * g / 100 + oil * 9); }
   function renderComp() {
     const box = $('mComp'); if (box.classList.contains('hidden')) return;
-    let h = '<div class="cp-t">1. Quelle cuisine ?</div><div class="chips">' + Object.keys(CUISINES).map(c => '<button type="button" class="chip" data-cu="' + esc(c) + '" aria-pressed="' + (CP.cuisine === c) + '">' + esc(c) + '</button>').join('') + '</div>';
-    h += '<div class="cp-t">2. Qu\'est-ce qu\'il y a dans l\'assiette ?</div>';
+    let h = '<div class="cp-step"><i>1</i><b>Cuisine</b><small>pour voir les aliments typiques</small></div><div class="chips">' + Object.keys(CUISINES).map(c => '<button type="button" class="chip" data-cu="' + esc(c) + '" aria-pressed="' + (CP.cuisine === c) + '">' + esc(c) + '</button>').join('') + '</div>';
+    h += '<div class="cp-step"><i>2</i><b>Aliments</b><small>touche tout ce qu\'il y a dans l\'assiette</small></div>';
     const chip = id => '<button type="button" class="chip" data-ing="' + id + '" aria-pressed="' + CP.sel.some(e => e.x.id === id) + '">' + (CP.sel.some(e => e.x.id === id) ? '✓ ' : '') + esc(INGR_BY[id].fr) + '</button>';
     if (CP.cuisine) {
       const ids = CUISINES[CP.cuisine];
@@ -4045,7 +4053,7 @@
     }
     h += '<input id="cpSearch" class="msearch" list="ingNames" placeholder="Chercher un ingrédient (riz, poulet, sauce…)" autocomplete="off" aria-label="Chercher un ingrédient">';
     if (CP.sel.length) {
-      h += '<div class="cp-t">3. Les quantités (' + CP.sel.length + ' aliment' + (CP.sel.length > 1 ? 's' : '') + ')</div>';
+      h += '<div class="cp-step"><i>3</i><b>Quantités</b><small>' + CP.sel.length + ' aliment' + (CP.sel.length > 1 ? 's' : '') + ' choisi' + (CP.sel.length > 1 ? 's' : '') + '</small></div>';
       CP.sel.forEach((e, si) => {
         const x = e.x, P = portionsOf(x);
         h += '<div class="cp-card"><div class="cp-h"><b>' + esc(x.fr) + '</b><span class="num">' + nf0.format(compKcal(x, e.por, e.cook)) + ' kcal</span><button type="button" class="xbtn" data-rm="' + si + '" aria-label="Retirer ' + esc(x.fr) + '">×</button></div>' +
