@@ -309,6 +309,19 @@
   .gkg{display:flex;align-items:center;gap:4px;color:var(--gris);font-size:13px}.gkg input{flex:1;min-width:0}
   .gsum{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.gsum div{background:var(--nuit-3);border-radius:14px;padding:10px 12px}
   .gsum span{display:block;font-size:13px;color:var(--gris)}.gsum b{font-size:28px;font-weight:800}.gsum small{margin-left:4px;color:var(--gris)}
+  .wtiles{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:10px;margin-bottom:14px}
+  .wtile{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:14px 12px;border-radius:18px;border:1px solid var(--ligne);background:var(--carte);color:var(--blanc);font:inherit;text-align:left;cursor:pointer;min-height:112px}
+  .wtile svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-bottom:auto;color:var(--rouge)}
+  .wtile b{font-size:16px;font-weight:800;line-height:1.15}.wtile small{font-size:12px;color:var(--gris)}
+  .wtile.main{background:linear-gradient(135deg,#ff7a2f,#ff4a1f);border:0}.wtile.main svg,.wtile.main small{color:#fff}.wtile.main small{opacity:.9}
+  .wmore{display:block;margin:6px auto 0;text-align:center}
+  .wgrp{margin-bottom:10px;border:1px solid var(--ligne);border-radius:18px;background:var(--carte);padding:0 12px}
+  .wgrp summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 4px;cursor:pointer}
+  .wgrp summary::-webkit-details-marker{display:none}
+  .wgrp summary span{display:flex;flex-direction:column;gap:2px}.wgrp summary b{font-size:16px}.wgrp summary small{font-size:13px;color:var(--gris)}
+  .wgrp summary i{font-style:normal;font-weight:800;min-width:30px;height:30px;border-radius:15px;display:grid;place-items:center;background:var(--nuit-3);color:var(--gris);font-size:13px;transition:transform .2s}
+  .wgrp[open] summary i{background:var(--rouge);color:#fff}
+  .wgrp[open]{padding-bottom:10px}
   .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
   .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   body.on-map .chatfab,body.ac-open .chatfab{display:none}
@@ -2372,48 +2385,43 @@
   const wCard = w => '<button class="wc" type="button" data-w="' + esc(w.id) + '"><span class="wc-l"><b>' + esc(w.name) + '</b><small>' +
     (w.level ? '<i class="lv lv' + w.level + '">' + LEVELS[w.level] + '</i>' : '') + plural(w.exercises.length, 'exercice') + ', ' + plural(w.rounds, 'tour') + '</small></span>' +
     '<span class="wc-r"><b class="num">' + fmtMin(totalSec(w)) + '</b><small>' + nf0.format(estKcal(w)) + ' kcal</small></span></button>';
+  const wOpen = new Set(); // catégories de séances dépliées
+  let wLogAll = false;
+  function wLogRow(l) {
+    if (l.kind === 'muscu') return '<div class="wlog"><div>' + esc(l.name) + '<small>' + cap(df.format(new Date(l.date))) + ', ' + (l.exercises && l.exercises.length ? l.exercises.length + ' exercice' + (l.exercises.length > 1 ? 's' : '') + ', ' : '') + 'intensité ' + esc((l.intensity || '').toLowerCase()) + '</small></div>' +
+      '<b>' + fmtClock(l.durationMs) + '<small>' + nf0.format(l.kcal) + ' kcal</small></b></div>';
+    if (l.kind === 'navette') return '<div class="wlog"><div>Test navette<small>' + cap(df.format(new Date(l.date))) + ', ' + navScore(l) + ', ' + nf1.format(l.speed) + ' km/h</small></div>' +
+      '<b>' + (l.vo2 ? nf1.format(l.vo2) + '<small>VO2max</small>' : nf0.format(l.distanceM) + ' m<small>' + fmtClock(l.durationMs) + '</small>') + '</b></div>';
+    return '<div class="wlog"><div>' + esc(l.name) + '<small>' + cap(df.format(new Date(l.date))) + ', ' + l.done + ' exercice' + (l.done > 1 ? 's' : '') + ' sur ' + l.total + '</small></div>' +
+      '<b>' + fmtClock(l.durationMs) + '<small>' + nf0.format(l.kcal) + ' kcal</small></b></div>';
+  }
   function renderSeances() {
     const ws = allWorkouts(), log = store.get(K_WLOG, []), mine = store.get(K_WORKOUTS, []);
-    const f = settings.wGoal || 'tout';
-    let h = '<div class="chips" role="group" aria-label="Objectif">' + [['tout', 'Tout']].concat(mine.length ? [['mes', 'Mes séances']] : [], GOALS_W.map(g => [g[0], g[1]]))
-      .map(([k, l]) => '<button type="button" class="chip" data-goal="' + k + '" aria-pressed="' + (f === k) + '">' + l + '</button>').join('') + '</div>';
-    h += '<button class="gymbtn" id="gNew" type="button"><b>Noter ma séance de musculation</b><small>Muscles travaillés, exercices, séries : calcule les calories dépensées</small></button>';
-    h += '<button class="newbtn" id="wNew" type="button">+ Créer ma séance</button>';
-    const groups = [];
-    if ((f === 'tout' || f === 'mes') && mine.length) groups.push(['Mes séances', '', mine]);
-    if (f === 'tout' || f === 'cardio') groups.push(['nav']);
-    GOALS_W.forEach(([k, l, d]) => { if (f === 'tout' || f === k) groups.push([l, d, ws.filter(w => w.goal === k)]); });
-    groups.forEach(g => {
-      if (g[0] === 'nav') {
-        h += '<button class="wc wc-nav" type="button" data-nav="1"><span class="wc-l"><b>Test navette</b><small>Luc Léger : va-et-vient de plus en plus vite, mesure ta VO2max</small></span><span class="wc-r"><b class="num">' + navCfg().dist + ' m</b><small>navette</small></span></button>';
-        return;
-      }
-      h += '<h3 class="wgh">' + esc(g[0]) + (g[1] ? '<small>' + esc(g[1]) + '</small>' : '') + '</h3>' + g[2].map(wCard).join('');
-    });
-    h += '<div class="block wplog"><div class="bh">Dernières séances</div>';
-    if (!log.length) h += '<p class="empty">Aucune séance terminée pour l\'instant. Choisis une séance ci-dessus pour commencer.</p>';
+    // 1. Les 3 actions principales
+    let h = '<div class="wtiles">' +
+      '<button class="wtile main" id="gNew" type="button"><svg viewBox="0 0 24 24"><path d="M6.5 7v10M17.5 7v10M3 10v4M21 10v4M6.5 12h11"/></svg><b>Musculation</b><small>Noter ma séance</small></button>' +
+      '<button class="wtile" type="button" data-nav="1"><svg viewBox="0 0 24 24"><path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4"/></svg><b>Test navette</b><small>Mesurer ma VO2max</small></button>' +
+      '<button class="wtile" id="wNew" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><b>Créer</b><small>Ma propre séance</small></button></div>';
+    // 2. Ce que j'ai fait
+    const n = log.filter(l => l.date >= weekStart(Date.now())).length;
+    h += '<div class="block wplog"><div class="bh">Mes séances</div>';
+    if (!log.length) h += '<p class="empty">Aucune séance pour l\'instant. Note ta séance de musculation ou lance une séance guidée ci-dessous.</p>';
     else {
-      const n = log.filter(l => l.date >= weekStart(Date.now())).length;
-      h += '<p class="streak">Cette semaine : <b>' + plural(n, 'séance') + '</b></p>';
-      log.slice(0, 12).forEach(l => {
-        if (l.kind === 'muscu') {
-          h += '<div class="wlog"><div>' + esc(l.name) + '<small>' + cap(df.format(new Date(l.date))) + ', ' + (l.exercises && l.exercises.length ? l.exercises.length + ' exercice' + (l.exercises.length > 1 ? 's' : '') + ', ' : '') + 'intensité ' + esc((l.intensity || '').toLowerCase()) + '</small></div>' +
-               '<b>' + fmtClock(l.durationMs) + '<small>' + nf0.format(l.kcal) + ' kcal</small></b></div>';
-          return;
-        }
-        if (l.kind === 'navette') {
-          h += '<div class="wlog"><div>Test navette<small>' + cap(df.format(new Date(l.date))) + ', ' + navScore(l) + ', ' + nf1.format(l.speed) + ' km/h</small></div>' +
-               '<b>' + (l.vo2 ? nf1.format(l.vo2) + '<small>VO2max</small>' : nf0.format(l.distanceM) + ' m<small>' + fmtClock(l.durationMs) + '</small>') + '</b></div>';
-          return;
-        }
-        h += '<div class="wlog"><div>' + esc(l.name) + '<small>' + cap(df.format(new Date(l.date))) + ', ' + l.done + ' exercice' + (l.done > 1 ? 's' : '') + ' sur ' + l.total + '</small></div>' +
-             '<b>' + fmtClock(l.durationMs) + '<small>' + nf0.format(l.kcal) + ' kcal</small></b></div>';
-      });
+      h += '<p class="streak">Cette semaine : <b>' + plural(n, 'séance') + '</b></p>' + log.slice(0, wLogAll ? 12 : 3).map(wLogRow).join('');
+      if (log.length > 3) h += '<button type="button" class="linkbtn wmore" data-wlog="1">' + (wLogAll ? 'Voir moins' : 'Voir tout') + '</button>';
     }
-    $('seances').innerHTML = h + '</div>';
+    h += '</div>';
+    // 3. Séances guidées, rangées par catégorie (touche pour déplier)
+    h += '<h3 class="wgh">Séances guidées<small>Chronomètre, voix et bips : suis l\'écran</small></h3>';
+    const groups = (mine.length ? [['mes', 'Mes séances créées', '', mine]] : []).concat(GOALS_W.map(([k, l, d]) => [k, l, d, ws.filter(w => w.goal === k)])).filter(g => g[3].length);
+    groups.forEach(([k, l, d, list]) => {
+      h += '<details class="wgrp" data-wg="' + k + '"' + (wOpen.has(k) ? ' open' : '') + '><summary><span><b>' + esc(l) + '</b>' + (d ? '<small>' + esc(d) + '</small>' : '') + '</span><i class="num">' + list.length + '</i></summary>' + list.map(wCard).join('') + '</details>';
+    });
+    $('seances').innerHTML = h;
   }
+  $('seances').addEventListener('toggle', e => { const d = e.target.closest && e.target.closest('.wgrp'); if (d) { if (d.open) wOpen.add(d.dataset.wg); else wOpen.delete(d.dataset.wg); } }, true);
   $('seances').addEventListener('click', e => {
-    const gc = e.target.closest('[data-goal]'); if (gc) { settings.wGoal = gc.dataset.goal; saveSettings(); renderSeances(); return; }
+    if (e.target.closest('[data-wlog]')) { wLogAll = !wLogAll; renderSeances(); return; }
     if (e.target.closest('#wNew')) { openEditor(null); return; }
     if (e.target.closest('#gNew')) { openGym(); return; }
     if (e.target.closest('[data-nav]')) { openNav(); return; }
