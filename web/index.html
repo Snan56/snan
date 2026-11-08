@@ -3792,7 +3792,7 @@
     // calories « en plus » de l'activité : on retire ce que le corps aurait brûlé au repos pendant ce temps (1 MET), déjà compté dans le besoin de base
     const rest = ms => weightKg() * (ms || 0) / 3600000;
     let burned = store.get(K_HIST, []).filter(h => dayKey(h.date) === key).reduce((a, h) => a + Math.max(0, (h.kcal || 0) - rest(h.durationMs)), 0)
-      + store.get(K_WLOG, []).filter(l => dayKey(l.date) === key).reduce((a, l) => a + Math.max(0, (l.kcal || 0) - (l.kind === 'muscu' ? 0 : rest(l.durationMs))), 0);
+      + store.get(K_WLOG, []).filter(l => dayKey(l.date) === key).reduce((a, l) => a + Math.max(0, l.kind === 'muscu' ? (({ 'Légère': 2.5, 'Normale': 3.5, 'Intense': 5 }[l.intensity] || 3.5) + ((l.muscles || []).includes('jambes') ? 0.5 : 0)) * weightKg() * (l.durationMs || 0) / 3600000 : (l.kcal || 0) - rest(l.durationMs)), 0);
     if (S.status !== 'idle' && dayKey(S.startTime) === key) burned += Math.max(0, (S.kcal || 0) - rest(S.activeMs + (S.status === 'running' ? Date.now() - S.resumedAt : 0)));
     return { eaten, burned };
   }
@@ -3809,8 +3809,10 @@
     let delta = g < 0 ? -pace : g > 0 ? 300 : 0;
     if (minor && g < 0) delta = 0; // pas de déficit pour un mineur : avis d'un médecin
     const floor = settings.sex === 'f' ? 1200 : 1500;
-    const target = Math.max(g < 0 ? floor : 0, base + burnedToday + delta);
-    return { bmr, base, delta, target, minor, floor, floored: g < 0 && target === floor };
+    // les montres et applis surestiment souvent l'activité : pour perdre du poids on n'en compte que la moitié, et jamais plus de 800 kcal par jour
+    const bonus = Math.round(Math.min(800, Math.max(0, burnedToday) * (g < 0 ? 0.5 : 1)));
+    const target = Math.max(g < 0 ? floor : 0, base + bonus + delta);
+    return { bmr, base, bonus, delta, target, minor, floor, floored: g < 0 && target === floor };
   }
   function needHtml(en) {
     const chips = (key, arr, cur) => '<div class="chips cp-wrap">' + arr.map((a, i) => '<button type="button" class="chip" data-need="' + key + ':' + i + '" aria-pressed="' + (cur === i) + '">' + a[0] + '</button>').join('') + '</div>';
@@ -3823,12 +3825,14 @@
     h += '<div class="cp-t">Ton objectif</div>' + chips('goal', WGOAL, (settings.weightGoal || 0) + 1);
     if ((settings.weightGoal || 0) < 0) h += '<div class="cp-t">Rythme</div>' + chips('pace', [['Doucement (−300 kcal/j)'], ['Normal (−500 kcal/j, ≈ 0,5 kg/semaine)']], settings.wPace != null ? settings.wPace : 1);
     const n = kcalNeed(Math.round(en.burned)), left = Math.round(n.target - en.eaten), pct = Math.min(100, en.eaten / n.target * 100);
-    h += '<div class="need"><div><span>Pour garder ton poids</span><b class="num">' + nf0.format(Math.round(n.base + en.burned)) + '</b><small>kcal</small></div>' +
+    h += '<div class="need"><div><span>Besoin de base (sans sport)</span><b class="num">' + nf0.format(Math.round(n.base)) + '</b><small>kcal</small></div>' +
       '<div><span>' + (n.delta < 0 ? 'Ton objectif (en déficit)' : n.delta > 0 ? 'Ton objectif (en surplus)' : 'Ton objectif') + '</span><b class="num">' + nf0.format(Math.round(n.target)) + '</b><small>kcal</small></div></div>' +
 
-      '<p class="about" style="margin-top:8px">Calcul : métabolisme de base (formule de Mifflin-St Jeor) × ta journée, + les calories de tes sorties et séances du jour' + (n.delta ? (n.delta < 0 ? ', − ' : ', + ') + Math.abs(n.delta) + ' kcal pour ton objectif' : '') + '.' +
+      '<p class="about" style="margin-top:8px">Calcul du jour : besoin de base ' + nf0.format(Math.round(n.base)) + ' kcal (formule de Mifflin-St Jeor × ta journée)' +
+      (n.bonus ? ' + ' + nf0.format(n.bonus) + ' kcal de sport' + ((+settings.weightGoal || 0) < 0 ? ' (on ne compte que la moitié de tes ' + nf0.format(Math.round(en.burned)) + ' kcal dépensées, pour ne pas fausser ta perte de poids)' : '') : '') +
+      (n.delta ? (n.delta < 0 ? ' − ' : ' + ') + Math.abs(n.delta) + ' kcal pour ton objectif' : '') + ' = ' + nf0.format(Math.round(n.target)) + ' kcal.' +
       (n.floored ? ' Ton objectif ne descend pas sous ' + n.floor + ' kcal : manger moins serait mauvais pour ta santé.' : '') +
-      (n.minor && (settings.weightGoal || 0) < 0 ? ' Avant 18 ans, l\'appli ne propose pas de déficit : parles-en d\'abord à un médecin.' : '') + ' C\'est une estimation, pas un avis médical.</p></details>';
+      (n.minor && (+settings.weightGoal || 0) < 0 ? ' Avant 18 ans, l\'appli ne propose pas de déficit : parles-en d\'abord à un médecin.' : '') +' C\'est une estimation, pas un avis médical.</p></details>';
     return h;
   }
   $('repas').addEventListener('click', e => {
