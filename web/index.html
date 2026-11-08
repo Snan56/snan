@@ -976,6 +976,8 @@
       <div class="row"><label for="remWeigh">Me peser<small>Une fois par semaine</small></label><span class="switch"><input id="remWeigh" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="remWeighDay">Jour de la pesée</label><select id="remWeighDay" class="tfield"><option value="2">Lundi</option><option value="3">Mardi</option><option value="4">Mercredi</option><option value="5">Jeudi</option><option value="6">Vendredi</option><option value="7">Samedi</option><option value="1">Dimanche</option></select></div>
       <div class="row"><label for="remWeighAt">Heure de la pesée</label><input id="remWeighAt" type="time" value="09:00" class="tfield"></div>
+      <div class="row"><button id="remTest" class="linkbtn" type="button">Tester : recevoir un rappel dans 10 secondes</button></div>
+      <small id="remInfo" style="display:block;color:var(--gris);padding:0 0 10px"></small>
     </div>
     <div class="set-title">Sauvegarde</div>
     <div class="set">
@@ -3488,6 +3490,17 @@
   [['remWalkAt', '18:00'], ['remLunchAt', '13:30'], ['remDinnerAt', '20:30'], ['remWeighAt', '09:00'], ['remWeighDay', '1']].forEach(([id, d]) => {
     $(id).value = settings[id] || d;
     $(id).addEventListener('change', e => { settings[id] = e.target.value || d; saveSettings(); remindersApply(true); try { renderProgress(); } catch (err) {} });
+  });
+  $('remTest').addEventListener('click', async () => {
+    const LN = plugin('LocalNotifications'), info = t => { $('remInfo').textContent = t; };
+    if (!LN) { info("Module de notifications absent : réinstalle l'appli depuis Xcode (▶️)."); return; }
+    try {
+      const p = await LN.requestPermissions();
+      if (p.display !== 'granted') { info("Notifications refusées : Réglages de l'iPhone > Parcours > Notifications > Autoriser."); return; }
+      await LN.schedule({ notifications: [{ id: 99, title: 'Parcours', body: 'Test réussi : tes rappels marchent !', schedule: { at: new Date(Date.now() + 10000), allowWhileIdle: true } }] });
+      const pend = await LN.getPending();
+      info('Rappel de test programmé. Verrouille ton iPhone ou quitte l\'appli : il arrive dans 10 s. Rappels prévus : ' + ((pend.notifications || []).length) + '.');
+    } catch (e) { info('Erreur : ' + (e && e.message || e)); }
   });
   remindersApply(false);
 
