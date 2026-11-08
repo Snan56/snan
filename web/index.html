@@ -871,6 +871,7 @@
   .wcard{flex-direction:column}
   .banner.info{background:#1c1f25;border-color:rgba(255,90,31,.45);color:var(--blanc)}
   .banner button{border-radius:10px}
+.pg-sec{margin:22px 4px 8px;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5)}
 </style>
 </head>
 <body>
@@ -2148,17 +2149,21 @@
   }
   function renderProgress(highlightFirst) {
     const hist = store.get(K_HIST, []), box = $('progress');
-    let html = weightHtml() + badgesHtml() + goalsHtml();
+    const sec = t => '<div class="pg-sec">' + t + '</div>';
     if (!hist.length) {
-      box.innerHTML = html + '<div class="block"><div class="bh">Tes sorties</div><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>';
+      box.innerHTML = goalsHtml() + sec('Corps') + weightHtml() + sec('Récompenses') + badgesHtml() + sec('Historique') + '<div class="block"><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>';
       return;
     }
     let totalM = 0, totalKcal = 0;
     hist.forEach(h => { totalM += h.distanceM || 0; totalKcal += h.kcal || 0; });
-    html += weekBilanHtml(hist) + recordsHtml(hist) + statsHtml(hist);
-    html += '<div class="total"><div class="po"><div class="plate"><div class="back"></div><div class="face">' +
+    let html = '<div class="total"><div class="po"><div class="plate"><div class="back"></div><div class="face">' +
       '<span class="lbl">' + hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + '<br>' + nf0.format(totalKcal) + ' kcal</span>' +
-      '<span class="val num">' + nf2.format(totalM / 1000) + '<small>km</small></span></div></div></div></div><ul class="runs">';
+      '<span class="val num">' + nf2.format(totalM / 1000) + '<small>km</small></span></div></div></div></div>';
+    html += sec('Cette semaine') + weekBilanHtml(hist) + goalsHtml();
+    html += sec('Performances') + statsHtml(hist) + recordsHtml(hist);
+    html += sec('Corps') + weightHtml();
+    html += sec('Récompenses') + badgesHtml();
+    html += sec('Historique') + '<ul class="runs">';
     hist.forEach((h, i) => {
       const act = ACT_LABEL[h.activity] || 'Sortie';
       html += '<li><button type="button" class="run' + (highlightFirst && i === 0 ? ' new' : '') + '" data-i="' + i + '">' + thumbSvg(h.track) +
