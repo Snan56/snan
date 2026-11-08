@@ -342,6 +342,7 @@
   .fk{font-size:13px;color:var(--gris)}
   .fbtn{width:40px;height:40px;border-radius:50%;border:0;background:var(--rouge);color:#fff;font-size:24px;font-weight:700;cursor:pointer;line-height:1}
   .fdel{width:32px;height:32px;border-radius:50%;border:1px solid var(--ligne);background:none;color:var(--gris);font-size:18px;cursor:pointer}
+  select.tfield{appearance:none;-webkit-appearance:none;width:136px!important;max-width:136px!important;flex:none}
   .tfield{font:inherit;font-size:16px;padding:9px 10px;border-radius:12px;background:var(--nuit-3);color:var(--blanc);border:1px solid rgba(200,205,215,.22);width:136px}
   .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
   .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
@@ -937,8 +938,12 @@
     <div class="set">
       <div class="row"><label for="remWalk">Aller marcher<small>Une notification chaque jour à l'heure choisie</small></label><span class="switch"><input id="remWalk" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="remWalkAt">Heure de la marche</label><input id="remWalkAt" type="time" value="18:00" class="tfield"></div>
-      <div class="row"><label for="remMeals">Noter mes repas<small>À 13 h 30 et 20 h 30</small></label><span class="switch"><input id="remMeals" type="checkbox" role="switch"><span></span></span></div>
-      <div class="row"><label for="remWeigh">Me peser<small>Le dimanche à 9 h</small></label><span class="switch"><input id="remWeigh" type="checkbox" role="switch"><span></span></span></div>
+      <div class="row"><label for="remMeals">Noter mes repas<small>Un rappel après le déjeuner et après le dîner</small></label><span class="switch"><input id="remMeals" type="checkbox" role="switch"><span></span></span></div>
+      <div class="row"><label for="remLunchAt">Heure du rappel du déjeuner</label><input id="remLunchAt" type="time" value="13:30" class="tfield"></div>
+      <div class="row"><label for="remDinnerAt">Heure du rappel du dîner</label><input id="remDinnerAt" type="time" value="20:30" class="tfield"></div>
+      <div class="row"><label for="remWeigh">Me peser<small>Une fois par semaine</small></label><span class="switch"><input id="remWeigh" type="checkbox" role="switch"><span></span></span></div>
+      <div class="row"><label for="remWeighDay">Jour de la pesée</label><select id="remWeighDay" class="tfield"><option value="2">Lundi</option><option value="3">Mardi</option><option value="4">Mercredi</option><option value="5">Jeudi</option><option value="6">Vendredi</option><option value="7">Samedi</option><option value="1">Dimanche</option></select></div>
+      <div class="row"><label for="remWeighAt">Heure de la pesée</label><input id="remWeighAt" type="time" value="09:00" class="tfield"></div>
     </div>
     <div class="set-title">Sauvegarde</div>
     <div class="set">
@@ -3315,7 +3320,7 @@
         h += '<p class="wverdict ' + (ok ? 'ok' : '') + '">' + (ok ? (g < 0 ? '✓ Ton objectif marche : tu perds du poids.' : '✓ Ton objectif marche : tu prends du poids.') : (g < 0 ? 'Pas encore de baisse sur 30 jours : vérifie tes repas et bouge un peu plus.' : 'Pas encore de hausse sur 30 jours : mange un peu plus.')) + '</p>';
       }
     } else h += '<p class="empty">Note ton poids une fois par semaine, le matin à jeun : une courbe apparaîtra ici pour voir si ton objectif marche.</p>';
-    h += '<button type="button" class="wremind" data-wremind="1"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>' + (settings.remWeigh ? 'Rappel de pesée activé : le dimanche à 9 h' : 'Me rappeler de me peser') + '</span><i>›</i></button>';
+    h += '<button type="button" class="wremind" data-wremind="1"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>' + (settings.remWeigh ? 'Rappel de pesée : ' + ({ 1: 'le dimanche', 2: 'le lundi', 3: 'le mardi', 4: 'le mercredi', 5: 'le jeudi', 6: 'le vendredi', 7: 'le samedi' }[+settings.remWeighDay || 1]) + ' à ' + String(settings.remWeighAt || '09:00').replace(/^0?(\d+):(\d+)$/, (m, h, mn) => h + ' h' + (mn !== '00' ? ' ' + mn : '')) : 'Me rappeler de me peser') + '</span><i>›</i></button>';
     return h + '</div>';
   }
   $('progress').addEventListener('click', e => {
@@ -3374,13 +3379,13 @@
     try {
       if (any) { const p = await LN.requestPermissions(); if (p.display !== 'granted') { toast('Autorise les notifications de Parcours dans les Réglages de l\'iPhone.'); return; } }
       await LN.cancel({ notifications: [1, 2, 3, 4].map(id => ({ id })) });
-      const [hh, mm] = String(settings.remWalkAt || '18:00').split(':').map(Number), N = [];
+      const hm = (v, d) => String(v || d).split(':').map(Number), [hh, mm] = hm(settings.remWalkAt, '18:00'), [lh, lm] = hm(settings.remLunchAt, '13:30'), [dh, dm] = hm(settings.remDinnerAt, '20:30'), [wh, wm] = hm(settings.remWeighAt, '09:00'), N = [];
       if (settings.remWalk) N.push({ id: 1, title: 'Parcours', body: 'C\'est l\'heure de ta marche ! Même 20 minutes, ça compte.', schedule: { on: { hour: hh, minute: mm }, repeats: true, allowWhileIdle: true } });
       if (settings.remMeals) {
-        N.push({ id: 2, title: 'Parcours', body: 'Pense à noter ton déjeuner.', schedule: { on: { hour: 13, minute: 30 }, repeats: true } });
-        N.push({ id: 3, title: 'Parcours', body: 'Pense à noter ton dîner.', schedule: { on: { hour: 20, minute: 30 }, repeats: true } });
+        N.push({ id: 2, title: 'Parcours', body: 'Pense à noter ton déjeuner.', schedule: { on: { hour: lh, minute: lm }, repeats: true } });
+        N.push({ id: 3, title: 'Parcours', body: 'Pense à noter ton dîner.', schedule: { on: { hour: dh, minute: dm }, repeats: true } });
       }
-      if (settings.remWeigh) N.push({ id: 4, title: 'Parcours', body: 'C\'est dimanche : note ton poids du matin.', schedule: { on: { weekday: 1, hour: 9, minute: 0 }, repeats: true } });
+      if (settings.remWeigh) N.push({ id: 4, title: 'Parcours', body: 'C\'est le jour de ta pesée : note ton poids du matin.', schedule: { on: { weekday: +settings.remWeighDay || 1, hour: wh, minute: wm }, repeats: true } });
       if (N.length) await LN.schedule({ notifications: N });
       if (fromUser) toast(N.length ? 'Rappels programmés' : 'Rappels désactivés');
     } catch (e) { if (fromUser) toast('Les rappels n\'ont pas pu être programmés.'); }
@@ -3389,8 +3394,10 @@
     $(id).checked = !!settings[k];
     $(id).addEventListener('change', e => { settings[k] = e.target.checked; saveSettings(); remindersApply(true); if (k === 'remWeigh') try { renderProgress(); } catch (err) {} });
   });
-  $('remWalkAt').value = settings.remWalkAt || '18:00';
-  $('remWalkAt').addEventListener('change', e => { settings.remWalkAt = e.target.value || '18:00'; saveSettings(); remindersApply(true); });
+  [['remWalkAt', '18:00'], ['remLunchAt', '13:30'], ['remDinnerAt', '20:30'], ['remWeighAt', '09:00'], ['remWeighDay', '1']].forEach(([id, d]) => {
+    $(id).value = settings[id] || d;
+    $(id).addEventListener('change', e => { settings[id] = e.target.value || d; saveSettings(); remindersApply(true); try { renderProgress(); } catch (err) {} });
+  });
   remindersApply(false);
 
   // ---------- Navigation en cube 3D ----------
