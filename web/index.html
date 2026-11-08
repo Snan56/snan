@@ -877,6 +877,11 @@
 .dbadge{display:block;width:100%;text-align:left;color:#fff;font:inherit;cursor:pointer}.dbn{display:flex;gap:12px;align-items:center}.dbn .bic{font-size:30px}.dbn>div{flex:1}.dbn b{display:block}.dbn small{color:rgba(255,255,255,.55);font-size:13px}.dbn .bbar{display:block;margin-top:6px}.dbn em{font-style:normal;font-size:22px;color:rgba(255,255,255,.4)}
 .pgtabs{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;margin:0 0 14px;border-radius:16px;background:#141418;border:1px solid rgba(255,255,255,.08)}.pgtabs button{border:0;border-radius:12px;padding:10px 4px;background:none;color:rgba(255,255,255,.55);font:inherit;font-weight:700;font-size:13.5px;cursor:pointer;transition:background .2s,color .2s}.pgtabs button[aria-selected="true"]{background:linear-gradient(135deg,#ff5a1f,#ff8a50);color:#fff;box-shadow:0 4px 14px rgba(255,90,31,.35)}.pgtabs i{font-style:normal;font-size:11px;opacity:.8;margin-left:2px}
 .scanbtn{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;width:100%;padding:14px 16px;margin:0 0 12px;border:0;border-radius:16px;background:linear-gradient(135deg,#ff5a1f,#ff8a50);color:#fff;font:inherit;text-align:left;cursor:pointer;box-shadow:0 6px 18px rgba(255,90,31,.3)}.scanbtn span{grid-row:1/3;font-size:30px;line-height:1;transform:rotate(90deg)}.scanbtn b{font-size:16px}.scanbtn small{font-size:12.5px;opacity:.9}
+.photobtn{display:flex;align-items:center;gap:10px;width:100%;margin:12px 0 0;padding:12px 16px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:#18181e;color:#fff;font:inherit;font-weight:700;font-size:15px;cursor:pointer}.photobtn span{font-size:22px}.photobtn small{margin-left:auto;color:#ff8a50;font-weight:700}
+.meteo{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:4px 12px;margin:12px 0 0;padding:12px 16px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:#18181e}.mt-ic{font-size:34px;line-height:1}.mt-m b{font-size:26px;display:block;line-height:1.1}.mt-m span{font-size:12.5px;color:rgba(255,255,255,.6)}.mt-s{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:13px;color:rgba(255,255,255,.7)}.mt-s b{color:#fff}.mt-tip{grid-column:1/-1;margin:6px 0 0;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:13px;color:rgba(255,255,255,.75)}
+.phrow{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px}.phth{flex:none;width:84px;height:84px;padding:0;border:2px solid rgba(255,255,255,.15);border-radius:14px;overflow:hidden;background:#222;cursor:pointer}.phth img{width:100%;height:100%;object-fit:cover;display:block}
+.phpin{cursor:pointer}.phmk{width:42px;height:42px;padding:0;border:3px solid #fff;border-radius:50%;overflow:hidden;background:#ff5a1f;box-shadow:0 3px 10px rgba(0,0,0,.5);cursor:pointer}.phmk img{width:100%;height:100%;object-fit:cover;display:block}
+.phview{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}.phview img{max-width:100%;max-height:85vh;object-fit:contain}.phview small{color:rgba(255,255,255,.7)}
 </style>
 </head>
 <body>
@@ -912,6 +917,9 @@
       <div class="po" style="--ry:15deg;--i:3" id="pPace"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Allure</span><span class="val num"><span id="pace">–</span><small>min/km</small></span></div></div></div>
       <div class="po" style="--ry:-9deg;--i:4"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Calories</span><span class="val num"><span id="kcal">0</span><small>kcal</small></span></div></div></div>
     </div>
+    <button type="button" id="photoBtn" class="photobtn hidden"><span>📷</span>Prendre une photo<small id="photoN"></small></button>
+    <input type="file" id="photoIn" accept="image/*" capture="environment" hidden>
+    <div id="meteo" class="meteo hidden" role="status"></div>
     <details class="hsort" id="heartBox"></details>
     <p class="hint" id="hint"></p>
   </section>
@@ -1080,6 +1088,7 @@
 </div>
 
 <!-- Détail d'une sortie -->
+<div id="phView" class="phview hidden" role="dialog" aria-label="Photo"><img id="phImg" alt="Photo de la sortie"><small id="phCap"></small></div>
 <div id="detail" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dTitle">
   <div class="sheet">
     <div class="d-head"><h2 id="dTitle"></h2><button id="dClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
@@ -1386,7 +1395,7 @@
   const fresh = () => ({ status: 'idle', activity: settings.activity, activeMs: 0, resumedAt: 0, startTime: 0, distance: 0, lastKm: 0,
     sensorSteps: 0, estSteps: 0, kcal: 0, motionOk: false, maxKmh: 0, track: [], savedAt: 0,
     dplus: 0, dminus: 0, altSmooth: null, altAnchor: null, grade: 0, gradeD: 0, gradeAlt: null,
-    splits: [], splitBaseMs: 0, lastPtMs: 0, lastAnnounce: 0 });
+    splits: [], splitBaseMs: 0, lastPtMs: 0, lastAnnounce: 0, photos: [] });
   let S = fresh();
   let watchId = null, nativeWatcher = null, last = null, curKmh = 0, lastMoveTs = 0, lastFix = null, lastFixAt = 0;
   let wakeLock = null, motionSeen = false, renderQueued = false, lastSave = 0, wasRunningBeforeModal = false;
@@ -1979,7 +1988,7 @@
       distanceM: Math.round(S.distance * 10) / 10, steps: S.activity === 'velo' ? 0 : steps(), stepsEstimated: !S.motionOk,
       avgKmh: Math.round(avgKmh() * 10) / 10, maxKmh: Math.round(S.maxKmh * 10) / 10, kcal: Math.round(S.kcal || 0),
       stepCm: S.activity === 'velo' ? null : Math.round((measuredStepM() || stepLenM(avgKmh())) * 100),
-      dplus: Math.round(S.dplus || 0), dminus: Math.round(S.dminus || 0), splits: S.splits.slice(), track: simplifyTrack(S.track)
+      dplus: Math.round(S.dplus || 0), dminus: Math.round(S.dminus || 0), splits: S.splits.slice(), track: simplifyTrack(S.track), photos: (S.photos || []).slice()
     };
     entry.kcal = Math.round(Math.max(entry.kcal, summaryKcal(entry)));
     hist.unshift(entry);
@@ -2045,7 +2054,7 @@
 
   // ---------- Écran Progrès ----------
   let statMode = 'week';
-  function thumbSvg(track, w, h, cls) {
+  function thumbSvg(track, w, h, cls, photos) {
     w = w || 66; h = h || 66;
     const open = '<svg class="' + (cls || 'thumb') + '" viewBox="0 0 ' + w + ' ' + h + '" aria-hidden="true">';
     if (!track || track.length < 2) return open + '<circle cx="' + (w / 2) + '" cy="' + (h / 2) + '" r="' + Math.min(w, h) * 0.14 + '" fill="none" stroke="#ff5a1f" stroke-width="' + Math.max(3, Math.min(w, h) * 0.06) + '"/></svg>';
@@ -2058,6 +2067,7 @@
     const first = pts.split(' ')[0].split(','), lastP = pts.split(' ').pop().split(',');
     return open + '<polyline points="' + pts + '" fill="none" stroke="#f4f6fb" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round"/>' +
       '<polyline points="' + pts + '" fill="none" stroke="#ff5a1f" stroke-width="' + (sw * 0.48) + '" stroke-linecap="round" stroke-linejoin="round"/>' +
+      (photos && photos.length ? photos.filter(f => f.lat != null).map((f, i) => { const X = ((f.lon - c) * k * s + ox).toFixed(1), Y = ((b - f.lat) * s + oy).toFixed(1); return '<g class="phpin" data-ph="' + i + '"><circle cx="' + X + '" cy="' + Y + '" r="13" fill="#fff" stroke="#ff5a1f" stroke-width="4"/><text x="' + X + '" y="' + (+Y + 5) + '" text-anchor="middle" font-size="13">📷</text></g>'; }).join('') : '') +
       (w > 100 ? '<circle cx="' + first[0] + '" cy="' + first[1] + '" r="' + sw * 0.9 + '" fill="#f4f6fb"/><circle cx="' + lastP[0] + '" cy="' + lastP[1] + '" r="' + sw * 0.9 + '" fill="#ff5a1f" stroke="#f4f6fb" stroke-width="3"/>' : '') + '</svg>';
   }
   const df = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
@@ -2264,7 +2274,7 @@
               : cell('Allure moyenne', fmtPace(h.durationMs || 0, h.distanceM || 0) + ' /km') + cell(h.stepsEstimated ? 'Pas estimés' : 'Pas', nf0.format(h.steps || 0));
     g += cell('Calories', nf0.format(h.kcal || 0) + ' kcal') + cell('Montée', nf0.format(h.dplus || 0) + ' m');
     if (!velo && h.stepCm) g += cell('Longueur de pas', h.stepCm + ' cm') + cell('Vitesse moyenne', nf1.format(h.avgKmh || 0) + ' km/h');
-    $('dBody').innerHTML = thumbSvg(h.track, 340, 200, 'd-route') + '<div class="sum">' + g + '</div>' + altSvg(h.track) + splitsHtml(h) + '<div style="height:14px"></div>';
+    $('dBody').innerHTML = thumbSvg(h.track, 340, 200, 'd-route', h.photos) + photosHtml(h.photos) + '<div class="sum">' + g + '</div>' + altSvg(h.track) + splitsHtml(h) + '<div style="height:14px"></div>';
     const ok = h.track && h.track.length >= 2;
     $('dReplay').disabled = !ok; $('dGpx').disabled = !ok;
     $('dReplay').style.opacity = ok ? '' : '.4'; $('dGpx').style.opacity = ok ? '' : '.4';
@@ -2342,7 +2352,7 @@
   }
   async function makeShareImage(h) {
     try { await Promise.all([document.fonts.load('800 120px Archivo'), document.fonts.load('600 40px Archivo')]); } catch (e) {}
-    const W = 1080, H = 1350, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const W = 1080, H = 1920, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const x = cv.getContext('2d');
     const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0b0c0f'); g.addColorStop(1, '#1c1f25');
     x.fillStyle = g; x.fillRect(0, 0, W, H);
@@ -2352,13 +2362,13 @@
       x.beginPath();
       for (let a = 0; a <= Math.PI * 2 + 0.06; a += 0.05) {
         const r = 40 + k * 40 + Math.sin(a * 3 + k * 0.45) * 22 + Math.sin(a * 5 - k * 0.3) * 12;
-        const px = 780 + Math.cos(a) * r * 1.3, py = 430 + Math.sin(a) * r;
+        const px = 780 + Math.cos(a) * r * 1.3, py = 620 + Math.sin(a) * r;
         a === 0 ? x.moveTo(px, py) : x.lineTo(px, py);
       }
       x.stroke();
     }
     // titre
-    x.fillStyle = '#ff5a1f'; x.beginPath(); x.arc(109, 104, 30, 0, 7); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 7; x.beginPath(); x.arc(109, 104, 12, 0, 7); x.stroke();
+    x.translate(0, 60); x.fillStyle = '#ff5a1f'; x.beginPath(); x.arc(109, 104, 30, 0, 7); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 7; x.beginPath(); x.arc(109, 104, 12, 0, 7); x.stroke();
     setFont(x, 800, 58, true); x.fillStyle = '#f4f6fb'; x.textBaseline = 'middle'; x.fillText('Parcours', 160, 104);
     // tracé
     const tr = h.track || [];
@@ -2366,7 +2376,7 @@
       let a = 90, b = -90, c = 180, d = -180;
       tr.forEach(p => { a = Math.min(a, p[0]); b = Math.max(b, p[0]); c = Math.min(c, p[1]); d = Math.max(d, p[1]); });
       const k = Math.cos(rad((a + b) / 2)), ww = Math.max((d - c) * k, 1e-6), hh = Math.max(b - a, 1e-6);
-      const bx = 110, by = 190, bw = 860, bh = 600, s = Math.min(bw / ww, bh / hh), ox = bx + (bw - ww * s) / 2, oy = by + (bh - hh * s) / 2;
+      const bx = 110, by = 210, bw = 860, bh = 900, s = Math.min(bw / ww, bh / hh), ox = bx + (bw - ww * s) / 2, oy = by + (bh - hh * s) / 2;
       const P = p => [(p[1] - c) * k * s + ox, (b - p[0]) * s + oy];
       x.lineJoin = 'round'; x.lineCap = 'round';
       [['#f4f6fb', 28], ['#ff5a1f', 13]].forEach(([col, lw]) => {
@@ -2376,30 +2386,118 @@
       const s0 = P(tr[0]), s1 = P(tr[tr.length - 1]);
       x.fillStyle = '#f4f6fb'; x.beginPath(); x.arc(s0[0], s0[1], 20, 0, 7); x.fill();
       x.fillStyle = '#ff5a1f'; x.strokeStyle = '#f4f6fb'; x.lineWidth = 7; x.beginPath(); x.arc(s1[0], s1[1], 20, 0, 7); x.fill(); x.stroke();
+      (h.photos || []).filter(f => f.lat != null).forEach(f => { const q = P([f.lat, f.lon]); x.fillStyle = '#f4f6fb'; x.strokeStyle = '#ff5a1f'; x.lineWidth = 6; x.beginPath(); x.arc(q[0], q[1], 24, 0, 7); x.fill(); x.stroke(); setFont(x, 400, 26, false); x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('📷', q[0], q[1] + 1); x.textAlign = 'left'; });
     }
     // date + activité
     x.textBaseline = 'alphabetic';
     setFont(x, 600, 38, false); x.fillStyle = '#8f96a2';
-    x.fillText(cap(dfLong.format(new Date(h.date))) + ' — ' + (ACT_LABEL[h.activity] || 'Sortie'), 80, 890);
+    x.fillText(cap(dfLong.format(new Date(h.date))) + ' — ' + (ACT_LABEL[h.activity] || 'Sortie'), 80, 1230);
     // distance
     setFont(x, 800, 210, true); x.fillStyle = '#f4f6fb';
-    const dTxt = nf2.format((h.distanceM || 0) / 1000); x.fillText(dTxt, 70, 1085);
-    const dw = x.measureText(dTxt).width; setFont(x, 700, 60, true); x.fillStyle = '#8f96a2'; x.fillText('km', 70 + dw + 20, 1085);
-    x.fillStyle = '#ff5a1f'; x.fillRect(80, 1138, 300, 14);
+    const dTxt = nf2.format((h.distanceM || 0) / 1000); x.fillText(dTxt, 70, 1430);
+    const dw = x.measureText(dTxt).width; setFont(x, 700, 60, true); x.fillStyle = '#8f96a2'; x.fillText('km', 70 + dw + 20, 1430);
+    x.fillStyle = '#ff5a1f'; x.fillRect(80, 1480, 300, 14);
     // stats
     const velo = h.activity === 'velo';
     const stats = [['Durée', fmtClock(h.durationMs || 0)], velo ? ['Vitesse', nf1.format(h.avgKmh || 0) + ' km/h'] : ['Allure', fmtPace(h.durationMs || 0, h.distanceM || 0) + ' /km'],
-      ['Calories', nf0.format(h.kcal || 0)], velo || !h.steps ? ['Montée', nf0.format(h.dplus || 0) + ' m'] : ['Pas', nf0.format(h.steps || 0)]];
+      ['Calories', nf0.format(h.kcal || 0) + ' kcal'], ['Montée', '+' + nf0.format(h.dplus || 0) + ' m'], ['Descente', '−' + nf0.format(h.dminus || 0) + ' m'], velo || !h.steps ? ['Max', nf1.format(h.maxKmh || 0) + ' km/h'] : ['Pas', nf0.format(h.steps || 0)]];
     stats.forEach(([l, v], i) => {
-      const cx = 80 + i * 245;
-      setFont(x, 600, 32, false); x.fillStyle = '#8f96a2'; x.fillText(l, cx, 1222);
-      let fs = 58; setFont(x, 800, fs, true);
-      while (x.measureText(v).width > 222 && fs > 30) { fs -= 2; setFont(x, 800, fs, true); } // la valeur doit tenir dans sa colonne
-      x.fillStyle = '#f4f6fb'; x.fillText(v, cx, 1284);
+      const cx = 80 + (i % 3) * 320, cy = 1590 + Math.floor(i / 3) * 170;
+      setFont(x, 600, 34, false); x.fillStyle = '#8f96a2'; x.fillText(l, cx, cy);
+      let fs = 66; setFont(x, 800, fs, true);
+      while (x.measureText(v).width > 295 && fs > 30) { fs -= 2; setFont(x, 800, fs, true); } // la valeur doit tenir dans sa colonne
+      x.fillStyle = '#f4f6fb'; x.fillText(v, cx, cy + 70);
     });
     return new Promise((res, rej) => cv.toBlob(bl => bl ? res(bl) : rej(new Error('toBlob')), 'image/png'));
   }
 
+
+  // ---------- Photos pendant la sortie ----------
+  const phSrc = f => f.d || (f.uri && window.Capacitor && Capacitor.convertFileSrc ? Capacitor.convertFileSrc(f.uri) : '');
+  function photosHtml(P) {
+    if (!P || !P.length) return '';
+    return '<div class="d-sub">Photos (' + P.length + ')</div><div class="phrow">' + P.map((f, i) => '<button type="button" class="phth" data-ph="' + i + '"><img src="' + phSrc(f) + '" alt="Photo ' + (i + 1) + '" loading="lazy"></button>').join('') + '</div>';
+  }
+  function phOpen(f) { if (!f) return; $('phImg').src = phSrc(f); $('phCap').textContent = f.t ? new Date(f.t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''; $('phView').classList.remove('hidden'); }
+  $('phView').addEventListener('click', () => $('phView').classList.add('hidden'));
+  $('dBody').addEventListener('click', e => {
+    const t = e.target.closest('[data-ph]'); if (!t) return;
+    const h = store.get(K_HIST, [])[detailIdx]; if (h && h.photos) phOpen(h.photos[+t.dataset.ph]);
+  });
+  function shrinkImage(file, max, q) {
+    return new Promise((res, rej) => {
+      const img = new Image(), url = URL.createObjectURL(file);
+      img.onload = () => { const r = Math.min(1, max / Math.max(img.width, img.height)), cv = document.createElement('canvas'); cv.width = Math.round(img.width * r); cv.height = Math.round(img.height * r); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url); res(cv.toDataURL('image/jpeg', q)); };
+      img.onerror = e => { URL.revokeObjectURL(url); rej(e); }; img.src = url;
+    });
+  }
+  $('photoBtn').addEventListener('click', () => { if (S.status === 'idle') return; $('photoIn').value = ''; $('photoIn').click(); });
+  $('photoIn').addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0]; if (!file || S.status === 'idle') return;
+    if ((S.photos || []).length >= 30) { toast('30 photos maximum par sortie.'); return; }
+    const pos = lastFix || (() => { const p = lastTrackPoint(); return p ? { lon: p[0], lat: p[1] } : null; })();
+    const f = { t: Date.now(), lat: pos ? r6(pos.lat) : null, lon: pos ? r6(pos.lon) : null };
+    try {
+      const fs = plugin('Filesystem');
+      if (isNative && fs) {
+        const data = await shrinkImage(file, 1400, 0.8);
+        const r = await fs.writeFile({ path: 'photos/' + f.t + '.jpg', data: data.split(',')[1], directory: 'DATA', recursive: true });
+        f.uri = r.uri;
+      } else f.d = await shrinkImage(file, 700, 0.65);
+    } catch (err) { toast('La photo n\'a pas pu être enregistrée.'); return; }
+    (S.photos = S.photos || []).push(f); save(true); photoUi(); mapPhotos();
+    toast(pos ? 'Photo épinglée sur ton parcours 📍' : 'Photo ajoutée (sans position GPS)');
+  });
+  function photoUi() {
+    const on = S.status !== 'idle';
+    $('photoBtn').classList.toggle('hidden', !on);
+    $('photoN').textContent = on && S.photos && S.photos.length ? S.photos.length + ' photo' + (S.photos.length > 1 ? 's' : '') : '';
+  }
+  let phMarkers = [];
+  function mapPhotos() {
+    if (typeof map === 'undefined' || !map || typeof maplibregl === 'undefined') return;
+    const P = (S.status !== 'idle' ? S.photos || [] : []).filter(f => f.lat != null);
+    if (phMarkers.length === P.length) return;
+    phMarkers.forEach(m => m.remove()); phMarkers = P.map(f => {
+      const el = document.createElement('button'); el.type = 'button'; el.className = 'phmk'; el.innerHTML = '<img src="' + phSrc(f) + '" alt="">';
+      el.addEventListener('click', ev => { ev.stopPropagation(); phOpen(f); });
+      return new maplibregl.Marker({ element: el }).setLngLat([f.lon, f.lat]).addTo(map);
+    });
+  }
+  setInterval(() => { try { photoUi(); mapPhotos(); } catch (e) {} }, 1500);
+
+  // ---------- Météo (Open-Meteo, gratuit, sans compte) ----------
+  const WMO = c => c === 0 ? ['☀️', 'Grand soleil'] : c <= 2 ? ['🌤️', 'Éclaircies'] : c === 3 ? ['☁️', 'Couvert'] : c <= 48 ? ['🌫️', 'Brouillard'] : c <= 57 ? ['🌦️', 'Bruine'] : c <= 67 ? ['🌧️', 'Pluie'] : c <= 77 ? ['🌨️', 'Neige'] : c <= 82 ? ['🌧️', 'Averses'] : c <= 86 ? ['🌨️', 'Averses de neige'] : ['⛈️', 'Orage'];
+  let meteoAt = 0;
+  function herePos() {
+    if (lastFix && Date.now() - lastFixAt < 30 * 60000) return Promise.resolve({ lat: lastFix.lat, lon: lastFix.lon });
+    return new Promise(res => {
+      if (!navigator.geolocation) return res(settings.meteoPos || null);
+      navigator.geolocation.getCurrentPosition(p => { const o = { lat: p.coords.latitude, lon: p.coords.longitude }; settings.meteoPos = { lat: Math.round(o.lat * 100) / 100, lon: Math.round(o.lon * 100) / 100 }; saveSettings(); res(o); },
+        () => res(settings.meteoPos || null), { enableHighAccuracy: false, maximumAge: 30 * 60000, timeout: 12000 });
+    });
+  }
+  async function loadMeteo(force) {
+    if (!force && Date.now() - meteoAt < 20 * 60000) return;
+    meteoAt = Date.now();
+    const pos = await herePos(); if (!pos) { meteoAt = Date.now() - 18 * 60000; return; }
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=' + pos.lat.toFixed(3) + '&longitude=' + pos.lon.toFixed(3) + '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day&hourly=precipitation_probability,weather_code&forecast_hours=4&timezone=auto';
+    let j;
+    try {
+      const H = isNative && plugin('CapacitorHttp');
+      if (H) { const r = await H.get({ url }); j = typeof r.data === 'string' ? JSON.parse(r.data) : r.data; } else j = await (await fetch(url)).json();
+    } catch (e) { meteoAt = 0; return; }
+    const c = j && j.current; if (!c) return;
+    const [ic, lbl] = WMO(c.weather_code), pr = (j.hourly && j.hourly.precipitation_probability) || [];
+    const now = pr[0] != null ? pr[0] : 0, maxN = Math.max(0, ...pr.slice(0, 4)), at = pr.findIndex(v => v >= 50);
+    const tip = at > 0 ? '☔ Pluie probable dans ' + at + ' h : pars maintenant ou prends un K-way.' : at === 0 ? '☔ Il pleut ou ça arrive : prévois un K-way.' : c.temperature_2m <= 3 ? '🧤 Il fait froid : couvre tes mains et tes oreilles.' : c.temperature_2m >= 28 ? '💧 Il fait chaud : prends de l\'eau et évite le plein soleil.' : '👍 Bonnes conditions pour sortir.';
+    $('meteo').innerHTML = '<div class="mt-ic">' + (c.is_day === 0 && c.weather_code <= 2 ? '🌙' : ic) + '</div><div class="mt-m"><b class="num">' + Math.round(c.temperature_2m) + '°</b><span>' + lbl + ' · ressenti ' + Math.round(c.apparent_temperature) + '°</span></div>' +
+      '<div class="mt-s"><span>🌧️ <b class="num">' + now + ' %</b></span><span>💨 <b class="num">' + Math.round(c.wind_speed_10m) + '</b> km/h</span></div><p class="mt-tip">' + tip + (maxN > now && at < 0 ? '' : '') + '</p>';
+    $('meteo').classList.remove('hidden');
+  }
+  setTimeout(() => loadMeteo(), 2500);
+  setInterval(() => { if (!document.hidden) loadMeteo(); }, 5 * 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadMeteo(); });
 
   // ---------- Séances d'exercices (minuteur) ----------
   const K_WORKOUTS = 'parcours.workouts', K_WLOG = 'parcours.workoutlog';
