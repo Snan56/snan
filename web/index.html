@@ -295,6 +295,13 @@
   .mrow select{width:78px;padding:9px 6px} #mType{min-width:150px}
   .mrow{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(200,205,215,.14)}
   .mrow.off .mname,.mrow.off .mkcal{opacity:.5}
+  .cp-open{width:100%;margin-top:10px}
+  .cp{margin-top:12px;padding:12px 14px;border:1px solid rgba(200,205,215,.18);border-radius:16px}
+  .cp-t{font-weight:700;font-size:14px;margin:10px 0 6px}
+  .cp .chips{margin:0 0 6px;padding:2px 0 6px}
+  .cp-card{margin-top:12px;padding-top:10px;border-top:1px solid rgba(200,205,215,.14)}
+  .cp-card .sbtn{width:100%;margin-top:8px}
+  .cp .linkbtn{display:block;margin:12px auto 0}
   .mname{display:flex;flex-direction:column;min-width:0} .mname small{color:var(--gris);font-size:13px}
   .mkcal{font-size:18px;min-width:48px;text-align:right}
   .mchk input{position:absolute;opacity:0;width:1px;height:1px} .mchk span{display:block;width:26px;height:26px;border-radius:8px;border:2px solid var(--gris);cursor:pointer}
@@ -915,6 +922,9 @@
     <div id="mList"></div>
     <input id="mSearch" class="msearch" list="foodNames" placeholder="Ajouter un aliment (ex. : frites)" autocomplete="off" aria-label="Ajouter un aliment">
     <datalist id="foodNames"></datalist>
+    <button id="mCompBtn" class="sbtn cancel cp-open" type="button">Composer mon assiette (plus précis)</button>
+    <div id="mComp" class="cp hidden"></div>
+    <datalist id="ingNames"></datalist>
     <div class="mphotos"><label class="linkbtn"><input id="mCamera" type="file" accept="image/*" capture="environment" hidden>Reprendre une photo</label><label class="linkbtn"><input id="mGallery" type="file" accept="image/*" hidden>Autre photo</label><button id="mNoPhoto" type="button" hidden></button></div>
     <p id="mTotal" class="mtotal"></p>
     <div class="btns">
@@ -3093,7 +3103,7 @@
     $('mList').innerHTML = MS.items.length ? MS.items.map((it, i) =>
       '<div class="mrow' + (it.on ? '' : ' off') + '" data-i="' + i + '">' +
       '<label class="mchk"><input type="checkbox" data-mon="' + i + '"' + (it.on ? ' checked' : '') + ' aria-label="Garder ' + esc(it.f.fr) + '"><span></span></label>' +
-      '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + (it.mem ? 'Comme ton repas habituel, ' : it.z ? 'Aussi dans l\'assiette, ' : it.v ? 'Variante, ' : it.p != null ? (it.p >= 0.5 ? 'Très probable' : it.p >= 0.12 ? 'Probable' : 'Possible') + ', ' : '') + 'portion : ' + esc(it.f.portion) + '</small></div>' +
+      '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + (it.mine ? 'Ajouté par toi, ' : it.mem ? 'Comme ton repas habituel, ' : it.z ? 'Aussi dans l\'assiette, ' : it.v ? 'Variante, ' : it.p != null ? (it.p >= 0.5 ? 'Très probable' : it.p >= 0.12 ? 'Probable' : 'Possible') + ', ' : '') + 'portion : ' + esc(it.f.portion) + '</small></div>' +
       '<select data-mq="' + i + '" aria-label="Nombre de portions de ' + esc(it.f.fr) + '">' + QTY.map(([q, l]) => '<option value="' + q + '"' + (q === it.q ? ' selected' : '') + '>× ' + l + '</option>').join('') + '</select>' +
       '<b class="mkcal num">' + nf0.format(Math.round(it.f.kcal * it.q)) + '</b></div>').join('')
       : '<p class="empty">Ajoute les aliments de ton repas avec la recherche ci-dessous.</p>';
@@ -3106,7 +3116,7 @@
     $('mBar').style.width = pct == null ? '0' : (pct * 100).toFixed(0) + '%'; $('mBarBox').classList.toggle('hidden', pct == null);
   }
   async function openMeal(file) {
-    MS.items = []; MS.thumb = ''; MS.date = Date.now(); MS.vec = null;
+    MS.items = []; MS.thumb = ''; MS.date = Date.now(); MS.vec = null; CP.ing = null; $('mComp').classList.add('hidden'); $('mCompBtn').classList.remove('hidden');
     $('mType').value = String(mealTypeFor(MS.date));
     $('mPhoto').classList.add('hidden'); $('mSearch').value = '';
     mealRows(); $('msheet').classList.remove('hidden');
@@ -3140,7 +3150,7 @@
       if (best && bs > 0.9) {
         MS.items.forEach(x => { x.on = false; });
         best.items.slice().reverse().forEach(it => {
-          const f = foodsList.foods.find(x => x.id === it.id); if (!f) return;
+          const f = it.f || foodsList.foods.find(x => x.id === it.id); if (!f) return;
           const ex = MS.items.find(x => x.f.id === f.id);
           if (ex) { ex.on = true; ex.q = it.q; ex.mem = true; } else MS.items.unshift({ f, p: null, q: it.q, on: true, mem: true });
         });
@@ -3185,13 +3195,119 @@
     while (!store.set(K_MEALS, kept) && kept.length > 20) kept = kept.slice(0, Math.floor(kept.length * 0.8)).map((m, i) => i > 30 ? Object.assign({}, m, { thumb: '' }) : m);
     if (MS.vec) { // on retient ta correction pour les prochaines photos du même plat
       const mem = store.get(K_MEALMEM, []);
-      mem.unshift({ v: MS.vec.map(x => Math.round(x * 100)), items: items.map(x => ({ id: x.id, q: x.q })) });
+      mem.unshift({ v: MS.vec.map(x => Math.round(x * 100)), items: MS.items.filter(x => x.on).map(x => x.f.id.indexOf('ing:') === 0 ? { id: x.f.id, q: x.q, f: x.f } : { id: x.f.id, q: x.q }) });
       store.set(K_MEALMEM, mem.slice(0, 80));
     }
     closeMeal(); renderRepas(); toast('Repas enregistré'); healthChanged();
   });
   ['mCamera', 'mGallery'].forEach(id => $(id).addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) openMeal(f); }));
   $('mNoPhoto').addEventListener('click', () => openMeal(null));
+
+  // ---------- Composer son assiette : base d'ingrédients (kcal pour 100 g ou 100 ml) + guidage par l'utilisateur ----------
+  // Valeurs moyennes (aliments cuits quand ils se mangent cuits), arrondies, d'après les tables de composition usuelles (type Ciqual).
+  const PORTIONS = {
+    feculent: [['2 c. à soupe', 50], ['un demi-poing', 80], ['un poing', 150], ['deux poings', 250], ['assiette pleine', 350]],
+    viande: [['moitié de la paume', 60], ['la paume de la main', 120], ['toute la main', 180], ['grosse pièce', 250]],
+    legume: [['une poignée', 50], ['un poing', 100], ['deux poings', 200], ['moitié de l\'assiette', 250]],
+    sauce: [['1 c. à café', 5], ['1 c. à soupe', 15], ['2 c. à soupe', 30], ['beaucoup (louche)', 60]],
+    gras: [['1 c. à café', 5], ['1 c. à soupe', 12], ['2 c. à soupe', 24]],
+    pain: [['un morceau / 1 tranche', 30], ['¼ de baguette', 60], ['½ baguette', 125], ['baguette entière', 250]],
+    fromage: [['taille d\'un pouce', 15], ['une portion', 30], ['grosse part', 60]],
+    boisson: [['un verre (20 cl)', 200], ['une canette (33 cl)', 330], ['une bouteille (50 cl)', 500]],
+    fruit: [['petit', 80], ['moyen', 130], ['gros', 200]],
+    dessert: [['petite part', 60], ['part normale', 100], ['grosse part', 150]],
+    bol: [['petit bol', 30], ['bol normal', 45], ['grand bol', 70]]
+  };
+  const COOK = [['Nature / cru', 0], ['Vapeur / bouilli', 0], ['Grillé / four', 2], ['Poêlé', 6], ['Frit', 12]]; // g d'huile ajoutée pour 100 g
+  // [id, nom, type de portion, kcal/100, cuisson possible, grammes par pièce]
+  const INGR = [
+    ['riz', 'Riz blanc', 'feculent', 130, 1], ['riz-c', 'Riz complet', 'feculent', 125, 1], ['pates', 'Pâtes', 'feculent', 150, 1], ['semoule', 'Semoule', 'feculent', 150, 1],
+    ['boulgour', 'Boulgour', 'feculent', 120, 1], ['quinoa', 'Quinoa', 'feculent', 120, 1], ['pdt', 'Pommes de terre', 'feculent', 85, 1], ['puree', 'Purée', 'feculent', 95, 0],
+    ['frites', 'Frites', 'feculent', 300, 0], ['lentilles', 'Lentilles', 'feculent', 115, 1], ['pois-ch', 'Pois chiches', 'feculent', 140, 1], ['haricots-r', 'Haricots rouges', 'feculent', 115, 1],
+    ['mais', 'Maïs', 'feculent', 100, 1], ['patate-d', 'Patate douce', 'feculent', 90, 1], ['nouilles', 'Nouilles', 'feculent', 140, 1],
+    ['poulet', 'Blanc de poulet', 'viande', 150, 1], ['cuisse', 'Cuisse de poulet', 'viande', 200, 1], ['steak', 'Steak de bœuf', 'viande', 180, 1], ['hache5', 'Steak haché 5 %', 'viande', 160, 1],
+    ['hache15', 'Steak haché 15 %', 'viande', 230, 1], ['kefta', 'Kefta / viande hachée', 'viande', 250, 1], ['agneau', 'Agneau', 'viande', 250, 1], ['porc', 'Porc (côte, filet)', 'viande', 210, 1],
+    ['kebab-v', 'Viande de kebab', 'viande', 250, 0], ['jambon', 'Jambon blanc', 'viande', 115, 0], ['lardons', 'Lardons', 'viande', 300, 1], ['saucisse', 'Saucisse', 'viande', 300, 1],
+    ['merguez', 'Merguez', 'viande', 300, 1], ['nuggets', 'Nuggets / tenders', 'viande', 260, 0], ['saumon', 'Saumon', 'viande', 200, 1], ['thon', 'Thon en boîte (nature)', 'viande', 115, 0],
+    ['poisson', 'Poisson blanc', 'viande', 90, 1], ['crevettes', 'Crevettes', 'viande', 100, 1], ['tofu', 'Tofu', 'viande', 120, 1], ['oeuf', 'Œuf', 'piece', 145, 1, 55],
+    ['salade', 'Salade verte', 'legume', 15, 0], ['tomate', 'Tomate', 'legume', 18, 0], ['concombre', 'Concombre', 'legume', 12, 0], ['carottes', 'Carottes', 'legume', 35, 1],
+    ['haricots-v', 'Haricots verts', 'legume', 30, 1], ['brocoli', 'Brocoli', 'legume', 35, 1], ['courgette', 'Courgette', 'legume', 20, 1], ['poivron', 'Poivron', 'legume', 25, 1],
+    ['champi', 'Champignons', 'legume', 25, 1], ['epinards', 'Épinards', 'legume', 25, 1], ['oignon', 'Oignon', 'legume', 40, 1], ['ratatouille', 'Ratatouille', 'legume', 60, 0],
+    ['legumes', 'Légumes mélangés', 'legume', 45, 1], ['avocat', 'Avocat', 'legume', 160, 0],
+    ['mayo', 'Mayonnaise', 'sauce', 700, 0], ['ketchup', 'Ketchup', 'sauce', 110, 0], ['moutarde', 'Moutarde', 'sauce', 150, 0], ['blanche', 'Sauce blanche', 'sauce', 300, 0],
+    ['algerienne', 'Sauce algérienne / samouraï', 'sauce', 450, 0], ['bbq', 'Sauce barbecue', 'sauce', 150, 0], ['vinaigrette', 'Vinaigrette', 'sauce', 450, 0], ['s-tomate', 'Sauce tomate', 'sauce', 50, 0],
+    ['creme', 'Crème fraîche', 'sauce', 300, 0], ['bechamel', 'Béchamel', 'sauce', 130, 0], ['s-fromage', 'Sauce fromagère', 'sauce', 250, 0], ['soja', 'Sauce soja', 'sauce', 60, 0],
+    ['pesto', 'Pesto', 'sauce', 450, 0], ['houmous', 'Houmous', 'sauce', 300, 0], ['confiture', 'Confiture', 'sauce', 250, 0], ['pate-tart', 'Pâte à tartiner', 'sauce', 540, 0], ['miel', 'Miel', 'sauce', 300, 0],
+    ['huile', 'Huile', 'gras', 900, 0], ['beurre', 'Beurre', 'gras', 740, 0],
+    ['pain', 'Pain blanc / baguette', 'pain', 270, 0], ['pain-c', 'Pain complet', 'pain', 245, 0], ['pita', 'Pain pita / galette', 'pain', 275, 0], ['naan', 'Naan', 'pain', 300, 0], ['tortilla', 'Tortilla', 'pain', 300, 0],
+    ['emmental', 'Emmental / râpé', 'fromage', 380, 0], ['mozza', 'Mozzarella', 'fromage', 250, 0], ['chevre', 'Chèvre', 'fromage', 300, 0], ['feta', 'Feta', 'fromage', 260, 0],
+    ['camembert', 'Camembert', 'fromage', 280, 0], ['cheddar', 'Cheddar', 'fromage', 400, 0], ['parmesan', 'Parmesan', 'fromage', 400, 0], ['chocolat', 'Chocolat', 'fromage', 540, 0],
+    ['pomme', 'Pomme', 'fruit', 55, 0], ['banane', 'Banane', 'fruit', 90, 0], ['orange', 'Orange', 'fruit', 45, 0], ['raisin', 'Raisin', 'fruit', 70, 0], ['fraises', 'Fraises', 'fruit', 32, 0],
+    ['melon', 'Melon / pastèque', 'fruit', 35, 0], ['mangue', 'Mangue', 'fruit', 65, 0],
+    ['coca', 'Soda (Coca…)', 'boisson', 42, 0], ['zero', 'Soda zéro', 'boisson', 1, 0], ['jus', 'Jus d\'orange', 'boisson', 45, 0], ['icetea', 'Ice Tea', 'boisson', 30, 0],
+    ['lait', 'Lait demi-écrémé', 'boisson', 46, 0], ['biere', 'Bière', 'boisson', 43, 0], ['energy', 'Boisson énergisante', 'boisson', 45, 0], ['eau', 'Eau, café ou thé sans sucre', 'boisson', 0, 0],
+    ['yaourt', 'Yaourt nature', 'piece', 60, 0, 125], ['yaourt-f', 'Yaourt aux fruits', 'piece', 95, 0, 125], ['compote', 'Compote', 'piece', 70, 0, 100], ['croissant', 'Croissant', 'piece', 410, 0, 60],
+    ['cookie', 'Cookie', 'piece', 480, 0, 40], ['glace', 'Glace (boule)', 'piece', 200, 0, 50], ['gateau', 'Gâteau au chocolat', 'dessert', 400, 0], ['tarte', 'Tarte aux fruits', 'dessert', 250, 0],
+    ['tiramisu', 'Tiramisu', 'dessert', 280, 0], ['cereales', 'Céréales', 'bol', 380, 0]
+  ].map(a => ({ id: a[0], fr: a[1], t: a[2], k: a[3], cook: !!a[4], pg: a[5] || 0 }));
+  const INGR_BY = Object.fromEntries(INGR.map(x => [x.id, x]));
+  const CUISINES = {
+    'Française': ['pdt', 'steak', 'poulet', 'haricots-v', 'puree', 'pain', 'beurre', 'camembert', 'salade'],
+    'Fast-food': ['frites', 'hache15', 'nuggets', 'pain', 'cheddar', 'ketchup', 'mayo', 'coca'],
+    'Turque / kebab': ['kebab-v', 'pita', 'boulgour', 'riz', 'blanche', 'algerienne', 'salade', 'tomate', 'oignon', 'kefta'],
+    'Italienne': ['pates', 's-tomate', 'parmesan', 'mozza', 'pesto', 'hache15', 'creme', 'lardons'],
+    'Maghrébine': ['semoule', 'pois-ch', 'merguez', 'agneau', 'poulet', 'legumes', 'pain'],
+    'Asiatique': ['riz', 'nouilles', 'poulet', 'crevettes', 'tofu', 'legumes', 'soja', 'oeuf'],
+    'Mexicaine': ['tortilla', 'haricots-r', 'riz', 'hache15', 'avocat', 'cheddar', 'tomate', 'mais'],
+    'Petit-déjeuner': ['pain', 'beurre', 'confiture', 'pate-tart', 'cereales', 'lait', 'jus', 'croissant', 'oeuf', 'yaourt'],
+    'Dessert / goûter': ['yaourt-f', 'compote', 'cookie', 'glace', 'gateau', 'tarte', 'chocolat', 'banane', 'pomme']
+  };
+  const CP = { cuisine: '', ing: null, por: 1, cook: 0 };
+  function portionsOf(x) { return x.t === 'piece' ? [['1', x.pg], ['2', x.pg * 2], ['3', x.pg * 3]] : PORTIONS[x.t]; }
+  function compKcal(x, gi, ci) { const g = portionsOf(x)[gi][1], oil = x.cook ? COOK[ci][1] * g / 100 : 0; return Math.round(x.k * g / 100 + oil * 9); }
+  function renderComp() {
+    const box = $('mComp'); if (box.classList.contains('hidden')) return;
+    let h = '<div class="cp-t">1. Quelle cuisine ?</div><div class="chips">' + Object.keys(CUISINES).map(c => '<button type="button" class="chip" data-cu="' + esc(c) + '" aria-pressed="' + (CP.cuisine === c) + '">' + esc(c) + '</button>').join('') + '</div>';
+    const quick = CP.cuisine ? CUISINES[CP.cuisine] : [];
+    h += '<div class="cp-t">2. Qu\'est-ce qu\'il y a dans l\'assiette ?</div>';
+    if (quick.length) h += '<div class="chips">' + quick.map(id => '<button type="button" class="chip" data-ing="' + id + '" aria-pressed="' + (CP.ing && CP.ing.id === id) + '">' + esc(INGR_BY[id].fr) + '</button>').join('') + '</div>';
+    h += '<input id="cpSearch" class="msearch" list="ingNames" placeholder="Chercher un ingrédient (riz, poulet, sauce…)" autocomplete="off" aria-label="Chercher un ingrédient">';
+    if (CP.ing) {
+      const x = CP.ing, P = portionsOf(x);
+      h += '<div class="cp-card"><b>' + esc(x.fr) + '</b><div class="cp-t">Quelle quantité ? (compare avec ta main)</div><div class="chips">' +
+        P.map((p, i) => '<button type="button" class="chip" data-por="' + i + '" aria-pressed="' + (CP.por === i) + '">' + esc(p[0]) + ' · ' + p[1] + (x.t === 'boisson' ? ' ml' : ' g') + '</button>').join('') + '</div>';
+      if (x.cook) h += '<div class="cp-t">Comment c\'est cuit ?</div><div class="chips">' + COOK.map((c, i) => '<button type="button" class="chip" data-cook="' + i + '" aria-pressed="' + (CP.cook === i) + '">' + c[0] + '</button>').join('') + '</div>';
+      h += '<button id="cpAdd" class="sbtn save" type="button">Ajouter · ' + nf0.format(compKcal(x, CP.por, CP.cook)) + ' kcal</button></div>';
+    }
+    h += '<button id="cpClose" class="linkbtn" type="button">Terminé</button>';
+    box.innerHTML = h;
+  }
+  function pickIng(x) { CP.ing = x; CP.por = Math.min(portionsOf(x).length - 1, x.t === 'sauce' || x.t === 'gras' ? 1 : x.t === 'piece' ? 0 : 1); CP.cook = 0; renderComp(); }
+  function openComp() {
+    if (!$('ingNames').children.length) $('ingNames').innerHTML = INGR.map(x => '<option value="' + esc(x.fr) + '">').join('');
+    $('mComp').classList.remove('hidden'); $('mCompBtn').classList.add('hidden'); renderComp();
+  }
+  $('mCompBtn').addEventListener('click', openComp);
+  $('mComp').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.cu != null) { CP.cuisine = CP.cuisine === b.dataset.cu ? '' : b.dataset.cu; renderComp(); }
+    else if (b.dataset.ing) pickIng(INGR_BY[b.dataset.ing]);
+    else if (b.dataset.por != null) { CP.por = +b.dataset.por; renderComp(); }
+    else if (b.dataset.cook != null) { CP.cook = +b.dataset.cook; renderComp(); }
+    else if (b.id === 'cpAdd') {
+      const x = CP.ing, P = portionsOf(x)[CP.por], cook = x.cook && CP.cook ? ' ' + COOK[CP.cook][0].toLowerCase() : '';
+      const f = { id: 'ing:' + x.id + ':' + P[1] + ':' + (x.cook ? CP.cook : 0), fr: x.fr + cook, portion: P[0] + ' (' + P[1] + (x.t === 'boisson' ? ' ml' : ' g') + ')', kcal: compKcal(x, CP.por, CP.cook) };
+      MS.items.unshift({ f, p: null, q: 1, on: true, mine: true }); CP.ing = null; mealRows(); renderComp(); toast(x.fr + ' ajouté');
+    }
+    else if (b.id === 'cpClose') { $('mComp').classList.add('hidden'); $('mCompBtn').classList.remove('hidden'); }
+  });
+  $('mComp').addEventListener('change', e => {
+    if (e.target.id !== 'cpSearch') return;
+    const nz = t => t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''), q = nz(e.target.value.trim()); if (!q) return;
+    const x = INGR.find(i => nz(i.fr) === q) || INGR.find(i => nz(i.fr).startsWith(q)) || INGR.find(i => nz(i.fr).includes(q));
+    if (!x) { toast('Ingrédient introuvable. Essaie un nom plus simple.'); return; }
+    pickIng(x);
+  });
 
   // Calories du jour : mangées (repas) et dépensées (sorties + séances)
   function dayEnergy(key) {
