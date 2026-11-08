@@ -337,6 +337,7 @@
   @keyframes rowflash{0%,60%{background:rgba(255,90,31,.22)}100%{background:transparent}}
   .hgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 4px}.hgrid div{background:var(--nuit-3);border-radius:14px;padding:10px 12px}
   .hgrid span{display:block;font-size:12px;color:var(--gris)}.hgrid b{font-size:28px;font-weight:900;color:#ff5a5f}.hgrid b i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-left:6px;vertical-align:middle}.hgrid small{margin-left:4px;color:var(--gris)}
+  .hwait b{color:var(--gris)!important}
   .hz{display:grid;grid-template-columns:12px 1fr auto;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--ligne);font-size:14px}.hz i{width:12px;height:12px;border-radius:4px}.hz b{font-size:15px}
   .wverdict{margin:8px 0 0;font-weight:600;color:var(--gris)}.wverdict.ok{color:#4ade80}
   .frow{display:grid;grid-template-columns:1fr auto 40px 32px;align-items:center;gap:8px;padding:10px 0;border-top:1px solid var(--ligne)}
@@ -940,8 +941,7 @@
           <li>Ajoute <b>Rechercher des échantillons de santé</b> : type <b>Pas</b>, date de début <b>aujourd'hui</b>.</li>
           <li>Ajoute <b>Calculer des statistiques</b> : <b>Somme</b> des échantillons.</li>
           <li>Ajoute encore <b>Rechercher des échantillons de santé</b> : type <b>Poids</b>, trier par <b>date de début</b>, <b>le plus récent d'abord</b>, limite <b>1</b>.</li>
-          <li><i>Pour le pouls de ta montre :</i> ajoute <b>Rechercher des échantillons de santé</b> : type <b>Fréquence cardiaque</b>, le plus récent d'abord, limite <b>1</b>. Puis la même chose avec le type <b>Fréquence cardiaque au repos</b>. Puis encore <b>Fréquence cardiaque</b>, date de début <b>aujourd'hui</b>, suivi de <b>Calculer des statistiques</b> : <b>Moyenne</b>, et une deuxième fois : <b>Maximum</b>.</li>
-          <li>Ajoute <b>Texte</b> et écris : <b>PARCOURS pas=</b> puis insère « Résultat des statistiques » (les pas), puis <b> poids=</b> et les échantillons de poids, puis <b> fc=</b> (dernière fréquence cardiaque), <b> fcrepos=</b> (au repos), <b> fcmoy=</b> (moyenne) et <b> fcmax=</b> (maximum). Les valeurs de pouls sont facultatives.</li>
+          <li>Ajoute <b>Texte</b> et écris : <b>PARCOURS pas=</b> puis insère « Résultat des statistiques » (les pas), puis <b> poids=</b> et insère les échantillons de poids.</li>
           <li>Ajoute <b>Copier dans le presse-papiers</b>.</li>
           <li>Nomme-le <b>Santé vers Parcours</b>. Ensuite, reviens dans Parcours et touche <b>Coller les données de Santé</b>.</li>
         </ol>
@@ -3324,17 +3324,16 @@
         (H.rest ? '<div><span>Au repos</span><b class="num">' + Math.round(H.rest) + '</b><small>BPM</small></div>' : '') +
         (H.avg ? '<div><span>Moyenne du jour</span><b class="num">' + Math.round(H.avg) + '</b><small>BPM</small></div>' : '') +
         (H.max ? '<div><span>Maximum du jour</span><b class="num">' + Math.round(H.max) + zf(H.max) + '</b><small>BPM</small></div>' : '') + '</div>' +
-        '<p class="about" style="margin:6px 0 0">Mesuré par ta montre, récupéré le ' + new Date(H.t).toLocaleDateString('fr-FR') + ' à ' + new Date(H.t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + '.' +
+        '<p class="about" style="margin:6px 0 0">Mesuré par ta montre, mis à jour le ' + new Date(H.t).toLocaleDateString('fr-FR') + ' à ' + new Date(H.t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) + '.' +
         (H.rest ? ' ' + (H.rest < 60 ? 'Pouls au repos bas : signe d\'une bonne forme.' : H.rest <= 80 ? 'Pouls au repos normal (60 à 80).' : 'Pouls au repos un peu élevé : le sport régulier aide à le faire baisser. Parles-en à un médecin s\'il reste au-dessus de 100.') : '') + '</p>';
-    } else h += '<p class="empty">Récupère le pouls mesuré par ton Apple Watch : dernier pouls, pouls au repos, moyenne et maximum du jour.</p>';
-    h += '<button type="button" class="wremind" data-hr="1"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg><span>Récupérer le pouls de ma montre</span><i>›</i></button>';
+    } else h += '<div class="hgrid hwait"><div><span>Dernier pouls</span><b class="num">–</b><small>BPM</small></div><div><span>Au repos</span><b class="num">–</b><small>BPM</small></div><div><span>Moyenne du jour</span><b class="num">–</b><small>BPM</small></div><div><span>Maximum du jour</span><b class="num">–</b><small>BPM</small></div></div>' +
+      '<p class="about" style="margin:6px 0 0">Le pouls de ton Apple Watch s\'affichera ici automatiquement quand l\'appli sera connectée directement à Apple Santé (avec le compte développeur Apple).</p>';
     if (z) {
       h += '<div class="cp-t" style="margin-top:14px">Tes zones d\'entraînement</div><p class="about" style="margin:0 0 8px">Fréquence cardiaque maximale estimée : <b>' + z.max + ' BPM</b> (formule de Tanaka avec ton âge).</p>' +
         z.zones.map(x => '<div class="hz"><i style="background:' + x.c + '"></i><span>' + x.n + '</span><b class="num">' + x.lo + '–' + x.hi + '</b></div>').join('');
     } else h += '<p class="about">Indique ton âge dans les Réglages pour voir tes zones d\'entraînement.</p>';
     return h + '</div>';
   }
-  $('progress').addEventListener('click', e => { if (e.target.closest('[data-hr]')) { awaitPaste = true; runShortcut(SC_IN); } });
 
   // ---------- Suivi du poids ----------
   const K_WEIGHTS = 'parcours.weights';
@@ -4210,7 +4209,7 @@
   // Appli iPhone : connexion directe à Apple Santé (HealthKit), automatique, sans raccourci
   // settings.healthNoHK : appli installée avec un compte Apple gratuit (Santé refusé par Apple) → on passe par les raccourcis
   let NH = isNative && Cap.getPlatform && Cap.getPlatform() === 'ios' && !settings.healthNoHK ? plugin('Health') : null;
-  const NH_READ = ['steps', 'weight'], NH_WRITE = ['calories', 'steps', 'distance', 'distanceCycling', 'dietaryEnergyConsumed'];
+  const NH_READ = ['steps', 'weight', 'heartRate', 'restingHeartRate'], NH_WRITE = ['calories', 'steps', 'distance', 'distanceCycling', 'dietaryEnergyConsumed'];
   let nhBusy = false;
   async function nativeHealthSync() {
     if (!NH || !settings.healthOn || nhBusy) return;
@@ -4238,6 +4237,14 @@
       }
       // lecture : pas de toute la journée et dernier poids
       const d0 = new Date(); d0.setHours(0, 0, 0, 0);
+      try { // pouls de l'Apple Watch
+        const now = new Date().toISOString(), wk = new Date(Date.now() - 7 * 864e5).toISOString(), hr = { t: Date.now() };
+        const last = await NH.readSamples({ dataType: 'heartRate', startDate: wk, endDate: now, limit: 1 }); hr.last = last.samples && last.samples[0] ? last.samples[0].value : null;
+        const rest = await NH.readSamples({ dataType: 'restingHeartRate', startDate: wk, endDate: now, limit: 1 }); hr.rest = rest.samples && rest.samples[0] ? rest.samples[0].value : null;
+        const ag = await NH.queryAggregated({ dataType: 'heartRate', startDate: d0.toISOString(), endDate: now, bucket: 'day', aggregation: ['average', 'max'] });
+        const v = ag.samples && ag.samples[0] && ag.samples[0].values; if (v) { hr.avg = v.average || null; hr.max = v.max || null; }
+        if (hr.last || hr.rest || hr.avg) { store.set(K_HR, hr); msg.push('pouls'); if (currentView === 3) renderProgress(); }
+      } catch (e) {}
       const msg = [];
       try {
         const r = await NH.queryAggregated({ dataType: 'steps', startDate: d0.toISOString(), endDate: new Date().toISOString(), bucket: 'day', aggregation: 'sum' });
