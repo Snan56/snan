@@ -3216,7 +3216,8 @@
     boisson: [['un verre (20 cl)', 200], ['une canette (33 cl)', 330], ['une bouteille (50 cl)', 500]],
     fruit: [['petit', 80], ['moyen', 130], ['gros', 200]],
     dessert: [['petite part', 60], ['part normale', 100], ['grosse part', 150]],
-    bol: [['petit bol', 30], ['bol normal', 45], ['grand bol', 70]]
+    bol: [['petit bol', 30], ['bol normal', 45], ['grand bol', 70]],
+    soupe: [['petit bol', 200], ['bol', 300], ['grand bol', 400]]
   };
   const COOK = [['Nature / cru', 0], ['Vapeur / bouilli', 0], ['Grillé / four', 2], ['Poêlé', 6], ['Frit', 12]]; // g d'huile ajoutée pour 100 g
   // [id, nom, type de portion, kcal/100, cuisson possible, grammes par pièce]
@@ -3226,7 +3227,7 @@
     ['frites', 'Frites', 'feculent', 300, 0], ['lentilles', 'Lentilles', 'feculent', 115, 1], ['pois-ch', 'Pois chiches', 'feculent', 140, 1], ['haricots-r', 'Haricots rouges', 'feculent', 115, 1],
     ['mais', 'Maïs', 'feculent', 100, 1], ['patate-d', 'Patate douce', 'feculent', 90, 1], ['nouilles', 'Nouilles', 'feculent', 140, 1],
     ['poulet', 'Blanc de poulet', 'viande', 150, 1], ['cuisse', 'Cuisse de poulet', 'viande', 200, 1], ['steak', 'Steak de bœuf', 'viande', 180, 1], ['hache5', 'Steak haché 5 %', 'viande', 160, 1],
-    ['hache15', 'Steak haché 15 %', 'viande', 230, 1], ['kefta', 'Kefta / viande hachée', 'viande', 250, 1], ['agneau', 'Agneau', 'viande', 250, 1], ['porc', 'Porc (côte, filet)', 'viande', 210, 1],
+    ['hache15', 'Steak haché 15 %', 'viande', 230, 1], ['kefta', 'Köfte / kefta', 'viande', 250, 1], ['agneau', 'Agneau', 'viande', 250, 1], ['porc', 'Porc (côte, filet)', 'viande', 210, 1],
     ['kebab-v', 'Viande de kebab', 'viande', 250, 0], ['jambon', 'Jambon blanc', 'viande', 115, 0], ['lardons', 'Lardons', 'viande', 300, 1], ['saucisse', 'Saucisse', 'viande', 300, 1],
     ['merguez', 'Merguez', 'viande', 300, 1], ['nuggets', 'Nuggets / tenders', 'viande', 260, 0], ['saumon', 'Saumon', 'viande', 200, 1], ['thon', 'Thon en boîte (nature)', 'viande', 115, 0],
     ['poisson', 'Poisson blanc', 'viande', 90, 1], ['crevettes', 'Crevettes', 'viande', 100, 1], ['tofu', 'Tofu', 'viande', 120, 1], ['oeuf', 'Œuf', 'piece', 145, 1, 55],
@@ -3248,13 +3249,17 @@
     ['lait', 'Lait demi-écrémé', 'boisson', 46, 0], ['biere', 'Bière', 'boisson', 43, 0], ['energy', 'Boisson énergisante', 'boisson', 45, 0], ['eau', 'Eau, café ou thé sans sucre', 'boisson', 0, 0],
     ['yaourt', 'Yaourt nature', 'piece', 60, 0, 125], ['yaourt-f', 'Yaourt aux fruits', 'piece', 95, 0, 125], ['compote', 'Compote', 'piece', 70, 0, 100], ['croissant', 'Croissant', 'piece', 410, 0, 60],
     ['cookie', 'Cookie', 'piece', 480, 0, 40], ['glace', 'Glace (boule)', 'piece', 200, 0, 50], ['gateau', 'Gâteau au chocolat', 'dessert', 400, 0], ['tarte', 'Tarte aux fruits', 'dessert', 250, 0],
-    ['tiramisu', 'Tiramisu', 'dessert', 280, 0], ['cereales', 'Céréales', 'bol', 380, 0]
+    ['tiramisu', 'Tiramisu', 'dessert', 280, 0], ['cereales', 'Céréales', 'bol', 380, 0],
+    ['pilaf', 'Riz pilaf', 'feculent', 160, 0], ['pide', 'Pide (pain turc)', 'pain', 270, 0], ['aubergine', 'Aubergine', 'legume', 25, 1],
+    ['cacik', 'Cacık (yaourt concombre)', 'sauce', 60, 0], ['ayran', 'Ayran', 'boisson', 35, 0], ['mercimek', 'Soupe de lentilles', 'soupe', 60, 0],
+    ['dolma', 'Dolma (feuilles de vigne)', 'piece', 150, 0, 40], ['borek', 'Börek', 'dessert', 300, 0], ['baklava', 'Baklava', 'piece', 430, 0, 30],
+    ['lahmacun', 'Lahmacun', 'piece', 230, 0, 150]
   ].map(a => ({ id: a[0], fr: a[1], t: a[2], k: a[3], cook: !!a[4], pg: a[5] || 0 }));
   const INGR_BY = Object.fromEntries(INGR.map(x => [x.id, x]));
   const CUISINES = {
     'Française': ['pdt', 'steak', 'poulet', 'haricots-v', 'puree', 'pain', 'beurre', 'camembert', 'salade'],
-    'Fast-food': ['frites', 'hache15', 'nuggets', 'pain', 'cheddar', 'ketchup', 'mayo', 'coca'],
-    'Turque / kebab': ['kebab-v', 'pita', 'boulgour', 'riz', 'blanche', 'algerienne', 'salade', 'tomate', 'oignon', 'kefta'],
+    'Fast-food': ['frites', 'hache15', 'kebab-v', 'nuggets', 'pain', 'pita', 'cheddar', 'blanche', 'algerienne', 'ketchup', 'mayo', 'salade', 'coca'],
+    'Turque': ['kefta', 'pilaf', 'boulgour', 'pide', 'lahmacun', 'mercimek', 'dolma', 'borek', 'cacik', 'yaourt', 'aubergine', 'poivron', 'salade', 'tomate', 'ayran', 'baklava'],
     'Italienne': ['pates', 's-tomate', 'parmesan', 'mozza', 'pesto', 'hache15', 'creme', 'lardons'],
     'Maghrébine': ['semoule', 'pois-ch', 'merguez', 'agneau', 'poulet', 'legumes', 'pain'],
     'Asiatique': ['riz', 'nouilles', 'poulet', 'crevettes', 'tofu', 'legumes', 'soja', 'oeuf'],
