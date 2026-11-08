@@ -3031,7 +3031,8 @@
   const FOOD_MODEL = 'Xenova/mobileclip_s0';
   let foodAI = null, foodAIloading = null, foodsList = null;
   const MEAL_TYPES = ['Petit-déjeuner', 'Déjeuner', 'Goûter', 'Dîner', 'En-cas'];
-  const QTY = [[0.5, '½'], [1, '1'], [1.5, '1 ½'], [2, '2'], [3, '3']];
+  const QTY = [[0.25, '¼'], [0.5, '½'], [0.75, '¾'], [1, '1'], [1.25, '1 ¼'], [1.5, '1 ½'], [2, '2'], [2.5, '2 ½'], [3, '3'], [4, '4']];
+  const K_MEALMEM = 'parcours.mealMemory'; // photos déjà corrigées : l'appli apprend tes plats
   function mealTypeFor(t) { const h = new Date(t).getHours(); return h < 11 ? 0 : h < 15 ? 1 : h < 18 ? 2 : h < 22 ? 3 : 4; }
   async function loadFoods() {
     if (foodsList) return foodsList;
@@ -3062,14 +3063,24 @@
     try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch (e) { bmp = await createImageBitmap(file); }
     const fit = (max) => { const k = Math.min(1, max / Math.max(bmp.width, bmp.height)); const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k); c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); return c; };
     const big = fit(512), small = fit(160);
-    const blob = await new Promise(r => big.toBlob(r, 'image/jpeg', 0.9));
-    return { blob, preview: big.toDataURL('image/jpeg', 0.8), thumb: small.toDataURL('image/jpeg', 0.6) };
+    const toBlob = c => new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
+    const crop = (x, y, w, h, flip) => { const W = big.width, H = big.height, c = document.createElement('canvas'); c.width = Math.round(W * w); c.height = Math.round(H * h); const g = c.getContext('2d');
+      if (flip) { g.translate(c.width, 0); g.scale(-1, 1); } g.drawImage(big, W * x, H * y, W * w, H * h, 0, 0, c.width, c.height); return c; };
+    const blob = await toBlob(big);
+    // vue d'ensemble (photo, centre, miroir) + 4 zones qui se chevauchent pour trouver chaque aliment de l'assiette
+    const views = await Promise.all([crop(0.15, 0.15, 0.7, 0.7), crop(0, 0, 1, 1, true)].map(toBlob));
+    const zones = await Promise.all([[0, 0], [0.4, 0], [0, 0.4], [0.4, 0.4]].map(([x, y]) => toBlob(crop(x, y, 0.6, 0.6))));
+    return { blob, views, zones, preview: big.toDataURL('image/jpeg', 0.8), thumb: small.toDataURL('image/jpeg', 0.6) };
   }
-  async function classifyPhoto(blob) {
+  async function embedPhoto(blob) {
     const ai = await loadFoodAI();
-    const img = await ai.T.RawImage.fromBlob(blob);
-    const { image_embeds } = await ai.vis(await ai.proc(img));
-    const v = Array.from(image_embeds.data), n = Math.hypot(...v);
+    const { image_embeds } = await ai.vis(await ai.proc(await ai.T.RawImage.fromBlob(blob)));
+    const v = Array.from(image_embeds.data), n = Math.hypot(...v) || 1;
+    return v.map(x => x / n);
+  }
+  async function classifyPhoto(blob, vec) {
+    const ai = await loadFoodAI();
+    const v = vec || await embedPhoto(blob), n = Math.hypot(...v) || 1;
     const cand = ai.data.foods.filter(f => f.ai !== 0); // plats que l'IA sait distinguer ; les autres sont proposés en variantes
     const sims = cand.map(f => { let s = 0; for (let k = 0; k < v.length; k++) s += f.vec[k] * v[k]; return s / n - (f.b || 0); }); // b : correction pour les plats que l'IA voit partout
     const mx = Math.max(...sims), ex = sims.map(s => Math.exp(100 * (s - mx))), sum = ex.reduce((a, b) => a + b, 0); // échelle du modèle CLIP
@@ -3082,7 +3093,7 @@
     $('mList').innerHTML = MS.items.length ? MS.items.map((it, i) =>
       '<div class="mrow' + (it.on ? '' : ' off') + '" data-i="' + i + '">' +
       '<label class="mchk"><input type="checkbox" data-mon="' + i + '"' + (it.on ? ' checked' : '') + ' aria-label="Garder ' + esc(it.f.fr) + '"><span></span></label>' +
-      '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + (it.v ? 'Variante, ' : it.p != null ? (it.p >= 0.5 ? 'Très probable' : it.p >= 0.12 ? 'Probable' : 'Possible') + ', ' : '') + 'portion : ' + esc(it.f.portion) + '</small></div>' +
+      '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + (it.mem ? 'Comme ton repas habituel, ' : it.z ? 'Aussi dans l\'assiette, ' : it.v ? 'Variante, ' : it.p != null ? (it.p >= 0.5 ? 'Très probable' : it.p >= 0.12 ? 'Probable' : 'Possible') + ', ' : '') + 'portion : ' + esc(it.f.portion) + '</small></div>' +
       '<select data-mq="' + i + '" aria-label="Nombre de portions de ' + esc(it.f.fr) + '">' + QTY.map(([q, l]) => '<option value="' + q + '"' + (q === it.q ? ' selected' : '') + '>× ' + l + '</option>').join('') + '</select>' +
       '<b class="mkcal num">' + nf0.format(Math.round(it.f.kcal * it.q)) + '</b></div>').join('')
       : '<p class="empty">Ajoute les aliments de ton repas avec la recherche ci-dessous.</p>';
@@ -3095,7 +3106,7 @@
     $('mBar').style.width = pct == null ? '0' : (pct * 100).toFixed(0) + '%'; $('mBarBox').classList.toggle('hidden', pct == null);
   }
   async function openMeal(file) {
-    MS.items = []; MS.thumb = ''; MS.date = Date.now();
+    MS.items = []; MS.thumb = ''; MS.date = Date.now(); MS.vec = null;
     $('mType').value = String(mealTypeFor(MS.date));
     $('mPhoto').classList.add('hidden'); $('mSearch').value = '';
     mealRows(); $('msheet').classList.remove('hidden');
@@ -3108,9 +3119,33 @@
     try {
       await loadFoodAI((p, total) => mealStatus("Téléchargement de l'IA (environ 45 Mo, une seule fois, de préférence en wifi)…", p));
       mealStatus('Analyse de la photo…');
-      const res = await classifyPhoto(ph.blob);
+      // moyenne de plusieurs vues = résultat plus stable
+      const vs = [];
+      for (const b of [ph.blob].concat(ph.views)) vs.push(await embedPhoto(b));
+      const avg = vs[0].map((_, k) => vs.reduce((a, v) => a + v[k], 0) / vs.length);
+      MS.vec = avg;
+      const res = await classifyPhoto(null, avg);
       const top = res.slice(0, 6);
       MS.items = top.map((r, i) => ({ f: r.f, p: r.p, q: 1, on: i === 0 || r.p >= 0.3 }));
+      // chaque zone de l'assiette : un autre aliment bien visible ? (ex. steak + frites + salade)
+      mealStatus('Recherche des autres aliments de l\'assiette…');
+      const seen = new Set(MS.items.map(x => x.f.id));
+      for (const z of ph.zones) {
+        const r = (await classifyPhoto(z))[0];
+        if (r && r.p >= 0.35 && !seen.has(r.f.id)) { seen.add(r.f.id); MS.items.splice(1, 0, { f: r.f, p: r.p, z: true, q: 1, on: r.p >= 0.55 }); }
+      }
+      // mémoire : une photo qui ressemble à un repas déjà corrigé → on reprend tes aliments et portions
+      const mem = store.get(K_MEALMEM, []); let best = null, bs = 0;
+      mem.forEach(m => { const mv = m.v; let d = 0; for (let k = 0; k < avg.length; k++) d += avg[k] * mv[k] / 100; if (d > bs) { bs = d; best = m; } });
+      if (best && bs > 0.9) {
+        MS.items.forEach(x => { x.on = false; });
+        best.items.slice().reverse().forEach(it => {
+          const f = foodsList.foods.find(x => x.id === it.id); if (!f) return;
+          const ex = MS.items.find(x => x.f.id === f.id);
+          if (ex) { ex.on = true; ex.q = it.q; ex.mem = true; } else MS.items.unshift({ f, p: null, q: it.q, on: true, mem: true });
+        });
+        MS.items.sort((a, b) => (b.mem ? 1 : 0) - (a.mem ? 1 : 0));
+      }
       // variantes : plats de la liste complète très proches du premier choix (ex. pizza → pizza 4 fromages, margherita…)
       const cos = (a, b) => { let s = 0, na = 0, nb = 0; for (let k = 0; k < a.length; k++) { s += a[k] * b[k]; na += a[k] * a[k]; nb += b[k] * b[k]; } return s / Math.sqrt(na * nb); };
       const vars = foodsList.foods.filter(f => f.ai === 0).map(f => [f, cos(f.vec, top[0].f.vec)]).filter(x => x[1] > 0.8).sort((a, b) => b[1] - a[1]).slice(0, 3);
@@ -3148,6 +3183,11 @@
     meals.unshift({ date: MS.date, type: +$('mType').value, items, kcal: items.reduce((a, x) => a + x.kcal, 0), thumb: MS.thumb });
     let kept = meals.slice(0, 300);
     while (!store.set(K_MEALS, kept) && kept.length > 20) kept = kept.slice(0, Math.floor(kept.length * 0.8)).map((m, i) => i > 30 ? Object.assign({}, m, { thumb: '' }) : m);
+    if (MS.vec) { // on retient ta correction pour les prochaines photos du même plat
+      const mem = store.get(K_MEALMEM, []);
+      mem.unshift({ v: MS.vec.map(x => Math.round(x * 100)), items: items.map(x => ({ id: x.id, q: x.q })) });
+      store.set(K_MEALMEM, mem.slice(0, 80));
+    }
     closeMeal(); renderRepas(); toast('Repas enregistré'); healthChanged();
   });
   ['mCamera', 'mGallery'].forEach(id => $(id).addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) openMeal(f); }));
