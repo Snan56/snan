@@ -1476,7 +1476,7 @@
   }
   function accrueKcal() {
     if (S.status !== 'running' || S.veh || !lastKcalAt) return;
-    const now = Date.now(), dt = Math.min(30, (now - lastKcalAt) / 1000);
+    const now = Date.now(), dt = Math.min(120, (now - lastKcalAt) / 1000);
     lastKcalAt = now;
     S.kcal = (S.kcal || 0) + kcalPerMin(curKmh) * dt / 60;
   }
@@ -1958,6 +1958,15 @@
   $('mDiscard').addEventListener('click', () => { closeModal(); reset(); });
   $('mSave').addEventListener('click', saveSortie);
 
+  // Calories d'une sortie à pied d'après son bilan (distance, dénivelé, durée) : sert de filet de sécurité
+  // quand le calcul en direct a raté des minutes (écran verrouillé, GPS lent en montagne, pentes raides).
+  function summaryKcal(h) {
+    if (!h || h.activity === 'velo') return 0;
+    const run = h.activity === 'course', d = h.distanceM || 0, up = h.dplus || 0, down = h.dminus || 0, min = (h.durationMs || 0) / 60000;
+    const vo2 = (run ? 0.2 : 0.1) * d + (run ? 0.9 : 1.8) * up + 0.5 * down + 3.5 * min; // ml O2 / kg sur toute la sortie
+    const terrain = !run && d > 0 && up / d > 0.03 ? 1.15 : 1; // sentier de montagne
+    return vo2 * terrain * weightKg() / 1000 * 5;
+  }
   function saveSortie() {
     const hist = store.get(K_HIST, []);
     const before = computeRecords(hist);
@@ -1968,6 +1977,7 @@
       stepCm: S.activity === 'velo' ? null : Math.round((measuredStepM() || stepLenM(avgKmh())) * 100),
       dplus: Math.round(S.dplus || 0), dminus: Math.round(S.dminus || 0), splits: S.splits.slice(), track: simplifyTrack(S.track)
     };
+    entry.kcal = Math.round(Math.max(entry.kcal, summaryKcal(entry)));
     hist.unshift(entry);
     let kept = hist.slice(0, 150);
     while (!store.set(K_HIST, kept) && kept.length > 10) kept = kept.slice(0, Math.floor(kept.length * 0.8)); // mémoire pleine : on garde les plus récentes
@@ -2163,7 +2173,7 @@
     const ws = weekStart(Date.now()), days = [];
     for (let i = 0; i < 7; i++) { const d = new Date(ws); d.setDate(d.getDate() + i); d.setHours(12); const k = dayKey(d.getTime()), e = dayEnergy(k); days.push([['L', 'M', 'M', 'J', 'V', 'S', 'D'][i], e.burned, e.eaten, k === today]); }
     const mx = Math.max(200, ...days.map(d => d[1]));
-    h += '<div class="block"><div class="bh">Calories dépensées cette semaine</div><div class="wbars">' + days.map(([l, b, e, t]) => '<div class="wkb' + (t ? ' t' : '') + '"><em class="num">' + (b ? Math.round(b) : '') + '</em><i style="height:' + Math.max(4, b / mx * 100).toFixed(0) + '%"></i><span>' + l + '</span></div>').join('') + '</div></div>';
+    h += '<div class="block"><div class="bh">Calories brûlées par le sport</div><div class="wbars">' + days.map(([l, b, e, t]) => '<div class="wkb' + (t ? ' t' : '') + '"><em class="num">' + (b ? Math.round(b) : '') + '</em><i style="height:' + Math.max(4, b / mx * 100).toFixed(0) + '%"></i><span>' + l + '</span></div>').join('') + '</div></div>';
     try {
       const got = badgesCheck(), bs = badgeStats(), n = BADGES.filter(b => got[b[0]]).length;
       const next = BADGES.filter(b => !got[b[0]]).map(b => [b, Math.min(1, (b[4](bs) || 0) / b[5])]).sort((a, b) => b[1] - a[1])[0];
@@ -5175,6 +5185,7 @@
   } else post.classList.remove('intro');
   applyAnim();
   syncSettingsForm();
+  try { const H = store.get(K_HIST, []); let ch = 0; H.forEach(h => { if (h.kcalFix) return; const k = summaryKcal(h); if (k > (h.kcal || 0) * 1.1) { h.kcal = Math.round(k); ch = 1; } h.kcalFix = 1; }); if (ch || H.length) store.set(K_HIST, H); } catch (e) {}
   renderProgress();
   renderSeances();
   render();
