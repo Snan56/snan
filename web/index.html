@@ -302,6 +302,10 @@
   .gymbtn b{font-size:17px;font-weight:800}.gymbtn small{font-size:13px;opacity:.9}
   #gBody.cp{border:0;padding:0;margin:0}
   .cp-t .opt{font-weight:400;color:var(--gris)}
+  .grec{display:flex;flex-direction:column;gap:8px}
+  .grecb{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:2px 10px;align-items:center;width:100%;padding:12px 14px;border:1px solid rgba(255,90,31,.45);border-radius:14px;background:rgba(255,90,31,.10);color:var(--blanc);font:inherit;text-align:left;cursor:pointer}
+  .grecb b{font-size:15px}.grecb small{grid-column:1;font-size:12px;color:var(--gris)}.grecb i{grid-row:1/3;grid-column:2;font-style:normal;font-size:22px;color:var(--rouge)}
+  .grec-or{text-align:center;font-size:12px;color:var(--gris);margin:12px 0 0;text-transform:uppercase;letter-spacing:.08em}
   .gex-h,.gex{display:grid;grid-template-columns:1fr 54px 54px 84px;gap:8px;align-items:center}
   .gex-h{font-size:12px;color:var(--gris);margin:12px 0 4px}.gex-h span:not(:first-child){text-align:center}
   .gex{padding:7px 0;border-top:1px solid rgba(200,205,215,.14)}.gex b{font-size:14px;font-weight:600}
@@ -2534,8 +2538,18 @@
   const G = { mus: [], ex: [], dur: 60, int: 1, def: [4, 10] }; // def : séries × répétitions pour les nouveaux exercices
   const GSR = [[3, 8], [3, 10], [3, 12], [4, 8], [4, 10], [4, 12], [5, 5]];
   function gymKcal() { const met = GINT[G.int][2] + (G.mus.includes('jambes') ? 0.5 : 0); return Math.round(met * weightKg() * G.dur / 60); } // ex. 80 kg, 1 h normale : 280 kcal
+  function gymRecent() { // dernières séances de muscu, une par combinaison de muscles
+    const seen = new Set(), out = [];
+    store.get(K_WLOG, []).forEach(l => { if (l.kind !== 'muscu') return; const k = (l.muscles || []).slice().sort().join('+'); if (seen.has(k)) return; seen.add(k); out.push(l); });
+    return out.slice(0, 4);
+  }
   function renderGym() {
-    let h = '<div class="cp-t">1. Les muscles travaillés</div><div class="chips cp-wrap">' + MUSCLES.map(m => '<button type="button" class="chip" data-gm="' + m[0] + '" aria-pressed="' + G.mus.includes(m[0]) + '">' + (G.mus.includes(m[0]) ? '✓ ' : '') + m[1] + '</button>').join('') + '</div>';
+    let h = '';
+    if (G.editIdx < 0 && !G.mus.length) {
+      const R = gymRecent();
+      if (R.length) h += '<div class="cp-t">Reprendre une séance</div><div class="grec">' + R.map((l, i) => '<button type="button" class="grecb" data-grec="' + i + '"><b>' + esc(MUSCLES.filter(m => (l.muscles || []).includes(m[0])).map(m => m[1]).join(' + ')) + '</b><small>' + new Date(l.date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' }) + ' · ' + (l.exercises || []).length + ' exercice' + ((l.exercises || []).length > 1 ? 's' : '') + ' · ' + Math.round((l.durationMs || 0) / 60000) + ' min</small><i>↻</i></button>').join('') + '</div><div class="grec-or">ou une nouvelle séance</div>';
+    }
+    h += '<div class="cp-t">1. Les muscles travaillés</div><div class="chips cp-wrap">' + MUSCLES.map(m => '<button type="button" class="chip" data-gm="' + m[0] + '" aria-pressed="' + G.mus.includes(m[0]) + '">' + (G.mus.includes(m[0]) ? '✓ ' : '') + m[1] + '</button>').join('') + '</div>';
     if (G.mus.length) {
       h += '<div class="cp-t">2. Les exercices <small class="opt">(facultatif)</small></div>';
       MUSCLES.filter(m => G.mus.includes(m[0])).forEach(m => {
@@ -2575,7 +2589,14 @@
     G.def = store.get('parcours.gymDef', [4, 10]); G.mus = []; G.ex = []; G.dur = 60; G.int = 1; $('gsheet').classList.remove('hidden'); renderGym(); }
   $('gBody').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.gm) { const k = b.dataset.gm, i = G.mus.indexOf(k); if (i >= 0) { G.mus.splice(i, 1); G.ex = G.ex.filter(x => x.m !== k); } else G.mus.push(k); }
+    if (b.dataset.grec != null) {
+      const l = gymRecent()[+b.dataset.grec]; if (!l) return;
+      G.mus = (l.muscles || []).slice();
+      G.ex = (l.exercises || []).map(e => ({ name: e.name, m: (MUSCLES.find(m => m[2].includes(e.name) && G.mus.includes(m[0])) || MUSCLES.find(m => m[2].includes(e.name)) || [''])[0], sets: e.sets, reps: e.reps, kg: e.kg || 0 }));
+      G.dur = Math.round((l.durationMs || 3600000) / 60000); G.int = Math.max(0, GINT.findIndex(g => g[0] === l.intensity));
+      toast('Séance reprise : ajuste les charges si tu as progressé');
+    }
+    else if (b.dataset.gm) { const k = b.dataset.gm, i = G.mus.indexOf(k); if (i >= 0) { G.mus.splice(i, 1); G.ex = G.ex.filter(x => x.m !== k); } else G.mus.push(k); }
     else if (b.dataset.gx) { const i = G.ex.findIndex(x => x.name === b.dataset.gx); if (i >= 0) G.ex.splice(i, 1); else G.ex.push({ name: b.dataset.gx, m: b.dataset.gxm, sets: G.def[0], reps: G.def[1], kg: 0 }); }
     else if (b.dataset.gsr) { const [a, r] = b.dataset.gsr.split('x').map(Number); G.def = [a, r]; G.ex.forEach(e => { e.sets = a; e.reps = r; }); }
     else if (b.dataset.gd) G.dur = +b.dataset.gd;
