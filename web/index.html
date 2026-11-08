@@ -383,6 +383,9 @@
   #myForm label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--gris)}
   #myForm input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:9px 10px;border-radius:12px;background:var(--nuit-3);color:var(--blanc);border:1px solid rgba(200,205,215,.22)}
   #mySave{width:100%;margin-top:10px}
+  .offf{display:flex;gap:8px;margin-top:10px}.offf .msearch{margin:0;flex:1}.offf .sbtn{width:auto;flex:none;padding:10px 14px}
+  .offl{display:flex;flex-direction:column;gap:6px;margin-top:8px}.offr{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:1px solid var(--ligne);border-radius:12px;background:var(--nuit-3);color:var(--blanc);font:inherit;text-align:left;cursor:pointer}
+  .offr span{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.offr b{font-size:14px}.offr small{font-size:12px;color:var(--gris)}.offr i{font-style:normal;width:30px;height:30px;border-radius:50%;background:var(--rouge);color:#fff;display:grid;place-items:center;font-size:20px;font-weight:700}
   .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
   .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   body.on-map .chatfab,body.ac-open .chatfab{display:none}
@@ -1058,6 +1061,8 @@
     <div id="mList"></div>
     <input id="mSearch" class="msearch" list="foodNames" placeholder="Ajouter un aliment (ex. : frites)" autocomplete="off" aria-label="Ajouter un aliment">
     <datalist id="foodNames"></datalist>
+    <form id="offForm" class="offf"><input id="offQ" class="msearch" placeholder="Chercher un produit du commerce (ex. : Kinder Bueno mini)" autocomplete="off" aria-label="Chercher un produit du commerce"><button class="sbtn save" type="submit">Chercher</button></form>
+    <div id="offRes"></div>
     <button id="myOpen" class="linkbtn my-open" type="button">+ Créer un aliment qui n'est pas dans la liste</button>
     <div id="myForm" class="cp hidden">
       <div class="cp-t">Nouvel aliment</div>
@@ -3701,7 +3706,7 @@
     $('mBar').style.width = pct == null ? '0' : (pct * 100).toFixed(0) + '%'; $('mBarBox').classList.toggle('hidden', pct == null);
   }
   async function openMeal(file) {
-    MS.items = []; MS.thumb = ''; MS.date = Date.now(); MS.vec = null; CP.sel = []; $('myForm').classList.add('hidden'); $('mComp').classList.add('hidden'); $('mCompBtn').classList.remove('hidden');
+    MS.items = []; MS.thumb = ''; MS.date = Date.now(); MS.vec = null; CP.sel = []; $('myForm').classList.add('hidden'); $('offRes').innerHTML = ''; $('offQ').value = ''; $('mComp').classList.add('hidden'); $('mCompBtn').classList.remove('hidden');
     $('mType').value = String(mealTypeFor(MS.date));
     $('mPhoto').classList.add('hidden'); $('mSearch').value = '';
     mealRows(); $('msheet').classList.remove('hidden');
@@ -3764,9 +3769,45 @@
     if (P != null || G != null || L != null) f.mac = [P || 0, G || 0, L || 0];
     const all = myFoods(); all.unshift(f); store.set(K_MYFOODS, all.slice(0, 200));
     MS.items.unshift({ f, p: null, q: 1, on: true, mine: true }); mealRows();
-    ['myName', 'myKcal', 'myPortion', 'myP', 'myG', 'myL'].forEach(id => $(id).value = ''); $('myForm').classList.add('hidden');
+    ['myName', 'myKcal', 'myPortion', 'myP', 'myG', 'myL'].forEach(id => $(id).value = ''); $('myForm').classList.add('hidden'); $('offRes').innerHTML = ''; $('offQ').value = '';
     $('foodNames').innerHTML = ''; fillFoodSearch();
     toast('« ' + f.fr + ' » ajouté et gardé dans tes aliments');
+  });
+  // ---------- Produits du commerce : base Open Food Facts (plusieurs millions de produits, gratuite) ----------
+  let offList = [];
+  async function offSearch(q) {
+    const url = 'https://search.openfoodfacts.org/search?q=' + encodeURIComponent(q) + '&page_size=12&langs=fr&fields=code,product_name,product_name_fr,brands,nutriments,serving_size,serving_quantity';
+    let j = null;
+    const H = isNative && plugin('CapacitorHttp');
+    if (H) { const r = await H.get({ url, headers: { 'User-Agent': 'Parcours/1.0 (appli perso)' } }); j = typeof r.data === 'string' ? JSON.parse(r.data) : r.data; }
+    else {
+      try { j = await (await fetch(url)).json(); }
+      catch (e) { j = await (await fetch('https://world.openfoodfacts.org/cgi/search.pl?search_simple=1&json=1&page_size=12&search_terms=' + encodeURIComponent(q) + '&fields=code,product_name,product_name_fr,brands,nutriments,serving_size,serving_quantity')).json(); }
+    }
+    const list = (j.hits || j.products || []).map(p => {
+      const n = p.nutriments || {}, k = +n['energy-kcal_100g'] || (n['energy_100g'] ? n['energy_100g'] / 4.184 : 0);
+      const brand = Array.isArray(p.brands) ? p.brands[0] : String(p.brands || '').split(',')[0];
+      return { code: p.code, name: (p.product_name_fr || p.product_name || '').trim(), brand: (brand || '').trim(), k: Math.round(k), P: +n.proteins_100g || 0, G: +n.carbohydrates_100g || 0, L: +n.fat_100g || 0, sq: +p.serving_quantity || 0, ss: p.serving_size || '' };
+    }).filter(x => x.name && x.k > 0);
+    const seen = new Set(); return list.filter(x => { const key = (x.name + x.brand).toLowerCase(); if (seen.has(key)) return false; seen.add(key); return true; }).slice(0, 8);
+  }
+  async function offRun(q) {
+    q = (q || '').trim(); if (q.length < 2) return;
+    $('offRes').innerHTML = '<p class="mac-note">Recherche dans les produits du commerce…</p>';
+    try { offList = await offSearch(q); }
+    catch (e) { $('offRes').innerHTML = '<p class="mac-note">' + (navigator.onLine === false ? 'Il faut internet pour chercher un produit du commerce.' : 'La recherche n\'a pas marché. Réessaie, ou crée l\'aliment toi-même ci-dessous.') + '</p>'; return; }
+    $('offRes').innerHTML = offList.length ? '<div class="offl">' + offList.map((x, i) => '<button type="button" class="offr" data-off="' + i + '"><span><b>' + esc(x.name) + '</b><small>' + esc(x.brand) + (x.brand ? ' · ' : '') + x.k + ' kcal / 100 g' + (x.sq ? ' · portion ' + esc(x.ss || x.sq + ' g') + ' = ' + Math.round(x.k * x.sq / 100) + ' kcal' : '') + '</small></span><i>+</i></button>').join('') + '</div><p class="mac-note">Source : Open Food Facts (base collaborative, vérifie l\'emballage si besoin).</p>'
+      : '<p class="mac-note">Aucun produit trouvé. Essaie un autre nom, ou crée l\'aliment toi-même ci-dessous.</p>';
+  }
+  $('offForm').addEventListener('submit', e => { e.preventDefault(); $('offQ').blur(); offRun($('offQ').value); });
+  $('offRes').addEventListener('click', e => {
+    const b = e.target.closest('[data-off]'); if (!b) return;
+    const x = offList[+b.dataset.off]; if (!x) return;
+    const g = x.sq > 0 ? x.sq : 100, f = { id: 'my:off' + x.code, fr: x.name + (x.brand && !x.name.toLowerCase().includes(x.brand.toLowerCase()) ? ' (' + x.brand + ')' : ''), portion: x.sq > 0 ? (x.ss || g + ' g') : '100 g', kcal: Math.round(x.k * g / 100), cat: 'plat',
+      mac: [x.P * g / 100, x.G * g / 100, x.L * g / 100].map(v => Math.round(v * 10) / 10) };
+    const all = myFoods().filter(y => y.id !== f.id); all.unshift(f); store.set(K_MYFOODS, all.slice(0, 200));
+    MS.items.unshift({ f, p: null, q: 1, on: true, mine: true }); mealRows(); $('foodNames').innerHTML = ''; fillFoodSearch();
+    $('offRes').innerHTML = ''; $('offQ').value = ''; toast('« ' + f.fr + ' » ajouté : règle la quantité à côté');
   });
   function fillFoodSearch() {
     if (!foodsList || $('foodNames').children.length) return;
@@ -3776,7 +3817,7 @@
     const q = e.target.value.trim().toLowerCase(); if (!q || !foodsList) return;
     const nz = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ı/g, 'i'), qn = nz(q); // sans accents : « kofte » trouve « Köfte »
     const L = myFoods().concat(foodsList.foods), f = L.find(x => nz(x.fr) === qn) || L.find(x => nz(x.fr).startsWith(qn)) || L.find(x => nz(x.fr).includes(qn));
-    if (!f) { toast('Aliment introuvable dans la liste.'); return; }
+    if (!f) { $('offQ').value = e.target.value.trim(); e.target.value = ''; offRun($('offQ').value); return; } // pas dans la liste : on cherche dans les produits du commerce
     const ex = MS.items.find(x => x.f.id === f.id);
     if (ex) ex.on = true; else MS.items.unshift({ f, p: null, q: 1, on: true });
     e.target.value = ''; mealRows();
