@@ -362,6 +362,15 @@
   .rsec[open] .rchev{transform:rotate(90deg)}
   .rsec > .set{border:0;border-radius:0;background:transparent;margin:0;padding-top:0}
   .rsec[open] summary{border-bottom:1px solid var(--ligne)}
+  .hsort{flex:none;margin:12px 0 0;border-radius:18px;background:var(--carte);border:1px solid var(--ligne);overflow:hidden}
+  .hsort summary{list-style:none;display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer}
+  .hsort summary::-webkit-details-marker{display:none}
+  .hsort summary svg{width:22px;height:22px;fill:#ff5a5f;stroke:none;flex:none}
+  .hs-l{font-weight:700;font-size:14px;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;margin-right:auto}
+  .hsort summary b{font-size:26px;font-weight:900}.hsort summary small{color:var(--gris);font-size:13px}
+  .hs-z{font-size:12px;font-weight:800;color:#111;padding:4px 9px;border-radius:999px;margin-left:6px}.hs-z.off{background:var(--nuit-3);color:var(--gris)}
+  .hsort[open] .rchev{transform:rotate(90deg)}
+  .hs-body{padding:0 14px 12px;border-top:1px solid var(--ligne)}
   .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
   .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   body.on-map .chatfab,body.ac-open .chatfab{display:none}
@@ -836,6 +845,7 @@
       <div class="po" style="--ry:15deg;--i:3" id="pPace"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Allure</span><span class="val num"><span id="pace">–</span><small>min/km</small></span></div></div></div>
       <div class="po" style="--ry:-9deg;--i:4"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Calories</span><span class="val num"><span id="kcal">0</span><small>kcal</small></span></div></div></div>
     </div>
+    <details class="hsort" id="heartBox"></details>
     <p class="hint" id="hint"></p>
   </section>
 
@@ -2057,7 +2067,7 @@
   }
   function renderProgress(highlightFirst) {
     const hist = store.get(K_HIST, []), box = $('progress');
-    let html = weightHtml() + heartHtml() + goalsHtml();
+    let html = weightHtml() + goalsHtml();
     if (!hist.length) {
       box.innerHTML = html + '<div class="block"><div class="bh">Tes sorties</div><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>';
       return;
@@ -3314,9 +3324,20 @@
     return { max, zones: [['Récupération', 0.5, 0.6, '#60a5fa'], ['Endurance (brûle les graisses)', 0.6, 0.7, '#4ade80'], ['Cardio', 0.7, 0.8, '#facc15'], ['Seuil', 0.8, 0.9, '#fb923c'], ['Effort maximal', 0.9, 1, '#ef4444']]
       .map(([n, a, b, c]) => ({ n, lo: Math.round(max * a), hi: Math.round(max * b) - (b < 1 ? 1 : 0), c })) };
   }
+  function renderHeart() {
+    const box = $('heartBox'); if (!box) return;
+    const H = store.get(K_HR, null), z = heartZones(), v = H && (H.last || H.avg);
+    const zone = z && v ? z.zones.find(x => v >= x.lo && v <= x.hi) : null;
+    const open = box.open;
+    box.innerHTML = '<summary><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg>' +
+      '<span class="hs-l">Pouls</span><b class="num">' + (v ? Math.round(v) : '–') + '</b><small>BPM</small>' +
+      (zone ? '<span class="hs-z" style="background:' + zone.c + '">' + zone.n.split(' (')[0] + '</span>' : '<span class="hs-z off">' + (z ? 'Zones' : 'Âge requis') + '</span>') + '<i class="rchev">›</i></summary>' +
+      '<div class="hs-body">' + heartHtml() + '</div>';
+    box.open = open;
+  }
   function heartHtml() {
     const H = store.get(K_HR, null), z = heartZones();
-    let h = '<div class="block hbox"><div class="bh">Mon cœur</div>';
+    let h = '<div class="hbox">';
     if (H && (H.last || H.rest || H.avg)) {
       const zf = v => { if (!z || !v) return ''; const k = z.zones.find(x => v >= x.lo && v < x.hi + 1); return k ? '<i style="background:' + k.c + '"></i>' : ''; };
       h += '<div class="hgrid">' +
@@ -3335,6 +3356,7 @@
     return h + '</div>';
   }
 
+  try { renderHeart(); } catch (e) {}
   // ---------- Suivi du poids ----------
   const K_WEIGHTS = 'parcours.weights';
   function weightTrack(force) {
@@ -3513,6 +3535,7 @@
     currentView = i;
     if (i === 4 && $('banner').dataset.tag === 'profile') $('banner').classList.add('hidden');
     if (i === 4) try { settingsSummaries(); } catch (e) {}
+    if (i === 0) try { renderHeart(); } catch (e) {}
     if (i === 2) renderSeances();
     if (i === 3) renderProgress();
     if (i === 5) renderRepas();
@@ -4243,7 +4266,7 @@
         const rest = await NH.readSamples({ dataType: 'restingHeartRate', startDate: wk, endDate: now, limit: 1 }); hr.rest = rest.samples && rest.samples[0] ? rest.samples[0].value : null;
         const ag = await NH.queryAggregated({ dataType: 'heartRate', startDate: d0.toISOString(), endDate: now, bucket: 'day', aggregation: ['average', 'max'] });
         const v = ag.samples && ag.samples[0] && ag.samples[0].values; if (v) { hr.avg = v.average || null; hr.max = v.max || null; }
-        if (hr.last || hr.rest || hr.avg) { store.set(K_HR, hr); msg.push('pouls'); if (currentView === 3) renderProgress(); }
+        if (hr.last || hr.rest || hr.avg) { store.set(K_HR, hr); msg.push('pouls'); renderHeart(); }
       } catch (e) {}
       const msg = [];
       try {
