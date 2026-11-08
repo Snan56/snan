@@ -298,6 +298,9 @@
   .cp-open{width:100%;margin-top:10px}
   .cp{margin-top:12px;padding:12px 14px;border:1px solid rgba(200,205,215,.18);border-radius:16px}
   .cp-t{font-weight:700;font-size:14px;margin:10px 0 6px}
+  .cp-g{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris);margin:8px 0 4px}
+  .cp .chips{flex-wrap:wrap;overflow:visible}
+  .cp .chip{padding:8px 12px;font-size:13px}
   .cp .chips{margin:0 0 6px;padding:2px 0 6px}
   .cp-card{margin-top:12px;padding-top:10px;border-top:1px solid rgba(200,205,215,.14)}
   .cp-card .sbtn{width:100%;margin-top:8px}
@@ -3255,39 +3258,65 @@
     ['dolma', 'Dolma (feuilles de vigne)', 'piece', 150, 0, 40], ['borek', 'Börek', 'dessert', 300, 0], ['baklava', 'Baklava', 'piece', 430, 0, 30],
     ['lahmacun', 'Lahmacun', 'piece', 230, 0, 150]
   ].map(a => ({ id: a[0], fr: a[1], t: a[2], k: a[3], cook: !!a[4], pg: a[5] || 0 }));
+  // Plats complets : on choisit la taille, les calories sont celles du plat entier (sauces de base comprises)
+  [['tacos', 'Tacos français', [['Taille M', 950], ['Taille L', 1300], ['Taille XL', 1800]]],
+   ['burger', 'Burger', [['Simple', 550], ['Double', 800], ['Triple', 1050]]],
+   ['cheese', 'Cheeseburger', [['Simple', 300], ['Double', 450]]],
+   ['kebab', 'Kebab complet', [['Sandwich', 750], ['Assiette (avec frites)', 1100]]],
+   ['pizza', 'Pizza', [['2 parts', 500], ['Demi-pizza', 900], ['Pizza entière', 1800]]],
+   ['wrap', 'Wrap / galette', [['1 wrap', 450], ['2 wraps', 900]]],
+   ['panini', 'Panini', [['1 panini', 500]]],
+   ['hotdog', 'Hot-dog', [['1 hot-dog', 300], ['2 hot-dogs', 600]]],
+   ['sandwich', 'Sandwich jambon-beurre', [['½ baguette', 400], ['Baguette entière', 800]]],
+   ['bowl', 'Poke bowl', [['Normal', 600], ['Grand', 850]]],
+   ['sushis', 'Sushis / makis', [['6 pièces', 250], ['12 pièces', 500], ['18 pièces', 750]]],
+   ['pide-p', 'Pide garni', [['½ pide', 450], ['Pide entier', 900]]]
+  ].forEach(a => INGR.push({ id: a[0], fr: a[1], t: 'plat', k: 0, cook: false, pg: 0, opts: a[2] }));
+  const GROUPS = [['Plats', x => x.t === 'plat' || x.t === 'soupe' || ['lahmacun', 'dolma', 'borek'].includes(x.id)],
+    ['Viandes, poissons, œufs', x => x.t === 'viande' || x.id === 'oeuf'], ['Féculents', x => x.t === 'feculent'], ['Légumes', x => x.t === 'legume'],
+    ['Pain', x => x.t === 'pain'], ['Fromages', x => x.t === 'fromage' && x.id !== 'chocolat'], ['Sauces, huile, beurre', x => x.t === 'sauce' || x.t === 'gras'],
+    ['Fruits', x => x.t === 'fruit'], ['Desserts, petit-déj', x => x.t === 'dessert' || x.t === 'bol' || x.id === 'chocolat' || (x.t === 'piece' && !['oeuf', 'lahmacun', 'dolma'].includes(x.id))],
+    ['Boissons', x => x.t === 'boisson']];
+  const groupOf = x => (GROUPS.find(g => g[1](x)) || GROUPS[0])[0];
   const INGR_BY = Object.fromEntries(INGR.map(x => [x.id, x]));
   const CUISINES = {
-    'Française': ['pdt', 'steak', 'poulet', 'haricots-v', 'puree', 'pain', 'beurre', 'camembert', 'salade'],
-    'Fast-food': ['frites', 'hache15', 'kebab-v', 'nuggets', 'pain', 'pita', 'cheddar', 'blanche', 'algerienne', 'ketchup', 'mayo', 'salade', 'coca'],
-    'Turque': ['kefta', 'pilaf', 'boulgour', 'pide', 'lahmacun', 'mercimek', 'dolma', 'borek', 'cacik', 'yaourt', 'aubergine', 'poivron', 'salade', 'tomate', 'ayran', 'baklava'],
-    'Italienne': ['pates', 's-tomate', 'parmesan', 'mozza', 'pesto', 'hache15', 'creme', 'lardons'],
+    'Française': ['sandwich', 'pdt', 'steak', 'poulet', 'haricots-v', 'puree', 'pain', 'beurre', 'camembert', 'salade'],
+    'Fast-food': ['tacos', 'burger', 'cheese', 'kebab', 'pizza', 'wrap', 'panini', 'hotdog', 'nuggets', 'kebab-v', 'frites', 'pita', 'cheddar', 'blanche', 'algerienne', 'ketchup', 'mayo', 'bbq', 'salade', 'coca', 'zero', 'glace'],
+    'Turque': ['pide-p', 'kefta', 'pilaf', 'boulgour', 'pide', 'lahmacun', 'mercimek', 'dolma', 'borek', 'cacik', 'yaourt', 'aubergine', 'poivron', 'salade', 'tomate', 'ayran', 'baklava'],
+    'Italienne': ['pizza', 'pates', 's-tomate', 'parmesan', 'mozza', 'pesto', 'hache15', 'creme', 'lardons'],
     'Maghrébine': ['semoule', 'pois-ch', 'merguez', 'agneau', 'poulet', 'legumes', 'pain'],
-    'Asiatique': ['riz', 'nouilles', 'poulet', 'crevettes', 'tofu', 'legumes', 'soja', 'oeuf'],
+    'Asiatique': ['sushis', 'bowl', 'riz', 'nouilles', 'poulet', 'crevettes', 'tofu', 'legumes', 'soja', 'oeuf'],
     'Mexicaine': ['tortilla', 'haricots-r', 'riz', 'hache15', 'avocat', 'cheddar', 'tomate', 'mais'],
     'Petit-déjeuner': ['pain', 'beurre', 'confiture', 'pate-tart', 'cereales', 'lait', 'jus', 'croissant', 'oeuf', 'yaourt'],
     'Dessert / goûter': ['yaourt-f', 'compote', 'cookie', 'glace', 'gateau', 'tarte', 'chocolat', 'banane', 'pomme']
   };
-  const CP = { cuisine: '', ing: null, por: 1, cook: 0 };
-  function portionsOf(x) { return x.t === 'piece' ? [['1', x.pg], ['2', x.pg * 2], ['3', x.pg * 3]] : PORTIONS[x.t]; }
-  function compKcal(x, gi, ci) { const g = portionsOf(x)[gi][1], oil = x.cook ? COOK[ci][1] * g / 100 : 0; return Math.round(x.k * g / 100 + oil * 9); }
+  const CP = { cuisine: '', group: '', ing: null, por: 1, cook: 0 };
+  function portionsOf(x) { return x.t === 'plat' ? x.opts : x.t === 'piece' ? [['1', x.pg], ['2', x.pg * 2], ['3', x.pg * 3]] : PORTIONS[x.t]; }
+  function compKcal(x, gi, ci) { if (x.t === 'plat') return x.opts[gi][1]; const g = portionsOf(x)[gi][1], oil = x.cook ? COOK[ci][1] * g / 100 : 0; return Math.round(x.k * g / 100 + oil * 9); }
   function renderComp() {
     const box = $('mComp'); if (box.classList.contains('hidden')) return;
     let h = '<div class="cp-t">1. Quelle cuisine ?</div><div class="chips">' + Object.keys(CUISINES).map(c => '<button type="button" class="chip" data-cu="' + esc(c) + '" aria-pressed="' + (CP.cuisine === c) + '">' + esc(c) + '</button>').join('') + '</div>';
-    const quick = CP.cuisine ? CUISINES[CP.cuisine] : [];
     h += '<div class="cp-t">2. Qu\'est-ce qu\'il y a dans l\'assiette ?</div>';
-    if (quick.length) h += '<div class="chips">' + quick.map(id => '<button type="button" class="chip" data-ing="' + id + '" aria-pressed="' + (CP.ing && CP.ing.id === id) + '">' + esc(INGR_BY[id].fr) + '</button>').join('') + '</div>';
+    const chip = id => '<button type="button" class="chip" data-ing="' + id + '" aria-pressed="' + (CP.ing && CP.ing.id === id) + '">' + esc(INGR_BY[id].fr) + '</button>';
+    if (CP.cuisine) {
+      const ids = CUISINES[CP.cuisine];
+      GROUPS.forEach(([name]) => { const g = ids.filter(id => groupOf(INGR_BY[id]) === name); if (g.length) h += '<div class="cp-g">' + name + '</div><div class="chips">' + g.map(chip).join('') + '</div>'; });
+    } else {
+      h += '<div class="chips">' + GROUPS.map(([name]) => '<button type="button" class="chip" data-grp="' + esc(name) + '" aria-pressed="' + (CP.group === name) + '">' + name + '</button>').join('') + '</div>';
+      if (CP.group) h += '<div class="chips cp-wrap">' + INGR.filter(x => groupOf(x) === CP.group).map(x => chip(x.id)).join('') + '</div>';
+    }
     h += '<input id="cpSearch" class="msearch" list="ingNames" placeholder="Chercher un ingrédient (riz, poulet, sauce…)" autocomplete="off" aria-label="Chercher un ingrédient">';
     if (CP.ing) {
       const x = CP.ing, P = portionsOf(x);
-      h += '<div class="cp-card"><b>' + esc(x.fr) + '</b><div class="cp-t">Quelle quantité ? (compare avec ta main)</div><div class="chips">' +
-        P.map((p, i) => '<button type="button" class="chip" data-por="' + i + '" aria-pressed="' + (CP.por === i) + '">' + esc(p[0]) + ' · ' + p[1] + (x.t === 'boisson' ? ' ml' : ' g') + '</button>').join('') + '</div>';
+      h += '<div class="cp-card"><b>' + esc(x.fr) + '</b><div class="cp-t">' + (x.t === 'plat' ? 'Quelle taille ?' : 'Quelle quantité ? (compare avec ta main)') + '</div><div class="chips">' +
+        P.map((p, i) => '<button type="button" class="chip" data-por="' + i + '" aria-pressed="' + (CP.por === i) + '">' + esc(p[0]) + (x.t === 'plat' ? '' : ' · ' + p[1] + (x.t === 'boisson' ? ' ml' : ' g')) + '</button>').join('') + '</div>';
       if (x.cook) h += '<div class="cp-t">Comment c\'est cuit ?</div><div class="chips">' + COOK.map((c, i) => '<button type="button" class="chip" data-cook="' + i + '" aria-pressed="' + (CP.cook === i) + '">' + c[0] + '</button>').join('') + '</div>';
       h += '<button id="cpAdd" class="sbtn save" type="button">Ajouter · ' + nf0.format(compKcal(x, CP.por, CP.cook)) + ' kcal</button></div>';
     }
     h += '<button id="cpClose" class="linkbtn" type="button">Terminé</button>';
     box.innerHTML = h;
   }
-  function pickIng(x) { CP.ing = x; CP.por = Math.min(portionsOf(x).length - 1, x.t === 'sauce' || x.t === 'gras' ? 1 : x.t === 'piece' ? 0 : 1); CP.cook = 0; renderComp(); }
+  function pickIng(x) { CP.ing = x; CP.por = Math.min(portionsOf(x).length - 1, x.t === 'sauce' || x.t === 'gras' ? 1 : x.t === 'piece' || x.t === 'plat' ? 0 : 1); CP.cook = 0; renderComp(); }
   function openComp() {
     if (!$('ingNames').children.length) $('ingNames').innerHTML = INGR.map(x => '<option value="' + esc(x.fr) + '">').join('');
     $('mComp').classList.remove('hidden'); $('mCompBtn').classList.add('hidden'); renderComp();
@@ -3296,12 +3325,13 @@
   $('mComp').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.cu != null) { CP.cuisine = CP.cuisine === b.dataset.cu ? '' : b.dataset.cu; renderComp(); }
+    else if (b.dataset.grp != null) { CP.group = CP.group === b.dataset.grp ? '' : b.dataset.grp; renderComp(); }
     else if (b.dataset.ing) pickIng(INGR_BY[b.dataset.ing]);
     else if (b.dataset.por != null) { CP.por = +b.dataset.por; renderComp(); }
     else if (b.dataset.cook != null) { CP.cook = +b.dataset.cook; renderComp(); }
     else if (b.id === 'cpAdd') {
       const x = CP.ing, P = portionsOf(x)[CP.por], cook = x.cook && CP.cook ? ' ' + COOK[CP.cook][0].toLowerCase() : '';
-      const f = { id: 'ing:' + x.id + ':' + P[1] + ':' + (x.cook ? CP.cook : 0), fr: x.fr + cook, portion: P[0] + ' (' + P[1] + (x.t === 'boisson' ? ' ml' : ' g') + ')', kcal: compKcal(x, CP.por, CP.cook) };
+      const f = { id: 'ing:' + x.id + ':' + P[1] + ':' + (x.cook ? CP.cook : 0), fr: x.fr + cook, portion: x.t === 'plat' ? P[0] : P[0] + ' (' + P[1] + (x.t === 'boisson' ? ' ml' : ' g') + ')', kcal: compKcal(x, CP.por, CP.cook) };
       MS.items.unshift({ f, p: null, q: 1, on: true, mine: true }); CP.ing = null; mealRows(); renderComp(); toast(x.fr + ' ajouté');
     }
     else if (b.id === 'cpClose') { $('mComp').classList.add('hidden'); $('mCompBtn').classList.remove('hidden'); }
