@@ -424,6 +424,14 @@
   .mtag{display:inline-block;margin-top:4px;font-style:normal;font-size:11px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--gris)}.mtag:empty{display:none}.mtag.ok{background:rgba(74,222,128,.15);color:#4ade80}
   .mplate .mkcal{text-align:right;font-size:16px;line-height:1.1;min-width:52px}.mplate .mkcal small{display:block;font-size:11px;color:var(--gris);font-weight:600}
   .mfoot .mtotal span{display:block;font-size:12px;color:var(--gris)}.mfoot .mtotal b{font-size:20px}
+  .bcount{font-size:13px;color:var(--gris);font-weight:600;letter-spacing:0;text-transform:none;margin-left:6px}
+  .bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .badge{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:10px 6px;border-radius:14px;background:var(--nuit-3);opacity:.55}
+  .badge.on{opacity:1;background:linear-gradient(160deg,rgba(255,122,47,.25),rgba(255,74,31,.08));box-shadow:inset 0 0 0 1px rgba(255,90,31,.45)}
+  .bic{font-size:28px;filter:grayscale(1)}.badge.on .bic{filter:none}
+  .badge b{font-size:12px;line-height:1.2}.badge small{font-size:10px;color:var(--gris);line-height:1.2}
+  .bdate{font-style:normal;font-size:10px;color:var(--rouge);font-weight:700;margin-top:2px}
+  .bbar{display:block;width:80%;height:4px;border-radius:2px;background:rgba(255,255,255,.1);margin-top:4px;overflow:hidden}.bbar u{display:block;height:100%;background:var(--rouge)}
   .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
   .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   body.on-map .chatfab,body.ac-open .chatfab{display:none}
@@ -1022,6 +1030,7 @@
       <div class="row"><label for="remMeals">Noter mes repas<small>Un rappel après le déjeuner et après le dîner</small></label><span class="switch"><input id="remMeals" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="remLunchAt">Heure du rappel du déjeuner</label><input id="remLunchAt" type="time" value="13:30" class="tfield"></div>
       <div class="row"><label for="remDinnerAt">Heure du rappel du dîner</label><input id="remDinnerAt" type="time" value="20:30" class="tfield"></div>
+      <div class="row"><label for="remWeek">Bilan de la semaine<small>Le dimanche à 20 h : tes sorties, séances, calories et ton poids de la semaine</small></label><span class="switch"><input id="remWeek" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="remWeigh">Me peser<small>Une fois par semaine</small></label><span class="switch"><input id="remWeigh" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="remWeighDay">Jour de la pesée</label><select id="remWeighDay" class="tfield"><option value="2">Lundi</option><option value="3">Mardi</option><option value="4">Mercredi</option><option value="5">Jeudi</option><option value="6">Vendredi</option><option value="7">Samedi</option><option value="1">Dimanche</option></select></div>
       <div class="row"><label for="remWeighAt">Heure de la pesée</label><input id="remWeighAt" type="time" value="09:00" class="tfield"></div>
@@ -1348,7 +1357,7 @@
   // ---------- Stockage local ----------
   const store = {
     get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return false; } try { if (/history|workoutlog|meals|weights/.test(k) && window.__badgeTick) window.__badgeTick(); } catch (e) {} return true; },
     del(k) { try { localStorage.removeItem(k); } catch (e) {} }
   };
   const K_SET = 'parcours.settings', K_CUR = 'parcours.current', K_HIST = 'parcours.history';
@@ -2138,7 +2147,7 @@
   }
   function renderProgress(highlightFirst) {
     const hist = store.get(K_HIST, []), box = $('progress');
-    let html = weightHtml() + goalsHtml();
+    let html = weightHtml() + badgesHtml() + goalsHtml();
     if (!hist.length) {
       box.innerHTML = html + '<div class="block"><div class="bh">Tes sorties</div><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>';
       return;
@@ -3532,11 +3541,11 @@
 
   // ---------- Rappels (notifications du téléphone) ----------
   async function remindersApply(fromUser) {
-    const LN = plugin('LocalNotifications'), any = settings.remWalk || settings.remMeals || settings.remWeigh;
+    const LN = plugin('LocalNotifications'), any = settings.remWalk || settings.remMeals || settings.remWeigh || settings.remWeek;
     if (!LN) { if (fromUser && any) toast('Les rappels marchent dans l\'appli installée sur ton téléphone.'); return; }
     try {
       if (any) { const p = await LN.requestPermissions(); if (p.display !== 'granted') { toast('Autorise les notifications de Parcours dans les Réglages de l\'iPhone.'); return; } }
-      await LN.cancel({ notifications: [1, 2, 3, 4].map(id => ({ id })) });
+      await LN.cancel({ notifications: [1, 2, 3, 4, 5].map(id => ({ id })) });
       const hm = (v, d) => String(v || d).split(':').map(Number), [hh, mm] = hm(settings.remWalkAt, '18:00'), [lh, lm] = hm(settings.remLunchAt, '13:30'), [dh, dm] = hm(settings.remDinnerAt, '20:30'), [wh, wm] = hm(settings.remWeighAt, '09:00'), N = [];
       if (settings.remWalk) N.push({ id: 1, title: 'Parcours', body: 'C\'est l\'heure de ta marche ! Même 20 minutes, ça compte.', schedule: { on: { hour: hh, minute: mm }, repeats: true, allowWhileIdle: true } });
       if (settings.remMeals) {
@@ -3544,11 +3553,12 @@
         N.push({ id: 3, title: 'Parcours', body: 'Pense à noter ton dîner.', schedule: { on: { hour: dh, minute: dm }, repeats: true } });
       }
       if (settings.remWeigh) N.push({ id: 4, title: 'Parcours', body: 'C\'est le jour de ta pesée : note ton poids du matin.', schedule: { on: { weekday: +settings.remWeighDay || 1, hour: wh, minute: wm }, repeats: true } });
+      if (settings.remWeek) N.push({ id: 5, title: 'Parcours · ton bilan de la semaine', body: weekSummaryText(), schedule: { on: { weekday: 1, hour: 20, minute: 0 }, repeats: true } });
       if (N.length) await LN.schedule({ notifications: N });
       if (fromUser) toast(N.length ? 'Rappels programmés' : 'Rappels désactivés');
     } catch (e) { if (fromUser) toast('Les rappels n\'ont pas pu être programmés.'); }
   }
-  [['remWalk', 'remWalk'], ['remMeals', 'remMeals'], ['remWeigh', 'remWeigh']].forEach(([id, k]) => {
+  [['remWalk', 'remWalk'], ['remMeals', 'remMeals'], ['remWeigh', 'remWeigh'], ['remWeek', 'remWeek']].forEach(([id, k]) => {
     $(id).checked = !!settings[k];
     $(id).addEventListener('change', e => { settings[k] = e.target.checked; saveSettings(); remindersApply(true); if (k === 'remWeigh') try { renderProgress(); } catch (err) {} });
   });
@@ -3608,7 +3618,7 @@
     $('rHead').innerHTML = '<span class="ravatar">' + esc((nm[0] || 'P').toUpperCase()) + '</span><span class="rtx"><b>' + esc(nm) + '</b><small>' + (parts.join(' · ') || 'Touche pour remplir ton profil') + (settings.email ? '<br>' + esc(settings.email) : '') + '</small></span><i class="rchev">›</i>';
     set('profil', 'Pseudo, taille, poids, âge');
     set('obj', nf0.format(settings.goalSteps || 0) + ' pas par jour · ' + nf0.format(settings.goalKm || 0) + ' km par semaine');
-    const n = ['remWalk', 'remMeals', 'remWeigh'].filter(k => settings[k]).length;
+    const n = ['remWalk', 'remMeals', 'remWeigh', 'remWeek'].filter(k => settings[k]).length;
     set('rappels', n ? n + ' rappel' + (n > 1 ? 's' : '') + ' activé' + (n > 1 ? 's' : '') : 'Aucun rappel activé');
     set('voix', settings.voice ? 'Voix activée' + (settings.beeps !== false ? ', bips activés' : '') : 'Voix désactivée');
     set('aff', 'Animations, pause automatique en véhicule');
@@ -3617,6 +3627,82 @@
   }
   try { settingsSummaries(); } catch (e) {}
 
+  // ---------- Badges ----------
+  const K_BADGES = 'parcours.badges';
+  function badgeStats() {
+    const hist = store.get(K_HIST, []), wlog = store.get(K_WLOG, []), meals = store.get(K_MEALS, []), W = store.get('parcours.weights', []);
+    const st = goalStats(), km = hist.reduce((a, h) => a + (h.distanceM || 0), 0) / 1000;
+    const months = {}; hist.forEach(h => { const d = new Date(h.date), k = d.getFullYear() + '-' + d.getMonth(); months[k] = (months[k] || 0) + (h.distanceM || 0) / 1000; });
+    const walkLong = hist.filter(h => h.activity !== 'velo').reduce((a, h) => Math.max(a, (h.distanceM || 0) / 1000), 0);
+    // meilleure série de jours d'affilée (sorties + séances)
+    const days = [...new Set(hist.map(h => dayKey(h.date)).concat(wlog.map(l => dayKey(l.date))))].sort();
+    let best = 0, cur = 0, prev = null;
+    days.forEach(k => { const t = new Date(k + 'T12:00').getTime(); cur = prev != null && Math.round((t - prev) / 864e5) === 1 ? cur + 1 : 1; best = Math.max(best, cur); prev = t; });
+    return {
+      sorties: hist.length, km, monthKm: Math.max(0, ...Object.values(months)), longest: walkLong, streak: Math.max(best, st.streak),
+      muscu: wlog.filter(l => l.kind === 'muscu').length, guided: wlog.filter(l => !l.kind).length, navette: wlog.filter(l => l.kind === 'navette').length,
+      mealDays: new Set(meals.map(m => dayKey(m.date))).size, weighs: W.length,
+      early: hist.some(h => new Date(h.date).getHours() < 7), night: hist.some(h => new Date(h.date).getHours() >= 21),
+      lost: W.length >= 2 ? W[0].kg - W[W.length - 1].kg : 0
+    };
+  }
+  const BADGES = [
+    ['first', '👟', 'Premier pas', 'Ta première sortie', s => s.sorties, 1],
+    ['streak3', '🔥', 'Lancé', '3 jours d\'affilée', s => s.streak, 3],
+    ['streak7', '🔥', 'Semaine parfaite', '7 jours d\'affilée', s => s.streak, 7],
+    ['streak30', '🌋', 'Inarrêtable', '30 jours d\'affilée', s => s.streak, 30],
+    ['km10', '🥉', '10 km', '10 km au total', s => s.km, 10],
+    ['km100', '🥈', '100 km', '100 km au total', s => s.km, 100],
+    ['km500', '🥇', '500 km', '500 km au total', s => s.km, 500],
+    ['month100', '📅', 'Mois de feu', '100 km dans le même mois', s => s.monthKm, 100],
+    ['long10', '🏞', 'Longue route', 'Une sortie à pied de 10 km', s => s.longest, 10],
+    ['half', '🏅', 'Semi', 'Une sortie à pied de 21 km', s => s.longest, 21.1],
+    ['muscu1', '💪', 'Première séance', '1 séance de muscu', s => s.muscu, 1],
+    ['muscu10', '🏋️', 'Habitué de la salle', '10 séances de muscu', s => s.muscu, 10],
+    ['muscu50', '🦍', 'Machine', '50 séances de muscu', s => s.muscu, 50],
+    ['guided10', '⏱', 'Discipliné', '10 séances guidées', s => s.guided, 10],
+    ['navette', '↔️', 'Testé', 'Faire le test navette', s => s.navette, 1],
+    ['meals7', '🍽', 'Bien noté', 'Repas notés 7 jours différents', s => s.mealDays, 7],
+    ['meals30', '📒', 'Carnet complet', 'Repas notés 30 jours différents', s => s.mealDays, 30],
+    ['weigh4', '⚖️', 'Suivi sérieux', '4 pesées notées', s => s.weighs, 4],
+    ['lost2', '📉', '−2 kg', 'Perdre 2 kg depuis ta première pesée', s => s.lost, 2],
+    ['early', '🌅', 'Lève-tôt', 'Une sortie avant 7 h', s => s.early ? 1 : 0, 1],
+    ['night', '🌙', 'Oiseau de nuit', 'Une sortie après 21 h', s => s.night ? 1 : 0, 1]
+  ];
+  function badgesCheck() { // retourne la liste des badges gagnés ; annonce les nouveaux
+    let s; try { s = badgeStats(); } catch (e) { return store.get(K_BADGES, {}); }
+    const got = store.get(K_BADGES, {}), fresh = [];
+    BADGES.forEach(([id, , t, , f, n]) => { if (!got[id] && f(s) >= n) { got[id] = Date.now(); fresh.push(t); } });
+    if (fresh.length) {
+      store.set(K_BADGES, got);
+      const first = Object.keys(got).length === fresh.length && fresh.length > 2; // premier calcul avec des données anciennes : un seul message
+      toast(first ? '🏅 ' + fresh.length + ' badges débloqués ! Va voir dans Progrès.' : '🏅 Nouveau badge : ' + fresh.join(', ') + ' !');
+    }
+    return got;
+  }
+  function badgesHtml() {
+    const got = badgesCheck(); let s; try { s = badgeStats(); } catch (e) { s = {}; }
+    const n = BADGES.filter(b => got[b[0]]).length;
+    return '<div class="block"><div class="bh">Mes badges <small class="bcount">' + n + ' / ' + BADGES.length + '</small></div><div class="bgrid">' + BADGES.map(([id, ic, t, d, f, goal]) => {
+      const on = !!got[id], v = Math.min(goal, f(s) || 0), p = Math.round(v / goal * 100);
+      return '<div class="badge' + (on ? ' on' : '') + '" title="' + esc(d) + '"><span class="bic">' + ic + '</span><b>' + esc(t) + '</b><small>' + esc(d) + '</small>' +
+        (on ? '<i class="bdate">' + new Date(got[id]).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + '</i>' : '<i class="bbar"><u style="width:' + p + '%"></u></i>') + '</div>';
+    }).join('') + '</div></div>';
+  }
+
+  // ---------- Bilan du dimanche soir (notification) ----------
+  function weekSummaryText() {
+    const ws = weekStart(Date.now()), hist = store.get(K_HIST, []).filter(h => h.date >= ws), wlog = store.get(K_WLOG, []).filter(l => l.date >= ws);
+    const km = hist.reduce((a, h) => a + (h.distanceM || 0), 0) / 1000, kcal = hist.reduce((a, h) => a + (h.kcal || 0), 0) + wlog.reduce((a, l) => a + (l.kcal || 0), 0);
+    const muscu = wlog.filter(l => l.kind === 'muscu').length, W = store.get('parcours.weights', []).filter(w => w.t >= ws - 7 * 864e5);
+    const parts = [hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + ' (' + nf1.format(km) + ' km)', wlog.length + ' séance' + (wlog.length > 1 ? 's' : '') + (muscu ? ' dont ' + muscu + ' de muscu' : ''), nf0.format(Math.round(kcal)) + ' kcal dépensées'];
+    if (W.length >= 2) { const d = W[W.length - 1].kg - W[0].kg; parts.push('poids ' + (d > 0 ? '+' : d < 0 ? '−' : '') + nf1.format(Math.abs(d)) + ' kg'); }
+    const st = goalStats(); if (st.streak >= 2) parts.push(st.streak + ' jours d\'affilée');
+    return 'Ta semaine : ' + parts.join(', ') + '. ' + (hist.length + wlog.length ? 'Bravo, continue comme ça !' : 'Nouvelle semaine demain : on s\'y remet ?');
+  }
+  window.__weekSummary = weekSummaryText;
+
+  window.__badgeTick = () => { clearTimeout(window.__badgeT); window.__badgeT = setTimeout(() => { try { badgesCheck(); remindersApply(false); } catch (e) {} }, 400); };
   // ---------- Navigation en cube 3D ----------
   const VIEWS = ['v-sortie', 'v-carte', 'v-seances', 'v-progres', 'v-reglages', 'v-repas'];
   let switching = false;
