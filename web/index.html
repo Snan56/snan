@@ -3819,7 +3819,11 @@
     fruit: [['petit', 80], ['moyen', 130], ['gros', 200]],
     dessert: [['petite part', 60], ['part normale', 100], ['grosse part', 150]],
     bol: [['petit bol', 30], ['bol normal', 45], ['grand bol', 70]],
-    soupe: [['petit bol', 200], ['bol', 300], ['grand bol', 400]]
+    soupe: [['petit bol', 200], ['bol', 300], ['grand bol', 400]],
+    bonbon: [['quelques-uns', 15], ['une poignée', 30], ['un petit sachet', 50], ['un grand sachet', 120]],
+    carre: [['1 carré', 5], ['2 carrés', 10], ['4 carrés', 20], ['½ tablette', 50], ['1 tablette', 100]],
+    chaud: [['une tasse (15 cl)', 150], ['un mug (25 cl)', 250], ['un grand gobelet (40 cl)', 400]],
+    verre: [['un verre (12 cl)', 120], ['2 verres', 240], ['3 verres', 360]]
   };
   const COOK = [['Nature / cru', 0], ['Vapeur / bouilli', 0], ['Grillé / four', 2], ['Poêlé', 6], ['Frit', 12]]; // g d'huile ajoutée pour 100 g
   // [id, nom, type de portion, kcal/100, cuisson possible, grammes par pièce]
@@ -3857,6 +3861,31 @@
     ['dolma', 'Dolma (feuilles de vigne)', 'piece', 150, 0, 40], ['borek', 'Börek', 'dessert', 300, 0], ['baklava', 'Baklava', 'piece', 430, 0, 30],
     ['lahmacun', 'Lahmacun', 'piece', 230, 0, 150], ['sucuk', 'Sucuk', 'viande', 450, 1], ['kasar', 'Kaşar (fromage)', 'fromage', 360, 0]
   ].map(a => ({ id: a[0], fr: a[1], t: a[2], k: a[3], cook: !!a[4], pg: a[5] || 0 }));
+
+  // Sucreries, desserts et boissons (valeurs moyennes des emballages, arrondies)
+  [['kinder-bueno', 'Kinder Bueno (barre)', 'piece', 572, 0, 21.5, 'choco'], ['mini-bueno', 'Mini Kinder Bueno', 'piece', 572, 0, 5.4, 'choco'], ['kinder-country', 'Kinder Country', 'piece', 561, 0, 23.5, 'choco'],
+   ['kinder-bar', 'Kinder Chocolat (barre)', 'piece', 566, 0, 12.5, 'choco'], ['kinder-maxi', 'Kinder Maxi', 'piece', 566, 0, 21, 'choco'], ['kinder-surprise', 'Kinder Surprise (œuf)', 'piece', 562, 0, 20, 'choco'],
+   ['schokobons', 'Kinder Schoko-Bons', 'piece', 581, 0, 5.8, 'choco'], ['twix', 'Twix (1 barre)', 'piece', 495, 0, 25, 'choco'], ['mars', 'Mars', 'piece', 449, 0, 51, 'choco'],
+   ['snickers', 'Snickers', 'piece', 488, 0, 50, 'choco'], ['bounty', 'Bounty (1 barre)', 'piece', 487, 0, 28.5, 'choco'], ['kitkat', 'KitKat (4 doigts)', 'piece', 518, 0, 41.5, 'choco'],
+   ['lion', 'Lion', 'piece', 485, 0, 42, 'choco'], ['mms', "M&M's chocolat (sachet)", 'piece', 480, 0, 45, 'choco'], ['mms-p', "M&M's cacahuètes (sachet)", 'piece', 512, 0, 45, 'choco'],
+   ['ferrero', 'Ferrero Rocher', 'piece', 576, 0, 12.5, 'choco'], ['raffaello', 'Raffaello', 'piece', 620, 0, 10, 'choco'], ['magnum', 'Magnum', 'piece', 300, 0, 79, 'choco'],
+   ['choc-noir', 'Chocolat noir', 'carre', 550, 0, 0, 'choco'], ['choc-lait', 'Chocolat au lait', 'carre', 540, 0, 0, 'choco'], ['choc-blanc', 'Chocolat blanc', 'carre', 560, 0, 0, 'choco'],
+   ['haribo', 'Bonbons Haribo (ours, Dragibus…)', 'bonbon', 340, 0, 0, 'choco'], ['tagada', 'Fraises Tagada', 'bonbon', 345, 0, 0, 'choco'], ['bonbons-acides', 'Bonbons acidulés', 'bonbon', 350, 0, 0, 'choco'],
+   ['chamallow', 'Chamallows', 'piece', 330, 0, 7, 'choco'], ['carambar', 'Carambar', 'piece', 430, 0, 8, 'choco'], ['chupa', 'Sucette', 'piece', 390, 0, 12, 'choco'], ['mentos', 'Mentos', 'piece', 390, 0, 2.7, 'choco'],
+   ['prince', 'Prince (biscuit)', 'piece', 465, 0, 12.5, 'gateau'], ['oreo', 'Oreo', 'piece', 480, 0, 11, 'gateau'], ['petit-ecolier', 'Petit Écolier', 'piece', 510, 0, 12.5, 'gateau'],
+   ['bn', 'BN', 'piece', 460, 0, 16, 'gateau'], ['madeleine', 'Madeleine', 'piece', 450, 0, 25, 'gateau'], ['pain-choc', 'Pain au chocolat', 'piece', 420, 0, 60, 'gateau'],
+   ['brownie', 'Brownie', 'piece', 450, 0, 50, 'gateau'], ['donut', 'Donut', 'piece', 420, 0, 60, 'gateau'], ['muffin', 'Muffin au chocolat', 'piece', 420, 0, 100, 'gateau'],
+   ['crepe', 'Crêpe nature', 'piece', 220, 0, 55, 'gateau'], ['gaufre', 'Gaufre au sucre', 'piece', 330, 0, 70, 'gateau'], ['churros', 'Churros', 'piece', 380, 0, 25, 'gateau'],
+   ['macaron', 'Macaron', 'piece', 420, 0, 15, 'gateau'], ['eclair', 'Éclair au chocolat', 'piece', 260, 0, 80, 'gateau'], ['mille-feuille', 'Mille-feuille', 'piece', 300, 0, 120, 'gateau'],
+   ['fondant', 'Fondant au chocolat', 'dessert', 420, 0, 0, 'gateau'], ['cheesecake', 'Cheesecake', 'dessert', 320, 0, 0, 'gateau'], ['tarte-citron', 'Tarte au citron meringuée', 'dessert', 330, 0, 0, 'gateau'],
+   ['mousse-choc', 'Mousse au chocolat', 'piece', 260, 0, 100, 'gateau'], ['creme-brulee', 'Crème brûlée', 'piece', 270, 0, 120, 'gateau'], ['flan', 'Flan', 'piece', 150, 0, 100, 'gateau'],
+   ['riz-lait', 'Riz au lait', 'piece', 130, 0, 125, 'gateau'], ['panna', 'Panna cotta', 'piece', 230, 0, 120, 'gateau'], ['sorbet', 'Sorbet (boule)', 'piece', 130, 0, 50, 'gateau'],
+   ['fanta', 'Fanta', 'boisson', 37, 0, 0], ['orangina', 'Orangina', 'boisson', 41, 0, 0], ['oasis', 'Oasis', 'boisson', 41, 0, 0], ['limonade', 'Limonade', 'boisson', 40, 0, 0],
+   ['redbull', 'Red Bull', 'boisson', 46, 0, 0], ['jus-pomme', 'Jus de pomme', 'boisson', 46, 0, 0], ['multifruits', 'Jus multifruits', 'boisson', 50, 0, 0], ['smoothie', 'Smoothie', 'boisson', 55, 0, 0],
+   ['sirop', "Sirop à l'eau", 'boisson', 30, 0, 0], ['milkshake', 'Milkshake', 'boisson', 110, 0, 0], ['bubble-tea', 'Bubble tea', 'boisson', 60, 0, 0], ['lait-fraise', 'Lait fraise / chocolat', 'boisson', 70, 0, 0],
+   ['choc-chaud', 'Chocolat chaud', 'chaud', 80, 0, 0], ['cappuccino', 'Cappuccino', 'chaud', 40, 0, 0], ['latte', 'Café latte', 'chaud', 50, 0, 0], ['cafe-sucre', 'Café ou thé sucré (1 sucre)', 'chaud', 13, 0, 0],
+   ['vin', 'Vin', 'verre', 85, 0, 0], ['eau-gaz', 'Eau gazeuse', 'boisson', 0, 0, 0]
+  ].forEach(a => INGR.push({ id: a[0], fr: a[1], t: a[2], k: a[3], cook: false, pg: a[5] || 0, g: a[6] || '' }));
   // Plats complets : on choisit la taille, les calories sont celles du plat entier (sauces de base comprises)
   [['tacos', 'Tacos français', [['Taille M', 950], ['Taille L', 1300], ['Taille XL', 1800]]],
    ['burger', 'Burger', [['Simple', 550], ['Double', 800], ['Triple', 1050]]],
@@ -3872,11 +3901,11 @@
    ['tost-sucuk', 'Tost au sucuk', [['Normal', 500], ['Grand', 700], ['Double fromage', 650]]],
    ['pide-p', 'Pide garni', [['½ pide', 450], ['Pide entier', 900]]]
   ].forEach(a => INGR.push({ id: a[0], fr: a[1], t: 'plat', k: 0, cook: false, pg: 0, opts: a[2] }));
-  const GROUPS = [['Plats', x => x.t === 'plat' || x.t === 'soupe' || ['lahmacun', 'dolma', 'borek'].includes(x.id)],
+  const GROUPS = [['Chocolats, bonbons', x => x.g === 'choco'], ['Gâteaux, biscuits, desserts', x => x.g === 'gateau'], ['Plats', x => x.t === 'plat' || x.t === 'soupe' || ['lahmacun', 'dolma', 'borek'].includes(x.id)],
     ['Viandes, poissons, œufs', x => x.t === 'viande' || x.id === 'oeuf'], ['Féculents', x => x.t === 'feculent'], ['Légumes', x => x.t === 'legume'],
     ['Pain', x => x.t === 'pain'], ['Fromages', x => x.t === 'fromage' && x.id !== 'chocolat'], ['Sauces, huile, beurre', x => x.t === 'sauce' || x.t === 'gras'],
     ['Fruits', x => x.t === 'fruit'], ['Desserts, petit-déj', x => x.t === 'dessert' || x.t === 'bol' || x.id === 'chocolat' || (x.t === 'piece' && !['oeuf', 'lahmacun', 'dolma'].includes(x.id))],
-    ['Boissons', x => x.t === 'boisson']];
+    ['Boissons', x => x.t === 'boisson' || x.t === 'chaud' || x.t === 'verre']];
   const groupOf = x => (GROUPS.find(g => g[1](x)) || GROUPS[0])[0];
   const INGR_BY = Object.fromEntries(INGR.map(x => [x.id, x]));
   const CUISINES = {
@@ -3888,10 +3917,12 @@
     'Asiatique': ['sushis', 'bowl', 'riz', 'nouilles', 'poulet', 'crevettes', 'tofu', 'legumes', 'soja', 'oeuf'],
     'Mexicaine': ['tortilla', 'haricots-r', 'riz', 'hache15', 'avocat', 'cheddar', 'tomate', 'mais'],
     'Petit-déjeuner': ['tost-sucuk', 'sucuk', 'pain', 'beurre', 'confiture', 'pate-tart', 'cereales', 'lait', 'jus', 'croissant', 'oeuf', 'yaourt'],
-    'Dessert / goûter': ['yaourt-f', 'compote', 'cookie', 'glace', 'gateau', 'tarte', 'chocolat', 'banane', 'pomme']
+    'Dessert / goûter': ['crepe', 'gaufre', 'pain-choc', 'brownie', 'muffin', 'donut', 'cookie', 'madeleine', 'fondant', 'cheesecake', 'tarte', 'tarte-citron', 'tiramisu', 'mousse-choc', 'creme-brulee', 'flan', 'riz-lait', 'macaron', 'eclair', 'glace', 'sorbet', 'magnum', 'yaourt-f', 'compote', 'banane', 'pomme'],
+    'Chocolats et bonbons': ['kinder-bueno', 'mini-bueno', 'kinder-country', 'kinder-bar', 'kinder-maxi', 'kinder-surprise', 'schokobons', 'twix', 'mars', 'snickers', 'bounty', 'kitkat', 'lion', 'mms', 'mms-p', 'ferrero', 'raffaello', 'choc-noir', 'choc-lait', 'choc-blanc', 'haribo', 'tagada', 'bonbons-acides', 'chamallow', 'carambar', 'chupa', 'mentos', 'prince', 'oreo', 'petit-ecolier', 'bn'],
+    'Boissons': ['eau', 'eau-gaz', 'coca', 'zero', 'fanta', 'orangina', 'oasis', 'icetea', 'limonade', 'sirop', 'jus', 'jus-pomme', 'multifruits', 'smoothie', 'lait', 'lait-fraise', 'milkshake', 'bubble-tea', 'energy', 'redbull', 'choc-chaud', 'cappuccino', 'latte', 'cafe-sucre', 'biere', 'vin']
   };
   const CP = { cuisine: '', group: '', sel: [] }; // sel : plusieurs aliments choisis en même temps
-  function portionsOf(x) { const u = x.fr.toLowerCase().replace(/ \(.*\)/, ''), pl = u.split(' ').map((w, i) => i === 0 && !/[sx]$/.test(w) ? w + 's' : w).join(' '); return x.t === 'plat' ? x.opts : x.t === 'piece' ? [['1 ' + u, x.pg], ['2 ' + pl, x.pg * 2], ['3 ' + pl, x.pg * 3]] : PORTIONS[x.t]; }
+  function portionsOf(x) { const u = x.g ? x.fr.replace(/ \(.*\)/, '') : x.fr.toLowerCase().replace(/ \(.*\)/, ''), pl = x.g ? u : u.split(' ').map((w, i) => i === 0 && !/[sx]$/.test(w) ? w + 's' : w).join(' '); return x.t === 'plat' ? x.opts : x.t === 'piece' ? (x.pg <= 15 ? [1, 2, 3, 4, 6, 10] : [1, 2, 3]).map(n => [n + ' ' + (n > 1 ? pl : u), Math.round(x.pg * n * 10) / 10]) : PORTIONS[x.t]; }
   function compKcal(x, gi, ci) { if (x.t === 'plat') return x.opts[gi][1]; const g = portionsOf(x)[gi][1], oil = x.cook ? COOK[ci][1] * g / 100 : 0; return Math.round(x.k * g / 100 + oil * 9); }
   function renderComp() {
     const box = $('mComp'); if (box.classList.contains('hidden')) return;
@@ -3911,7 +3942,7 @@
       CP.sel.forEach((e, si) => {
         const x = e.x, P = portionsOf(x);
         h += '<div class="cp-card"><div class="cp-h"><b>' + esc(x.fr) + '</b><span class="num">' + nf0.format(compKcal(x, e.por, e.cook)) + ' kcal</span><button type="button" class="xbtn" data-rm="' + si + '" aria-label="Retirer ' + esc(x.fr) + '">×</button></div>' +
-          '<div class="chips">' + P.map((p, i) => '<button type="button" class="chip cp-por" data-por="' + si + ':' + i + '" aria-pressed="' + (e.por === i) + '"><span>' + esc(p[0]) + (x.t === 'plat' ? '' : ' · ' + p[1] + (x.t === 'boisson' ? ' ml' : ' g')) + '</span><b>' + nf0.format(compKcal(x, i, e.cook)) + ' kcal</b></button>').join('') + '</div>';
+          '<div class="chips">' + P.map((p, i) => '<button type="button" class="chip cp-por" data-por="' + si + ':' + i + '" aria-pressed="' + (e.por === i) + '"><span>' + esc(p[0]) + (x.t === 'plat' ? '' : ' · ' + p[1] + (['boisson', 'chaud', 'verre'].includes(x.t) ? ' ml' : ' g')) + '</span><b>' + nf0.format(compKcal(x, i, e.cook)) + ' kcal</b></button>').join('') + '</div>';
         if (x.cook) h += '<div class="chips">' + COOK.map((c, i) => '<button type="button" class="chip" data-cook="' + si + ':' + i + '" aria-pressed="' + (e.cook === i) + '">' + c[0] + '</button>').join('') + '</div>';
         h += '</div>';
       });
@@ -3945,8 +3976,8 @@
       CP.sel.slice().reverse().forEach(e => {
         const x = e.x, P = portionsOf(x)[e.por], cook = x.cook && e.cook ? ' (' + COOK[e.cook][0].toLowerCase() + ')' : '';
         const g = P[1], m = MAC100[x.id], oil = x.cook ? COOK[e.cook][1] * g / 100 : 0;
-        const mac = x.t === 'plat' ? splitMac(P[1], 'plat') : m ? [m[0] * g / 100, m[1] * g / 100, m[2] * g / 100 + oil] : splitMac(compKcal(x, e.por, e.cook), x.t === 'boisson' ? 'boisson' : x.t === 'fruit' ? 'fruit' : 'plat');
-        const f = { mac: mac.map(v => Math.round(v * 10) / 10), id: 'ing:' + x.id + ':' + P[1] + ':' + (x.cook ? e.cook : 0), fr: x.fr + cook, portion: x.t === 'plat' ? P[0] : P[0] + ' (' + P[1] + (x.t === 'boisson' ? ' ml' : ' g') + ')', kcal: compKcal(x, e.por, e.cook) };
+        const mac = x.t === 'plat' ? splitMac(P[1], 'plat') : m ? [m[0] * g / 100, m[1] * g / 100, m[2] * g / 100 + oil] : splitMac(compKcal(x, e.por, e.cook), (x.t === 'boisson' || x.t === 'verre') ? 'boisson' : x.t === 'fruit' ? 'fruit' : (x.g || x.t === 'chaud') ? 'dessert' : 'plat');
+        const f = { mac: mac.map(v => Math.round(v * 10) / 10), id: 'ing:' + x.id + ':' + P[1] + ':' + (x.cook ? e.cook : 0), fr: x.fr + cook, portion: x.t === 'plat' ? P[0] : P[0] + ' (' + P[1] + (['boisson', 'chaud', 'verre'].includes(x.t) ? ' ml' : ' g') + ')', kcal: compKcal(x, e.por, e.cook) };
         MS.items.unshift({ f, p: null, q: 1, on: true, mine: true });
       });
       CP.sel = []; mealRows(); renderComp(); toast(n + ' aliment' + (n > 1 ? 's ajoutés' : ' ajouté'));
