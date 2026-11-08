@@ -183,6 +183,9 @@
   input[type=number],select{background:var(--nuit);color:var(--blanc);border:1px solid rgba(200,205,215,.3);border-radius:10px;padding:8px 10px;font:inherit;font-size:16px;width:124px}
   .unitfield{display:flex;align-items:center;gap:6px;color:var(--gris);font-weight:600}
   .unitfield input{width:92px}
+  .row .unitfield{width:136px;flex:none}
+  #pname{width:136px!important;flex:none}
+  .row select{max-width:150px}
   .switch{position:relative;width:52px;height:30px;flex:none}
   .switch{cursor:pointer;-webkit-tap-highlight-color:transparent}
   .switch input{position:absolute;inset:0;opacity:0;margin:0;pointer-events:none}
@@ -197,7 +200,7 @@
 
   /* ---------- Barre d'onglets + bouton principal ---------- */
   .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;height:var(--bottom);padding-bottom:var(--safe-b);
-    display:grid;grid-template-columns:1fr 1fr 84px 1fr 1fr 1fr;align-items:center;
+    display:grid;grid-template-columns:1.5fr 1.5fr 84px 1fr 1fr 1fr;align-items:center;
     background:rgba(11,12,15,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid rgba(200,205,215,.16)}
   .tab{background:none;border:0;color:var(--gris);font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;cursor:pointer;position:relative}
   .tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -297,7 +300,8 @@
   .mrow.off .mname,.mrow.off .mkcal{opacity:.5}
   .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
   .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-  body.on-map .chatfab{display:none}
+  body.on-map .chatfab,body.ac-open .chatfab{display:none}
+  .view{padding-bottom:calc(var(--bottom) + 84px)!important}
   .csheet{display:flex;flex-direction:column;height:100%}
   .cmsgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:6px 0 10px;min-height:200px}
   .cmsg{max-width:85%;padding:10px 13px;border-radius:16px;line-height:1.4;font-size:15px}
@@ -305,12 +309,18 @@
   .cmsg.assistant{align-self:flex-start;background:var(--nuit-3);border-bottom-left-radius:4px}
   .cform{display:flex;gap:8px;align-items:center}.cform .msearch{margin:0;flex:1}.cform .sbtn{flex:none;width:auto;padding:10px 14px}
   .csheet .linkbtn{display:block;margin:10px auto 0}
+  .chq{margin:8px -20px 10px;padding:2px 20px 4px;flex-wrap:nowrap}
   .cp-open{width:100%;margin-top:10px}
   .cp{margin-top:12px;padding:12px 14px;border:1px solid rgba(200,205,215,.18);border-radius:16px}
   .cp-t{font-weight:700;font-size:14px;margin:10px 0 6px}
   .chips.cp-wrap{flex-wrap:wrap;overflow:visible;margin:0 0 6px;padding:2px 0 6px}
   .need{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 10px}.need span{display:block;font-size:13px;color:var(--gris)}.need b{font-size:28px}.need small{margin-left:4px;color:var(--gris)}
   .need-left{margin:8px 0 0;font-weight:600}
+  #repas .goal-bar{margin:0 0 14px}
+  .energy.e3{grid-template-columns:1fr 1fr 1fr}.energy.e3 b{font-size:28px}
+  .need-box summary{list-style:none;display:flex;flex-direction:column;gap:4px;cursor:pointer}.need-box summary::-webkit-details-marker{display:none}
+  .need-box summary small{color:var(--gris);font-size:14px}.need-box summary::after{content:'Modifier';position:absolute;right:20px;top:20px;color:var(--rouge);font-weight:700;font-size:14px}.need-box{position:relative}.need-box[open] summary::after{content:'Fermer'}
+  .mbtns .linkbtn{text-align:center}
   .cp-g{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--gris);margin:8px 0 4px}
   .cp .chips{flex-wrap:wrap;overflow:visible}
   .cp .chip{padding:8px 12px;font-size:13px}
@@ -800,7 +810,7 @@
       <div class="row"><label for="pname">Ton prénom<small>Pour te dire bonjour sur l'accueil</small></label><input id="pname" type="text" maxlength="24" autocomplete="given-name" style="width:150px"></div>
       <div class="row"><label for="height">Ta taille<small>Sert à calculer la longueur de tes pas</small></label><span class="unitfield"><input id="height" type="number" min="100" max="230" step="1" inputmode="numeric" placeholder="170"> cm</span></div>
       <div class="row"><label for="weight">Ton poids<small>Sert à calculer les calories dépensées</small></label><span class="unitfield"><input id="weight" type="number" min="30" max="250" step="1" inputmode="numeric" placeholder="70"> kg</span></div>
-      <div class="row"><label for="age">Ton âge (facultatif)<small>Sert à estimer ta VO2max au test navette si tu as moins de 18 ans</small></label><span class="unitfield"><input id="age" type="number" min="6" max="99" step="1" inputmode="numeric"> ans</span></div>
+      <div class="row"><label for="age">Ton âge<small>Sert à calculer tes besoins en calories (et ta VO2max au test navette)</small></label><span class="unitfield"><input id="age" type="number" min="6" max="99" step="1" inputmode="numeric"> ans</span></div>
       <div class="row"><div class="rl">Longueur d'un pas<small id="stepInfo"></small></div></div>
     </div>
     <div class="set-title">Objectifs</div>
@@ -963,7 +973,7 @@
     <div id="chStatus" class="mstatus hidden" role="status"><span id="chStatusTxt"></span><div id="chBarBox" class="mbarbox hidden"><i id="chBar"></i></div></div>
     <div id="chSetup"><p class="about">Le coach est une petite IA qui tourne directement sur ton téléphone : tes questions et tes données ne partent nulle part. Il faut la télécharger une fois (environ 600 Mo, en wifi). Pour tes chiffres (calories, sorties, objectif), le coach répond tout de suite avec tes vraies données ; pour les autres questions, l'IA met 20 à 40 secondes et reste une petite IA : ses conseils sont généraux. Elle connaît ton profil, tes repas et tes sorties, mais peut se tromper : ce n'est pas un avis médical.</p>
       <button id="chGo" class="sbtn save" type="button">Télécharger le coach IA</button></div>
-    <div id="chQuick" class="chips cp-wrap"><button type="button" class="chip" data-q="Il me reste combien de calories à manger ?">Calories restantes</button><button type="button" class="chip" data-q="Mon bilan de la semaine ?">Bilan de la semaine</button><button type="button" class="chip" data-q="Ma meilleure sortie ?">Mon record</button><button type="button" class="chip" data-q="Une idée de dîner léger et rassasiant ?">Idée de dîner léger</button><button type="button" class="chip" data-q="Comment progresser en course à pied ?">Progresser en course</button></div>
+    <div id="chQuick" class="chips chq"><button type="button" class="chip" data-q="Il me reste combien de calories à manger ?">Calories restantes</button><button type="button" class="chip" data-q="Mon bilan de la semaine ?">Bilan de la semaine</button><button type="button" class="chip" data-q="Ma meilleure sortie ?">Mon record</button><button type="button" class="chip" data-q="Une idée de dîner léger et rassasiant ?">Idée de dîner léger</button><button type="button" class="chip" data-q="Comment progresser en course à pied ?">Progresser en course</button></div>
     <form id="chForm" class="cform"><input id="chInput" class="msearch" placeholder="Pose ta question…" autocomplete="off" aria-label="Ta question"><button id="chSend" class="sbtn save" type="submit">Envoyer</button></form>
     <button id="chClear" class="linkbtn" type="button">Effacer la conversation</button>
   </div>
@@ -3430,7 +3440,7 @@
     if (settings.sex) L.push('Sexe : ' + (settings.sex === 'f' ? 'femme' : 'homme'));
     if (settings.height) L.push('Taille : ' + settings.height + ' cm');
     if (settings.weight) L.push('Poids : ' + settings.weight + ' kg');
-    L.push('Objectif de poids : ' + ['perdre du poids', 'garder son poids', 'prendre du poids'][(settings.wGoal || 0) + 1]);
+    L.push('Objectif de poids : ' + ['perdre du poids', 'garder son poids', 'prendre du poids'][(settings.weightGoal || 0) + 1]);
     try {
       const en = dayEnergy(today), n = kcalNeed(Math.round(en.burned));
       L.push("Aujourd'hui : " + Math.round(en.eaten) + ' kcal mangées, ' + Math.round(en.burned) + ' kcal dépensées en activité' + (n ? ', objectif du jour ' + Math.round(n.target) + ' kcal (il reste ' + Math.round(n.target - en.eaten) + ' kcal)' : ''));
@@ -3542,6 +3552,7 @@
     return { eaten, burned };
   }
   // ---------- Besoin en calories (Mifflin-St Jeor) et objectif de poids ----------
+  if (typeof settings.wGoal === 'number') { settings.weightGoal = settings.wGoal; settings.wGoal = 'tout'; saveSettings(); } // ancienne version : réglage mélangé avec le filtre des séances
   const LIFE = [['Assis toute la journée', 1.2], ['Un peu actif', 1.375], ['Debout / travail physique', 1.55]];
   const WGOAL = [['Perdre du poids', -1], ['Garder mon poids', 0], ['Prendre du poids', 1]];
   const PACE = [['Doucement', 300], ['Normal', 500]]; // kcal par jour : 500 ≈ 0,5 kg par semaine
@@ -3549,7 +3560,7 @@
     if (!settings.height || !settings.weight || !settings.age || !settings.sex) return null;
     const bmr = 10 * settings.weight + 6.25 * settings.height - 5 * settings.age + (settings.sex === 'f' ? -161 : 5);
     const base = bmr * (LIFE[settings.lifeAct != null ? settings.lifeAct : 1] || LIFE[1])[1];
-    const g = settings.wGoal || 0, minor = settings.age < 18, pace = (PACE[settings.wPace || 1] || PACE[1])[1];
+    const g = +settings.weightGoal || 0, minor = settings.age < 18, pace = (PACE[settings.wPace != null ? settings.wPace : 1] || PACE[1])[1];
     let delta = g < 0 ? -pace : g > 0 ? 300 : 0;
     if (minor && g < 0) delta = 0; // pas de déficit pour un mineur : avis d'un médecin
     const floor = settings.sex === 'f' ? 1200 : 1500;
@@ -3558,21 +3569,21 @@
   }
   function needHtml(en) {
     const chips = (key, arr, cur) => '<div class="chips cp-wrap">' + arr.map((a, i) => '<button type="button" class="chip" data-need="' + key + ':' + i + '" aria-pressed="' + (cur === i) + '">' + a[0] + '</button>').join('') + '</div>';
-    let h = '<div class="block"><div class="bh">Ton objectif calories</div>';
-    if (!settings.height || !settings.weight || !settings.age) return h + '<p class="empty">Indique ta taille, ton poids et ton âge dans les Réglages pour calculer ce que tu dois manger chaque jour.</p><button type="button" class="linkbtn" data-need="reglages">Ouvrir les Réglages</button></div>';
+    const nd = kcalNeed(Math.round(en.burned)), sum = nd ? WGOAL[(+settings.weightGoal || 0) + 1][0] + ' · ' + nf0.format(Math.round(nd.target)) + ' kcal aujourd\'hui' : 'À régler';
+    let h = '<details class="block need-box"' + (nd ? '' : ' open') + '><summary><span class="bh">Mon objectif calories</span><small>' + sum + '</small></summary>';
+    if (!settings.height || !settings.weight || !settings.age) return h + '<p class="empty">Indique ta taille, ton poids et ton âge dans les Réglages pour calculer ce que tu dois manger chaque jour.</p><button type="button" class="linkbtn" data-need="reglages">Ouvrir les Réglages</button></details>';
     h += '<div class="cp-t">Tu es</div>' + chips('sex', [['Un homme'], ['Une femme']], settings.sex === 'm' ? 0 : settings.sex === 'f' ? 1 : -1);
-    if (!settings.sex) return h + '</div>';
+    if (!settings.sex) return h + '</details>';
     h += '<div class="cp-t">Ta journée (hors sport)</div>' + chips('life', LIFE, settings.lifeAct != null ? settings.lifeAct : 1);
-    h += '<div class="cp-t">Ton objectif</div>' + chips('goal', WGOAL, (settings.wGoal || 0) + 1);
-    if ((settings.wGoal || 0) < 0) h += '<div class="cp-t">Rythme</div>' + chips('pace', [['Doucement (−300 kcal/j)'], ['Normal (−500 kcal/j, ≈ 0,5 kg/semaine)']], settings.wPace != null ? settings.wPace : 1);
+    h += '<div class="cp-t">Ton objectif</div>' + chips('goal', WGOAL, (settings.weightGoal || 0) + 1);
+    if ((settings.weightGoal || 0) < 0) h += '<div class="cp-t">Rythme</div>' + chips('pace', [['Doucement (−300 kcal/j)'], ['Normal (−500 kcal/j, ≈ 0,5 kg/semaine)']], settings.wPace != null ? settings.wPace : 1);
     const n = kcalNeed(Math.round(en.burned)), left = Math.round(n.target - en.eaten), pct = Math.min(100, en.eaten / n.target * 100);
     h += '<div class="need"><div><span>Pour garder ton poids</span><b class="num">' + nf0.format(Math.round(n.base + en.burned)) + '</b><small>kcal</small></div>' +
       '<div><span>' + (n.delta < 0 ? 'Ton objectif (en déficit)' : n.delta > 0 ? 'Ton objectif (en surplus)' : 'Ton objectif') + '</span><b class="num">' + nf0.format(Math.round(n.target)) + '</b><small>kcal</small></div></div>' +
-      '<div class="goal-bar"><i style="width:' + pct.toFixed(0) + '%' + (left < 0 ? ';background:var(--rouge)' : '') + '"></i></div>' +
-      '<p class="need-left">' + (left >= 0 ? 'Il te reste <b class="num">' + nf0.format(left) + ' kcal</b> à manger aujourd\'hui.' : 'Tu as dépassé ton objectif de <b class="num">' + nf0.format(-left) + ' kcal</b> aujourd\'hui.') + '</p>' +
+
       '<p class="about" style="margin-top:8px">Calcul : métabolisme de base (formule de Mifflin-St Jeor) × ta journée, + les calories de tes sorties et séances du jour' + (n.delta ? (n.delta < 0 ? ', − ' : ', + ') + Math.abs(n.delta) + ' kcal pour ton objectif' : '') + '.' +
       (n.floored ? ' Ton objectif ne descend pas sous ' + n.floor + ' kcal : manger moins serait mauvais pour ta santé.' : '') +
-      (n.minor && (settings.wGoal || 0) < 0 ? ' Avant 18 ans, l\'appli ne propose pas de déficit : parles-en d\'abord à un médecin.' : '') + ' C\'est une estimation, pas un avis médical.</p></div>';
+      (n.minor && (settings.weightGoal || 0) < 0 ? ' Avant 18 ans, l\'appli ne propose pas de déficit : parles-en d\'abord à un médecin.' : '') + ' C\'est une estimation, pas un avis médical.</p></details>';
     return h;
   }
   $('repas').addEventListener('click', e => {
@@ -3581,18 +3592,21 @@
     const [k, i] = v.split(':'), n = +i;
     if (k === 'sex') settings.sex = n === 0 ? 'm' : 'f';
     if (k === 'life') settings.lifeAct = n;
-    if (k === 'goal') settings.wGoal = n - 1;
+    if (k === 'goal') settings.weightGoal = n - 1;
     if (k === 'pace') settings.wPace = n;
-    saveSettings(); renderRepas();
+    saveSettings(); renderRepas(); const d = document.querySelector('.need-box'); if (d) d.open = true;
   });
   let mealDelArmed = -1;
   function renderRepas() {
     const today = dayKey(Date.now()), en = dayEnergy(today), meals = store.get(K_MEALS, []);
     const todays = meals.map((m, i) => [m, i]).filter(([m]) => dayKey(m.date) === today);
     const tf = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit' });
-    let h = '<div class="block"><div class="bh">Aujourd\'hui</div><div class="energy">' +
+    const nd = kcalNeed(Math.round(en.burned)), left = nd ? Math.round(nd.target - en.eaten) : null;
+    let h = '<div class="block"><div class="bh">Aujourd\'hui</div><div class="energy e3">' +
       '<div><span>Mangées</span><b class="num">' + nf0.format(en.eaten) + '</b><small>kcal</small></div>' +
-      '<div><span>Dépensées en activité</span><b class="num">' + nf0.format(Math.round(en.burned)) + '</b><small>kcal</small></div></div>' +
+      '<div><span>Dépensées</span><b class="num">' + nf0.format(Math.round(en.burned)) + '</b><small>kcal</small></div>' +
+      '<div><span>' + (left == null ? 'Objectif' : left >= 0 ? 'Reste' : 'Dépassé') + '</span><b class="num">' + (left == null ? '–' : nf0.format(Math.abs(left))) + '</b><small>' + (nd ? 'sur ' + nf0.format(Math.round(nd.target)) : 'à régler') + '</small></div></div>' +
+      (nd ? '<div class="goal-bar"><i style="width:' + Math.min(100, en.eaten / nd.target * 100).toFixed(0) + '%' + (left < 0 ? ';background:var(--rouge)' : '') + '"></i></div>' : '') +
       (settings.healthSteps && settings.healthSteps.day === today ? '<p class="hsteps">Pas aujourd\'hui selon Apple Santé : <b class="num">' + nf0.format(settings.healthSteps.v) + '</b></p>' : '') +
       '<div class="mbtns"><label class="mbig"><input id="mCameraP" type="file" accept="image/*" capture="environment" hidden>Prendre une photo du repas</label>' +
       '<label class="mbig alt"><input id="mGalleryP" type="file" accept="image/*" hidden>Choisir une photo</label>' +
