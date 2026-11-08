@@ -871,6 +871,10 @@
   .wcard{flex-direction:column}
   .banner.info{background:#1c1f25;border-color:rgba(255,90,31,.45);color:var(--blanc)}
   .banner button{border-radius:10px}
+.dash-today{display:flex;gap:16px;align-items:center}.dt-ring{position:relative;width:118px;height:118px;flex:none}.dt-ring svg{width:100%;height:100%;transform:rotate(-90deg)}.dt-ring circle{fill:none;stroke-width:9}.dt-ring .r0{stroke:rgba(255,255,255,.08)}.dt-ring .r1{stroke:#ff6a2b;stroke-linecap:round;transition:stroke-dasharray .6s}.dt-ring>div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}.dt-ring b{font-size:22px}.dt-ring small{font-size:11px;color:rgba(255,255,255,.5)}.dt-side{flex:1;min-width:0}.dt-t{font-weight:800;text-transform:uppercase;letter-spacing:.06em;font-size:13px;margin-bottom:8px}.dt-l{display:flex;justify-content:space-between;padding:6px 0;border-top:1px solid rgba(255,255,255,.06);font-size:14px;color:rgba(255,255,255,.7)}.dt-l b{color:#fff}.dt-l span{display:flex;gap:6px}
+.dtiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.dtile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:rgba(24,24,30,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff;font:inherit;text-align:left;cursor:pointer}.dtile span{font-size:20px}.dtile b{font-size:26px;line-height:1.1}.dtile b small{font-size:14px;color:rgba(255,255,255,.6)}.dtile>small{font-size:12px;color:rgba(255,255,255,.55)}
+.wbars{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;height:130px;align-items:end}.wkb{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}.wkb i{width:100%;max-width:26px;border-radius:8px 8px 4px 4px;background:rgba(255,255,255,.12)}.wkb.t i{background:linear-gradient(#ff8a50,#ff5a1f)}.wkb span{font-size:12px;color:rgba(255,255,255,.5);font-weight:700}.wkb.t span{color:#ff8a50}.wkb em{font-style:normal;font-size:10px;color:rgba(255,255,255,.55)}
+.dbadge{display:block;width:100%;text-align:left;color:#fff;font:inherit;cursor:pointer}.dbn{display:flex;gap:12px;align-items:center}.dbn .bic{font-size:30px}.dbn>div{flex:1}.dbn b{display:block}.dbn small{color:rgba(255,255,255,.55);font-size:13px}.dbn .bbar{display:block;margin-top:6px}.dbn em{font-style:normal;font-size:22px;color:rgba(255,255,255,.4)}
 .pgtabs{position:sticky;top:0;z-index:5;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;margin:0 0 14px;border-radius:16px;background:rgba(20,20,24,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.08)}.pgtabs button{border:0;border-radius:12px;padding:10px 4px;background:none;color:rgba(255,255,255,.55);font:inherit;font-weight:700;font-size:13.5px;cursor:pointer;transition:background .2s,color .2s}.pgtabs button[aria-selected="true"]{background:linear-gradient(135deg,#ff5a1f,#ff8a50);color:#fff;box-shadow:0 4px 14px rgba(255,90,31,.35)}.pgtabs i{font-style:normal;font-size:11px;opacity:.8;margin-left:2px}
 </style>
 </head>
@@ -2147,6 +2151,27 @@
     return '<div class="block"><div class="bh">Statistiques<span class="seg" role="group" aria-label="Période"><button type="button" data-mode="week" aria-pressed="' + (statMode === 'week') + '">Semaines</button><button type="button" data-mode="month" aria-pressed="' + (statMode === 'month') + '">Mois</button></span></div>' +
       svg + '<div class="period"><span>' + (statMode === 'week' ? 'Cette semaine' : 'Ce mois-ci') + ' :</span><span><b>' + nf1.format(c.m / 1000) + '</b> km</span><span><b>' + c.n + '</b> sortie' + (c.n > 1 ? 's' : '') + '</span><span><b>' + nf0.format(c.k) + '</b> kcal</span><span><b>' + nf0.format(c.up) + '</b> m de montée</span></div></div>';
   }
+  function dashHtml() {
+    const st = goalStats(), today = dayKey(Date.now()), E = dayEnergy(today), sg = +settings.goalSteps || 10000;
+    const pr = Math.min(1, st.steps / sg), C = 2 * Math.PI * 42;
+    const W = store.get(K_WEIGHTS, []), w = +settings.weight || 0, dW = W.length >= 2 ? W[W.length - 1].kg - W[0].kg : 0;
+    let h = '<div class="block dash-today"><div class="dt-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" class="r0"/><circle cx="50" cy="50" r="42" class="r1" style="stroke-dasharray:' + (pr * C).toFixed(1) + ' ' + C.toFixed(1) + '"/></svg><div><b class="num">' + nf0.format(st.steps) + '</b><small>/ ' + nf0.format(sg) + ' pas</small></div></div>' +
+      '<div class="dt-side"><div class="dt-t">Aujourd\'hui</div><div class="dt-l"><span>🍽️ Mangées</span><b class="num">' + nf0.format(Math.round(E.eaten)) + ' kcal</b></div><div class="dt-l"><span>🔥 Dépensées</span><b class="num">' + nf0.format(Math.round(E.burned)) + ' kcal</b></div><div class="dt-l"><span>🎯 Pas</span><b class="num">' + Math.round(pr * 100) + ' %</b></div></div></div>';
+    const tile = (ic, v, l, tab) => '<button type="button" class="dtile"' + (tab ? ' data-pgtab="' + tab + '"' : '') + '><span>' + ic + '</span><b class="num">' + v + '</b><small>' + l + '</small></button>';
+    h += '<div class="dtiles">' + tile('🔥', st.streak, 'jour' + (st.streak > 1 ? 's' : '') + ' d\'affilée') + tile('📍', nf1.format(st.km), 'km cette semaine', 'hist') +
+      tile('💪', st.sessions, 'séance' + (st.sessions > 1 ? 's' : '') + ' cette semaine') + tile('⚖️', w ? nf1.format(w) + '<small> kg</small>' : '–', W.length >= 2 ? (dW > 0 ? '+' : dW < 0 ? '−' : '') + nf1.format(Math.abs(dW)) + ' kg depuis le début' : 'mon poids', 'corps') + '</div>';
+    const ws = weekStart(Date.now()), days = [];
+    for (let i = 0; i < 7; i++) { const d = new Date(ws); d.setDate(d.getDate() + i); d.setHours(12); const k = dayKey(d.getTime()), e = dayEnergy(k); days.push([['L', 'M', 'M', 'J', 'V', 'S', 'D'][i], e.burned, e.eaten, k === today]); }
+    const mx = Math.max(200, ...days.map(d => d[1]));
+    h += '<div class="block"><div class="bh">Calories dépensées cette semaine</div><div class="wbars">' + days.map(([l, b, e, t]) => '<div class="wkb' + (t ? ' t' : '') + '"><em class="num">' + (b ? Math.round(b) : '') + '</em><i style="height:' + Math.max(4, b / mx * 100).toFixed(0) + '%"></i><span>' + l + '</span></div>').join('') + '</div></div>';
+    try {
+      const got = badgesCheck(), bs = badgeStats(), n = BADGES.filter(b => got[b[0]]).length;
+      const next = BADGES.filter(b => !got[b[0]]).map(b => [b, Math.min(1, (b[4](bs) || 0) / b[5])]).sort((a, b) => b[1] - a[1])[0];
+      h += '<button type="button" class="block dbadge" data-pgtab="badges"><div class="bh">Badges <small class="bcount">' + n + ' / ' + BADGES.length + '</small></div>' +
+        (next ? '<div class="dbn"><span class="bic">' + next[0][1] + '</span><div><b>Prochain : ' + esc(next[0][2]) + '</b><small>' + esc(next[0][3]) + '</small><i class="bbar"><u style="width:' + Math.round(next[1] * 100) + '%"></u></i></div><em>›</em></div>' : '<p class="empty">Tous les badges sont débloqués. Bravo !</p>') + '</button>';
+    } catch (e) {}
+    return h;
+  }
   function renderProgress(highlightFirst) {
     if (highlightFirst) window.__pgTab = 'hist';
     const hist = store.get(K_HIST, []), box = $('progress');
@@ -2156,6 +2181,7 @@
     let totalM = 0, totalKcal = 0;
     hist.forEach(h => { totalM += h.distanceM || 0; totalKcal += h.kcal || 0; });
     if (tab === 'res') {
+      html += dashHtml();
       if (hist.length) html += '<div class="total"><div class="po"><div class="plate"><div class="back"></div><div class="face">' +
         '<span class="lbl">' + hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + '<br>' + nf0.format(totalKcal) + ' kcal</span>' +
         '<span class="val num">' + nf2.format(totalM / 1000) + '<small>km</small></span></div></div></div></div>' + weekBilanHtml(hist);
