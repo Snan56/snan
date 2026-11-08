@@ -2424,9 +2424,10 @@
     ['jambes', 'Jambes', ['Squat', 'Presse', 'Fentes', 'Leg extension', 'Leg curl', 'Soulevé de terre jambes tendues', 'Mollets']],
     ['abdos', 'Abdos', ['Crunch', 'Gainage', 'Relevé de jambes', 'Russian twist', 'Roue abdominale']]
   ];
-  const GINT = [['Légère', 'Longues pauses, charges légères', 3.5], ['Normale', 'Pauses de 1 à 2 min', 5], ['Intense', 'Peu de repos, charges lourdes', 6]];
+  // MET « nets » : on enlève 1 MET (ce que le corps dépense au repos), déjà compté dans ton besoin de base de l'onglet Repas
+  const GINT = [['Légère', 'Longues pauses, charges légères', 2.5], ['Normale', 'Pauses de 1 à 2 min', 3.5], ['Intense', 'Peu de repos, charges lourdes', 5]];
   const G = { mus: [], ex: [], dur: 60, int: 1 };
-  function gymKcal() { const met = GINT[G.int][2] + (G.mus.includes('jambes') ? 0.5 : 0); return Math.round(met * weightKg() * G.dur / 60); }
+  function gymKcal() { const met = GINT[G.int][2] + (G.mus.includes('jambes') ? 0.5 : 0); return Math.round(met * weightKg() * G.dur / 60); } // ex. 80 kg, 1 h normale : 280 kcal
   function renderGym() {
     let h = '<div class="cp-t">1. Les muscles travaillés</div><div class="chips cp-wrap">' + MUSCLES.map(m => '<button type="button" class="chip" data-gm="' + m[0] + '" aria-pressed="' + G.mus.includes(m[0]) + '">' + (G.mus.includes(m[0]) ? '✓ ' : '') + m[1] + '</button>').join('') + '</div>';
     if (G.mus.length) {
@@ -2449,7 +2450,7 @@
     const vol = G.ex.reduce((a, e) => a + e.sets * e.reps * (e.kg || 0), 0), sets = G.ex.reduce((a, e) => a + e.sets, 0);
     h += '<div class="gsum"><div><span>Calories dépensées</span><b class="num">' + nf0.format(gymKcal()) + '</b><small>kcal</small></div>' +
       '<div><span>' + (vol ? 'Volume soulevé' : 'Séries') + '</span><b class="num">' + (vol ? nf0.format(vol) : sets || '–') + '</b><small>' + (vol ? 'kg' : '') + '</small></div></div>' +
-      '<p class="about" style="margin-top:8px">Estimation avec ton poids (' + nf0.format(weightKg()) + ' kg), la durée et l\'intensité (valeurs du Compendium des activités physiques). Les jambes, plus gros muscles, dépensent un peu plus.</p>';
+      '<p class="about" style="margin-top:8px">Calories dépensées en plus de ce que ton corps brûle au repos, avec ton poids (' + nf0.format(weightKg()) + ' kg), la durée et l\'intensité (Compendium des activités physiques). En musculation, une grande partie de la séance est faite de pauses : compte environ 200 à 400 kcal par heure. Les jambes dépensent un peu plus.</p>';
     $('gBody').innerHTML = h;
     $('gSave').disabled = !G.mus.length;
   }
