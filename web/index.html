@@ -882,6 +882,11 @@
 .phrow{display:flex;gap:8px;overflow-x:auto;padding:2px 0 6px}.phth{flex:none;width:84px;height:84px;padding:0;border:2px solid rgba(255,255,255,.15);border-radius:14px;overflow:hidden;background:#222;cursor:pointer}.phth img{width:100%;height:100%;object-fit:cover;display:block}
 .phpin{cursor:pointer}.phmk{width:42px;height:42px;padding:0;border:3px solid #fff;border-radius:50%;overflow:hidden;background:#ff5a1f;box-shadow:0 3px 10px rgba(0,0,0,.5);cursor:pointer}.phmk img{width:100%;height:100%;object-fit:cover;display:block}
 .phview{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}.phview img{max-width:100%;max-height:85vh;object-fit:contain}.phview small{color:rgba(255,255,255,.7)}
+.prog-pick summary{display:flex;align-items:center;gap:12px;list-style:none;cursor:pointer}.prog-pick summary::-webkit-details-marker{display:none}.pp-ic{font-size:28px}.prog-pick summary span:nth-child(2){flex:1}.prog-pick summary b{display:block;font-size:16px}.prog-pick summary small{color:rgba(255,255,255,.6);font-size:13px}.prog-pick summary i{font-style:normal;font-size:22px;color:rgba(255,255,255,.4);transition:transform .2s}.prog-pick[open] summary i{transform:rotate(90deg)}
+.prog-card{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;padding:14px 0 0;margin-top:14px;border-top:1px solid rgba(255,255,255,.07)}.pc-ic{font-size:30px}.prog-card b{font-size:15.5px}.prog-card small{display:block;color:#ff8a50;font-size:12.5px;font-weight:700}.prog-card p{margin:4px 0 0;font-size:13.5px;color:rgba(255,255,255,.7)}.prog-card .sbtn{grid-column:1/-1}
+.prog-top{display:flex;justify-content:space-between;align-items:baseline;margin:2px 0 6px;font-size:14px;color:rgba(255,255,255,.7)}.prog-top b{color:#fff}.prog-today{margin-top:14px;padding:14px;border-radius:16px;background:rgba(255,90,31,.1);border:1px solid rgba(255,90,31,.3)}.prog-today.rest,.prog-today.done{background:rgba(70,200,120,.1);border-color:rgba(70,200,120,.3)}.prog-today p{margin:8px 0 0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.85)}
+.pt-h{display:flex;gap:12px;align-items:center}.pt-h>span{font-size:30px}.pt-h small{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:#ff8a50;font-weight:800}.pt-h b{font-size:16.5px}.pt-b{display:grid;grid-template-columns:1.3fr 1fr;gap:8px;margin-top:12px}.pt-n{display:block;margin-top:8px;font-size:12px;color:rgba(255,255,255,.5)}
+.prog-all{margin-top:12px}.prog-all summary{cursor:pointer;font-size:14px;font-weight:700;color:#ff8a50}.pa-w{margin:12px 0 4px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.5)}.pa-s{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:14px;color:rgba(255,255,255,.75)}.pa-s i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:800;background:rgba(255,255,255,.08)}.pa-s.ok i{background:#3fbf73;color:#fff}.pa-s.ok span{color:rgba(255,255,255,.45);text-decoration:line-through}.pa-s.cur i{background:#ff5a1f;color:#fff}.pa-s.cur span{color:#fff;font-weight:700}
 </style>
 </head>
 <body>
@@ -2711,6 +2716,7 @@
       '<button class="wtile main" id="gNew" type="button"><svg viewBox="0 0 24 24"><path d="M6.5 7v10M17.5 7v10M3 10v4M21 10v4M6.5 12h11"/></svg><b>Musculation</b><small>Noter ma séance</small></button>' +
       '<button class="wtile" type="button" data-nav="1"><svg viewBox="0 0 24 24"><path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4"/></svg><b>Test navette</b><small>Mesurer ma VO2max</small></button>' +
       '<button class="wtile" id="wNew" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><b>Créer</b><small>Ma propre séance</small></button></div>';
+    try { h += progHtml(); } catch (e) {}
     // 2. Ce que j'ai fait
     const n = log.filter(l => l.date >= weekStart(Date.now())).length;
     h += '<div class="block wplog"><div class="bh">Mes séances</div>';
@@ -2856,6 +2862,78 @@
 
   // Fiche d'une séance
   let wsel = null, wDelArmed = false;
+
+  // ---------- Programmes d'entraînement ----------
+  const PROGS = (() => {
+    const R = (w, min, txt) => ({ w, t: 'course', min, txt });
+    const M = (w, min, txt, dp) => ({ w, t: 'marche', min, txt, dp: dp || 0 });
+    const F = (w, min, txt) => ({ w, t: 'renfo', min, txt });
+    const run = [
+      [1, '8 × (1 min de course + 1 min 30 de marche)', 25], [1, '8 × (1 min de course + 1 min 30 de marche)', 25], [1, '6 × (1 min 30 de course + 2 min de marche)', 26],
+      [2, '6 × (2 min de course + 1 min 30 de marche)', 26], [2, '5 × (3 min de course + 1 min 30 de marche)', 28], [2, '5 × (3 min de course + 1 min de marche)', 25],
+      [3, '4 × (5 min de course + 1 min 30 de marche)', 31], [3, '3 × (6 min de course + 1 min 30 de marche)', 28], [3, '3 × (7 min de course + 1 min de marche)', 29],
+      [4, '2 × (10 min de course + 2 min de marche)', 29], [4, '3 × (8 min de course + 1 min de marche)', 32], [4, '2 × (12 min de course + 2 min de marche)', 33],
+      [5, '15 min de course + 2 min de marche + 8 min de course', 30], [5, '20 min de course sans t\'arrêter', 30], [5, '2 × (12 min de course + 1 min de marche)', 30],
+      [6, '25 min de course tranquille', 35], [6, '28 min de course tranquille', 38], [6, 'Le grand jour : 5 km de course, à ton rythme', 40]
+    ].map(([w, t, m]) => R(w, m, '5 min de marche pour t\'échauffer, puis ' + t + ', et 5 min de marche pour finir.'));
+    const hike = [];
+    [[200, 45], [300, 50], [450, 55], [600, 60], [800, 65], [1000, 70]].forEach(([dp, q], i) => {
+      const w = i + 1;
+      hike.push(M(w, q - 10, 'Marche rapide de ' + (q - 10) + ' min sur le plat : tu dois être un peu essoufflé mais pouvoir parler.'));
+      hike.push(F(w, 20, 'Renforcement jambes et fessiers : 20 min (squats, fentes, montées de marches, mollets). Prends une séance « Jambes et fessiers » ci-dessous.'));
+      hike.push(M(w, Math.round(dp / 300 * 60 + 40), w === 6 ? 'Objectif atteint : une rando de 1 000 m de dénivelé positif. Pars tôt, prends 2 L d\'eau et des bâtons si tu en as.' : 'Rando avec ' + dp + ' m de dénivelé positif. Monte à ton rythme, régulier, sans t\'arrêter à chaque virage.', dp));
+    });
+    const loss = [];
+    for (let w = 1; w <= 4; w++) for (let d = 0; d < 5; d++) { const m = 25 + w * 8 + (d === 4 ? 15 : 0); loss.push(M(w, m, d === 4 ? 'Longue marche de ' + m + ' min, en nature si tu peux.' : 'Marche active de ' + m + ' min : un bon rythme, les bras qui bougent.')); }
+    const fit = [];
+    for (let w = 1; w <= 4; w++) { fit.push(F(w, 15 + w * 5, 'Renforcement complet : ' + (15 + w * 5) + ' min. Choisis une séance « Renforcement » ci-dessous.')); fit.push(M(w, 25 + w * 5, 'Marche rapide de ' + (25 + w * 5) + ' min.')); fit.push(F(w, 10 + w * 3, 'Abdos et gainage : ' + (10 + w * 3) + ' min.')); fit.push(M(w, 35 + w * 10, 'Sortie plus longue : ' + (35 + w * 10) + ' min de marche, avec quelques côtes si possible.', w * 50)); }
+    return [
+      { id: 'run5k', ic: '🏃', t: 'Courir 5 km', d: '6 semaines · 3 séances par semaine', lvl: 'Débutant', desc: 'Alterner course et marche, puis courir 30 min sans t\'arrêter.', s: run },
+      { id: 'hike1000', ic: '⛰️', t: 'Rando de 1 000 m D+', d: '6 semaines · 3 séances par semaine', lvl: 'Intermédiaire', desc: 'Du dénivelé de plus en plus fort et des jambes solides, jusqu\'à 1 000 m de montée.', s: hike },
+      { id: 'loss', ic: '🔥', t: 'Perdre du poids en marchant', d: '4 semaines · 5 marches par semaine', lvl: 'Tous niveaux', desc: 'Des marches de plus en plus longues pour brûler plus de calories.', s: loss },
+      { id: 'fit', ic: '💪', t: 'Remise en forme', d: '4 semaines · 4 séances par semaine', lvl: 'Débutant', desc: 'Marche et renforcement au poids du corps pour reprendre en douceur.', s: fit }
+    ];
+  })();
+  const progCur = () => { const p = settings.prog; return p && PROGS.find(x => x.id === p.id) ? p : null; };
+  const progDef = () => { const p = progCur(); return p && PROGS.find(x => x.id === p.id); };
+  const PT = { course: ['🏃', 'Course'], marche: ['🚶', 'Marche'], renfo: ['💪', 'Renforcement'] };
+  function progAuto() { // une sortie ou une séance qui correspond valide la séance du jour toute seule
+    const p = progCur(), P = progDef(); if (!p) return;
+    const i = p.done.length, x = P.s[i]; if (!x) return;
+    const since = Math.max(p.start, p.done.length ? p.done[p.done.length - 1] + 1 : 0);
+    let ok = false;
+    if (x.t === 'renfo') ok = store.get(K_WLOG, []).some(l => l.date > since && (l.durationMs || 0) >= x.min * 60000 * 0.7);
+    else ok = store.get(K_HIST, []).some(h => h.date > since && (x.t === 'course' ? h.activity === 'course' : h.activity !== 'velo') && (h.durationMs || 0) >= x.min * 60000 * 0.8 && (h.dplus || 0) >= (x.dp || 0) * 0.8);
+    if (ok) { p.done.push(Date.now()); saveSettings(); toast(p.done.length >= P.s.length ? '🏆 Programme « ' + P.t + ' » terminé, bravo !' : '✅ Séance ' + p.done.length + ' du programme validée !'); }
+  }
+  function progHtml() {
+    const p = progCur(), P = progDef();
+    if (!p) return '<details class="block prog-pick"><summary><span class="pp-ic">🎯</span><span><b>Programmes d\'entraînement</b><small>Un plan semaine par semaine, avec la séance du jour</small></span><i>›</i></summary>' +
+      PROGS.map(x => '<div class="prog-card"><span class="pc-ic">' + x.ic + '</span><div><b>' + esc(x.t) + '</b><small>' + esc(x.d) + ' · ' + esc(x.lvl) + '</small><p>' + esc(x.desc) + '</p></div><button type="button" class="sbtn save" data-prog-start="' + x.id + '">Commencer</button></div>').join('') + '</details>';
+    const n = P.s.length, i = p.done.length, pct = Math.round(i / n * 100);
+    let h = '<div class="block prog"><div class="bh">' + P.ic + ' ' + esc(P.t) + '<button type="button" class="linkbtn" data-prog-stop="1" style="padding:0;font-size:13px">Arrêter</button></div>' +
+      '<div class="prog-top"><span>Séance <b>' + Math.min(i + 1, n) + '</b> / ' + n + (i < n ? ' · semaine ' + P.s[i].w + ' / ' + P.s[n - 1].w : '') + '</span><b class="num">' + pct + ' %</b></div><div class="goal-bar"><i style="width:' + pct + '%"></i></div>';
+    if (i >= n) return h + '<div class="prog-today done"><b>🏆 Programme terminé !</b><p>Tu as fait les ' + n + ' séances. Choisis-en un autre quand tu veux.</p><button type="button" class="sbtn save" data-prog-stop="1">Choisir un autre programme</button></div></div>';
+    const x = P.s[i], todayDone = p.done.length && dayKey(p.done[p.done.length - 1]) === dayKey(Date.now());
+    h += todayDone ? '<div class="prog-today rest"><b>✅ Séance du jour faite</b><p>Récupère bien. Prochaine séance : ' + PT[x.t][1].toLowerCase() + ', ' + x.min + ' min' + (x.dp ? ', ' + x.dp + ' m D+' : '') + '. Idéalement demain ou après-demain.</p></div>'
+      : '<div class="prog-today"><div class="pt-h"><span>' + PT[x.t][0] + '</span><div><small>Séance du jour</small><b>' + PT[x.t][1] + ' · ' + x.min + ' min' + (x.dp ? ' · ' + x.dp + ' m D+' : '') + '</b></div></div><p>' + esc(x.txt) + '</p>' +
+        '<div class="pt-b"><button type="button" class="sbtn save" data-prog-go="' + x.t + '">' + (x.t === 'renfo' ? 'Voir les séances' : 'Lancer la sortie') + '</button><button type="button" class="sbtn cancel" data-prog-done="1">C\'est fait</button></div>' +
+        '<small class="pt-n">Elle se valide aussi toute seule quand tu enregistres la sortie ou la séance.</small></div>';
+    h += '<details class="prog-all"><summary>Voir tout le programme</summary>' + P.s.map((y, k) => (k === 0 || P.s[k - 1].w !== y.w ? '<div class="pa-w">Semaine ' + y.w + '</div>' : '') + '<div class="pa-s' + (k < i ? ' ok' : k === i ? ' cur' : '') + '"><i>' + (k < i ? '✓' : k + 1) + '</i><span>' + PT[y.t][0] + ' ' + y.min + ' min' + (y.dp ? ' · ' + y.dp + ' m D+' : '') + '</span></div>').join('') + '</details>';
+    return h + '</div>';
+  }
+  $('seances').addEventListener('click', e => {
+    const st = e.target.closest('[data-prog-start]');
+    if (st) { const P = PROGS.find(x => x.id === st.dataset.progStart); settings.prog = { id: P.id, start: Date.now(), done: [] }; saveSettings(); renderSeances(); toast('Programme « ' + P.t + ' » lancé. C\'est parti !'); return; }
+    if (e.target.closest('[data-prog-stop]')) { if (!progCur() || progCur().done.length >= progDef().s.length || confirm('Arrêter ce programme ? Ta progression sera perdue.')) { settings.prog = null; saveSettings(); renderSeances(); } return; }
+    if (e.target.closest('[data-prog-done]')) { const p = progCur(); if (p) { p.done.push(Date.now()); saveSettings(); renderSeances(); toast('✅ Séance validée, bravo !'); } return; }
+    const go1 = e.target.closest('[data-prog-go]');
+    if (go1) {
+      const t = go1.dataset.progGo;
+      if (t === 'renfo') { const g = document.querySelector('.wgrp[data-wg="bas"]') || document.querySelector('.wgrp[data-wg="renfo"]'); if (g) { g.open = true; g.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
+      const b = document.querySelector('[data-act="' + t + '"]'); if (b) b.click(); go(0); toast('Appuie sur le bouton orange pour démarrer');
+    }
+  });
   function openWorkout(id) {
     const w = allWorkouts().find(x => x.id === id); if (!w) return;
     wsel = w; wDelArmed = false;
@@ -3854,7 +3932,7 @@
   }
   window.__weekSummary = weekSummaryText;
 
-  window.__badgeTick = () => { clearTimeout(window.__badgeT); window.__badgeT = setTimeout(() => { try { badgesCheck(); remindersApply(false); } catch (e) {} }, 400); };
+  window.__badgeTick = () => { clearTimeout(window.__badgeT); window.__badgeT = setTimeout(() => { try { progAuto(); } catch (e) {} try { badgesCheck(); remindersApply(false); } catch (e) {} }, 400); };
   // ---------- Navigation en cube 3D ----------
   const VIEWS = ['v-sortie', 'v-carte', 'v-seances', 'v-progres', 'v-reglages', 'v-repas'];
   let switching = false;
