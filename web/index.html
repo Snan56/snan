@@ -344,6 +344,20 @@
   .fdel{width:32px;height:32px;border-radius:50%;border:1px solid var(--ligne);background:none;color:var(--gris);font-size:18px;cursor:pointer}
   select.tfield{appearance:none;-webkit-appearance:none;width:136px!important;max-width:136px!important;flex:none}
   .tfield{font:inherit;font-size:16px;padding:9px 10px;border-radius:12px;background:var(--nuit-3);color:var(--blanc);border:1px solid rgba(200,205,215,.22);width:136px}
+  .rsecs{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+  .rhead{display:flex;align-items:center;gap:14px;width:100%;padding:16px;border:0;border-radius:20px;background:linear-gradient(135deg,rgba(255,122,47,.22),rgba(255,74,31,.08)),var(--carte);color:var(--blanc);font:inherit;text-align:left;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(255,90,31,.35)}
+  .ravatar{flex:none;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#ff7a2f,#ff4a1f);color:#fff;font-weight:900;font-size:24px}
+  .rtx{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}.rtx b{font-size:16px}.rtx small{font-size:13px;color:var(--gris);line-height:1.35}
+  .rhead .rtx b{font-size:19px}
+  .rchev{font-style:normal;color:var(--gris);font-size:22px;transition:transform .2s}
+  .rsec{border-radius:18px;background:var(--carte);border:1px solid var(--ligne);overflow:hidden}
+  .rsec summary{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer}
+  .rsec summary::-webkit-details-marker{display:none}
+  .ric{flex:none;width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:rgba(255,90,31,.14)}
+  .ric svg{width:20px;height:20px;fill:none;stroke:var(--rouge);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .rsec[open] .rchev{transform:rotate(90deg)}
+  .rsec > .set{border:0;border-radius:0;background:transparent;margin:0;padding-top:0}
+  .rsec[open] summary{border-bottom:1px solid var(--ligne)}
   .chatfab{position:fixed;right:16px;bottom:calc(var(--bottom) + 16px);z-index:45;display:grid;place-items:center;width:58px;height:58px;padding:0;border:0;border-radius:50%;background:var(--rouge);color:#fff;font:inherit;font-weight:800;font-size:15px;box-shadow:0 8px 22px rgba(0,0,0,.45);cursor:pointer}
   .chatfab svg{width:27px;height:27px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
   body.on-map .chatfab,body.ac-open .chatfab{display:none}
@@ -1261,7 +1275,7 @@
     goalsOn: { steps: true, km: true, sessions: false, kcal: false, longest: false, navette: false },
     sens: 'moyenne', maxAcc: 30, anim3d: !reduceMotion, map3d: true
   }, store.get(K_SET, {}));
-  const saveSettings = () => { store.set(K_SET, settings); try { weightTrack(); } catch (e) {} };
+  const saveSettings = () => { store.set(K_SET, settings); try { weightTrack(); } catch (e) {} try { settingsSummaries(); } catch (e) {} };
   const anim = () => !!settings.anim3d;
   const SENS = { faible: {hi: 1.9, lo: 0.4}, moyenne: {hi: 1.3, lo: 0.25}, forte: {hi: 0.85, lo: 0.15} };
   const ACT_LABEL = { marche: 'Marche', course: 'Course', velo: 'Vélo' };
@@ -3328,6 +3342,7 @@
     go(4);
     setTimeout(() => {
       const row = $('remWeigh').closest('.row'); if (!row) return;
+      const sec = row.closest('details'); if (sec) sec.open = true;
       row.scrollIntoView({ behavior: 'smooth', block: 'center' });
       row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash');
     }, anim() ? 750 : 50);
@@ -3400,6 +3415,54 @@
   });
   remindersApply(false);
 
+  // ---------- Réglages rangés en sections repliables ----------
+  (function buildSettingsUI() {
+    const root = $('v-reglages'), title = root.querySelector('.h-title');
+    const IC = {
+      profil: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+      obj: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+      rappels: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+      voix: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>',
+      aff: '<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/>',
+      sante: '<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+      save: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/>'
+    };
+    const titles = [...root.querySelectorAll('.set-title')];
+    const find = t => titles.find(x => x.textContent.trim().startsWith(t));
+    const SECS = [['profil', 'Ton profil', 'profil'], ['obj', 'Objectifs', 'obj'], ['rappels', 'Rappels', 'rappels'], ['voix', 'Annonces vocales', 'voix'], ['aff', 'Affichage et capteurs', 'aff'], ['sante', 'Apple Santé', 'sante'], ['save', 'Sauvegarde', 'save']];
+    const wrap = document.createElement('div'); wrap.className = 'rsecs';
+    // carte de profil en haut
+    const head = document.createElement('button'); head.type = 'button'; head.className = 'rhead'; head.id = 'rHead';
+    wrap.appendChild(head);
+    SECS.forEach(([k, label, ic]) => {
+      const t = find(label); if (!t) return;
+      const box = t.nextElementSibling; if (!box || !box.classList.contains('set')) return;
+      const d = document.createElement('details'); d.className = 'rsec'; d.dataset.sec = k;
+      if (t.hidden || box.hidden) d.hidden = true;
+      d.innerHTML = '<summary><span class="ric"><svg viewBox="0 0 24 24">' + IC[ic] + '</svg></span><span class="rtx"><b>' + (k === 'sante' ? 'Apple Santé' : label) + '</b><small data-rsum="' + k + '"></small></span><i class="rchev">›</i></summary>';
+      t.remove(); d.appendChild(box); wrap.appendChild(d);
+    });
+    title.after(wrap);
+    // une seule section ouverte à la fois
+    wrap.addEventListener('toggle', e => { const d = e.target; if (d.open) wrap.querySelectorAll('details.rsec[open]').forEach(x => { if (x !== d) x.open = false; }); }, true);
+    head.addEventListener('click', () => { const d = wrap.querySelector('[data-sec="profil"]'); if (d) { d.open = true; d.scrollIntoView({ behavior: 'smooth', block: 'start' }); } });
+  })();
+  function settingsSummaries() {
+    const set = (k, t) => { const e = document.querySelector('[data-rsum="' + k + '"]'); if (e) e.textContent = t; };
+    const parts = [settings.height && settings.height + ' cm', settings.weight && nf1.format(settings.weight) + ' kg', settings.age && settings.age + ' ans'].filter(Boolean);
+    const nm = settings.name || 'Ton profil';
+    $('rHead').innerHTML = '<span class="ravatar">' + esc((nm[0] || 'P').toUpperCase()) + '</span><span class="rtx"><b>' + esc(nm) + '</b><small>' + (parts.join(' · ') || 'Touche pour remplir ton profil') + (settings.email ? '<br>' + esc(settings.email) : '') + '</small></span><i class="rchev">›</i>';
+    set('profil', 'Pseudo, taille, poids, âge');
+    set('obj', nf0.format(settings.goalSteps || 0) + ' pas par jour · ' + nf0.format(settings.goalKm || 0) + ' km par semaine');
+    const n = ['remWalk', 'remMeals', 'remWeigh'].filter(k => settings[k]).length;
+    set('rappels', n ? n + ' rappel' + (n > 1 ? 's' : '') + ' activé' + (n > 1 ? 's' : '') : 'Aucun rappel activé');
+    set('voix', settings.voice ? 'Voix activée' + (settings.beeps !== false ? ', bips activés' : '') : 'Voix désactivée');
+    set('aff', 'Animations, pause automatique en véhicule');
+    set('sante', settings.healthOn ? 'Connecté' : 'Envoyer tes sorties, séances et repas');
+    const b = store.get('parcours.lastBackup', 0); set('save', b ? 'Dernière sauvegarde le ' + new Date(b).toLocaleDateString('fr-FR') : 'Aucune sauvegarde : pense à en faire une');
+  }
+  try { settingsSummaries(); } catch (e) {}
+
   // ---------- Navigation en cube 3D ----------
   const VIEWS = ['v-sortie', 'v-carte', 'v-seances', 'v-progres', 'v-reglages', 'v-repas'];
   let switching = false;
@@ -3416,6 +3479,7 @@
     if (i === 5) $('mealBtn').setAttribute('aria-current', 'page'); else $('mealBtn').removeAttribute('aria-current');
     currentView = i;
     if (i === 4 && $('banner').dataset.tag === 'profile') $('banner').classList.add('hidden');
+    if (i === 4) try { settingsSummaries(); } catch (e) {}
     if (i === 2) renderSeances();
     if (i === 3) renderProgress();
     if (i === 5) renderRepas();
