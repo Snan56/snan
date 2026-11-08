@@ -184,7 +184,8 @@
   .unitfield{display:flex;align-items:center;gap:6px;color:var(--gris);font-weight:600}
   .unitfield input{width:92px}
   .switch{position:relative;width:52px;height:30px;flex:none}
-  .switch input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+  .switch{cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .switch input{position:absolute;inset:0;opacity:0;margin:0;pointer-events:none}
   .switch span{position:absolute;inset:0;border-radius:999px;background:#2e323b;transition:background .2s;pointer-events:none}
   .switch span::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--blanc);transition:transform .2s}
   .switch input:checked+span{background:var(--rouge)}
@@ -196,9 +197,9 @@
 
   /* ---------- Barre d'onglets + bouton principal ---------- */
   .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;height:var(--bottom);padding-bottom:var(--safe-b);
-    display:grid;grid-template-columns:1fr 1fr 96px 1fr 1fr;align-items:center;
+    display:grid;grid-template-columns:1fr 1fr 84px 1fr 1fr 1fr;align-items:center;
     background:rgba(11,12,15,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-top:1px solid rgba(200,205,215,.16)}
-  .tab{background:none;border:0;color:var(--gris);font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;cursor:pointer;position:relative}
+  .tab{background:none;border:0;color:var(--gris);font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;cursor:pointer;position:relative}
   .tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
   .tab[aria-current="page"]{color:var(--blanc)}
   .tab[aria-current="page"]::after{content:"";position:absolute;bottom:1px;width:18px;height:6px;background:linear-gradient(var(--blanc) 0 50%,var(--rouge) 50% 100%)}
@@ -700,7 +701,7 @@
 
 <header class="top">
   <div class="brand"><button id="brandBtn" class="brand-btn" type="button" aria-label="Ouvrir l'accueil et tes objectifs"><span class="blaze" aria-hidden="true"></span>Parcours</button></div>
-  <div class="top-right"><div id="gps" class="gps" role="status"><span class="dot"></span><span id="gpsText">GPS inactif</span></div><button id="mealBtn" class="gear" type="button" aria-label="Repas et calories"><svg viewBox="0 0 24 24"><path d="M4 4v6a3 3 0 0 0 3 3v7M7 4v5M10 4v6a3 3 0 0 1-3 3"/><circle cx="16.5" cy="13" r="4.5"/><path d="M16.5 4v4.5"/></svg></button><button id="gear" class="gear" type="button" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
+  <div class="top-right"><div id="gps" class="gps" role="status"><span class="dot"></span><span id="gpsText">GPS inactif</span></div><button id="mealBtn" class="gear" style="display:none" type="button" aria-label="Repas et calories"><svg viewBox="0 0 24 24"><path d="M4 4v6a3 3 0 0 0 3 3v7M7 4v5M10 4v6a3 3 0 0 1-3 3"/><circle cx="16.5" cy="13" r="4.5"/><path d="M16.5 4v4.5"/></svg></button><button id="gear" class="gear" type="button" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
 </header>
 <div id="banner" class="banner hidden" role="alert"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -843,6 +844,12 @@
     <div class="set" id="apkBox" hidden><div class="row"><div class="rl">Appli Android<small>Avec l'appli, le suivi continue quand l'écran est verrouillé.</small></div></div>
       <a class="linkbtn" href="parcours.apk" download style="display:block;text-decoration:none">Télécharger l'appli Android</a></div>
     <div class="set" id="installBox" hidden><button id="installBtn" class="linkbtn" type="button">Installer l'appli sur l'écran d'accueil</button></div>
+    <div class="set-title">Sauvegarde</div>
+    <div class="set">
+      <div class="row"><div class="rl">Sauvegarder mes données<small>Sorties, repas, séances, objectifs et réglages dans un fichier. Garde-le dans Fichiers ou iCloud Drive : si tu supprimes l'appli, tu pourras tout récupérer.</small></div></div>
+      <div class="hbtns"><button id="bkSave" class="linkbtn" type="button">Créer une sauvegarde</button><label class="linkbtn" style="cursor:pointer">Restaurer une sauvegarde<input id="bkLoad" type="file" accept=".json,application/json" hidden></label></div>
+      <small id="bkInfo" style="display:block;color:var(--gris);margin-top:6px"></small>
+    </div>
     <div class="set"><button id="clearHist" class="danger-btn" type="button">Effacer l'historique</button></div>
     <p class="about" id="about">Les calories sont une estimation calculée avec ton poids, ta vitesse et la pente : équations de l'ACSM pour la marche et la course, valeurs du Compendium des activités physiques pour le vélo. Ta taille, ton poids et tes sorties restent enregistrés sur ton téléphone. Rien n'est envoyé sur internet.</p>
   </section>
@@ -855,6 +862,7 @@
   <button class="tab" type="button" data-view="1"><svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg>Carte</button>
   <button id="fab" class="fab" type="button" aria-label="Démarrer la sortie"><svg viewBox="0 0 24 24" id="fabIcon"><path d="M8 5v14l11-7z"/></svg></button>
   <button class="tab" type="button" data-view="2"><svg viewBox="0 0 24 24"><path d="M6.5 7v10M17.5 7v10M3 10v4M21 10v4M6.5 12h11"/></svg>Séances</button>
+  <button class="tab" type="button" data-view="5"><svg viewBox="0 0 24 24"><path d="M4 4v6a3 3 0 0 0 3 3v7M7 4v5M10 4v6a3 3 0 0 1-3 3"/><circle cx="16.5" cy="13" r="4.5"/><path d="M16.5 4v4.5"/></svg>Repas</button>
   <button class="tab" type="button" data-view="3"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Progrès</button>
 </nav>
 
@@ -1716,14 +1724,15 @@
     if (beaten.length) setTimeout(() => showMedal(beaten, after), anim() ? 700 : 50);
   }
   function simplifyTrack(track) {
-    const pts = track.flat().filter(p => p && p.length >= 2);
+    const pts = [];
+    track.forEach((seg, si) => (seg || []).forEach((p, j) => { if (p && p.length >= 2) pts.push(si > 0 && j === 0 ? [p[0], p[1], p[2], p[3], 1] : p); }));
     if (pts.length < 2) return pts.map(roundPt);
     const step = Math.ceil(pts.length / 500), out = [];
-    for (let i = 0; i < pts.length; i += step) out.push(roundPt(pts[i]));
+    for (let i = 0; i < pts.length; i++) if (i % step === 0 || pts[i][4] || (pts[i + 1] && pts[i + 1][4])) out.push(roundPt(pts[i]));
     if ((pts.length - 1) % step) out.push(roundPt(pts[pts.length - 1]));
     return out;
   }
-  function roundPt(p) { return [Math.round(p[0] * 1e5) / 1e5, Math.round(p[1] * 1e5) / 1e5, p[2] == null ? null : Math.round(p[2]), p[3] == null ? null : p[3]]; }
+  function roundPt(p) { return [Math.round(p[0] * 1e5) / 1e5, Math.round(p[1] * 1e5) / 1e5, p[2] == null ? null : Math.round(p[2]), p[3] == null ? null : p[3]].concat(p[4] ? [1] : []); }
 
   // ---------- Records ----------
   const REC = {
@@ -1842,6 +1851,18 @@
     return '<div class="block"><div class="bh">Records</div>' + keys.map(k =>
       '<div class="rec"><div>' + REC[k].l + '<small>' + dShort.format(new Date(r[k].date)) + '</small></div><div class="v">' + REC[k].f(r[k].v) + '</div></div>').join('') + '</div>';
   }
+  function weekBilanHtml(hist) {
+    const ws = weekStart(Date.now()), wk = hist.filter(h => h.date >= ws);
+    const km = wk.reduce((a, h) => a + (h.distanceM || 0), 0) / 1000;
+    let eaten = 0, burned = 0;
+    for (let d = 0; d < 7; d++) { const t = ws + d * 86400000 + 3600000; if (t > Date.now()) break; try { const e = dayEnergy(dayKey(t)); eaten += e.eaten; burned += e.burned; } catch (e) {} }
+    const goal = settings.goalKm || 0;
+    return '<div class="block"><div class="bh">Bilan de la semaine</div>' +
+      '<div class="row"><span class="rl">Sorties</span><b class="num">' + wk.length + '</b></div>' +
+      '<div class="row"><span class="rl">Distance' + (goal ? '<small>Objectif : ' + nf0.format(goal) + ' km</small>' : '') + '</span><b class="num">' + nf2.format(km) + ' km</b></div>' +
+      '<div class="row"><span class="rl">Calories dépensées<small>Sorties et séances</small></span><b class="num">' + nf0.format(burned) + ' kcal</b></div>' +
+      '<div class="row"><span class="rl">Calories mangées<small>Repas enregistrés</small></span><b class="num">' + nf0.format(eaten) + ' kcal</b></div></div>';
+  }
   function statsHtml(hist) {
     const now = new Date(), buckets = [];
     if (statMode === 'week') {
@@ -1881,7 +1902,7 @@
     }
     let totalM = 0, totalKcal = 0;
     hist.forEach(h => { totalM += h.distanceM || 0; totalKcal += h.kcal || 0; });
-    html += recordsHtml(hist) + statsHtml(hist);
+    html += weekBilanHtml(hist) + recordsHtml(hist) + statsHtml(hist);
     html += '<div class="total"><div class="po"><div class="plate"><div class="back"></div><div class="face">' +
       '<span class="lbl">' + hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + '<br>' + nf0.format(totalKcal) + ' kcal</span>' +
       '<span class="val num">' + nf2.format(totalM / 1000) + '<small>km</small></span></div></div></div></div><ul class="runs">';
@@ -2928,6 +2949,38 @@
   $('pname').addEventListener('change', e => { settings.name = e.target.value.trim().slice(0, 24); saveSettings(); });
   $('showWelcome').addEventListener('change', e => { settings.showWelcome = e.target.checked; saveSettings(); });
 
+  // Interrupteurs (réglages, objectifs) : on bascule nous-mêmes au toucher
+  document.addEventListener('click', e => {
+    const sw = e.target.closest && e.target.closest('.switch');
+    if (!sw) return;
+    const inp = sw.querySelector('input[type=checkbox]'); if (!inp || inp.disabled) return;
+    e.preventDefault(); e.stopPropagation();
+    inp.checked = !inp.checked;
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    inp.dispatchEvent(new Event('change', { bubbles: true }));
+  }, true);
+
+  // ---------- Sauvegarde de toutes les données ----------
+  const K_BK = 'parcours.lastBackup';
+  function bkInfo() { const t = store.get(K_BK, 0); $('bkInfo').textContent = t ? 'Dernière sauvegarde : ' + dfLong.format(new Date(t)) : 'Aucune sauvegarde pour l\'instant.'; }
+  $('bkSave').addEventListener('click', () => {
+    const data = {};
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.indexOf('parcours.') === 0 && k !== K_BK) data[k] = localStorage.getItem(k); }
+    const blob = new Blob([JSON.stringify({ app: 'Parcours', version: 1, date: Date.now(), data })], { type: 'application/json' });
+    saveFile(blob, 'parcours-sauvegarde-' + fileStamp(Date.now()) + '.json', 'Sauvegarde Parcours', true);
+    store.set(K_BK, Date.now()); bkInfo();
+  });
+  $('bkLoad').addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+    let j; try { j = JSON.parse(await f.text()); } catch (err) { toast('Ce fichier n\'est pas une sauvegarde Parcours.'); return; }
+    if (!j || j.app !== 'Parcours' || !j.data) { toast('Ce fichier n\'est pas une sauvegarde Parcours.'); return; }
+    const n = (JSON.parse(j.data['parcours.history'] || '[]')).length;
+    if (!confirm('Restaurer la sauvegarde du ' + dfLong.format(new Date(j.date)) + ' (' + n + ' sorties) ? Les données actuelles seront remplacées.')) return;
+    Object.keys(j.data).forEach(k => { if (k.indexOf('parcours.') === 0) try { localStorage.setItem(k, j.data[k]); } catch (err) {} });
+    toast('Sauvegarde restaurée'); setTimeout(() => location.reload(), 800);
+  });
+  try { bkInfo(); } catch (e) {}
+
   // ---------- Navigation en cube 3D ----------
   const VIEWS = ['v-sortie', 'v-carte', 'v-seances', 'v-progres', 'v-reglages', 'v-repas'];
   let switching = false;
@@ -3362,7 +3415,24 @@
     map.addLayer({ id: 'route-coeur', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff5a1f', 'line-width': lw(2.2, 7) } });
     map.addLayer({ id: 'replay-bord', type: 'line', source: 'replay', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#f4f6fb', 'line-width': lw(6, 16) } });
     map.addLayer({ id: 'replay-coeur', type: 'line', source: 'replay', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#ff5a1f', 'line-width': lw(2.8, 8) } });
+    // Relief : modèle d'altitude gratuit (Terrarium, sans clé) + ombrage des pentes
+    try {
+      if (!map.getSource('relief')) map.addSource('relief', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 13 });
+      if (!map.getSource('relief-ombre')) map.addSource('relief-ombre', { type: 'raster-dem', tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium', tileSize: 256, maxzoom: 13 });
+      const first = map.getStyle().layers.find(l => l.type === 'symbol' || l.type === 'fill-extrusion');
+      map.addLayer({ id: 'p-ombrage', type: 'hillshade', source: 'relief-ombre',
+        paint: { 'hillshade-exaggeration': 0.45, 'hillshade-shadow-color': '#000000', 'hillshade-highlight-color': '#ffffff' } }, first && first.id);
+    } catch (e) {}
+    applyRelief();
     mapRouteDirty = true; flushRoute(); mapOnFix(true);
+  }
+  function applyRelief() {
+    if (!map || !map.getSource || !map.getSource('relief')) return;
+    // pendant le replay la caméra bouge vite et rentre dans le relief : on garde juste l'ombrage des pentes
+    const on = !!(settings.map3d && !replayState);
+    try { map.setTerrain(on ? { source: 'relief', exaggeration: 1 } : null); } catch (e) {}
+    // les bâtiments 3D se mélangent mal avec le relief : on les cache quand le relief est actif
+    try { if (map.getLayer('p-batiments')) map.setLayoutProperty('p-batiments', 'visibility', on ? 'none' : 'visible'); } catch (e) {}
   }
   function flushRoute() {
     if (!map || !mapRouteDirty) return;
@@ -3392,6 +3462,7 @@
     settings.map3d = !settings.map3d; saveSettings();
     $('btn3d').textContent = settings.map3d ? 'Vue 2D' : 'Vue 3D';
     if (map) map.easeTo(settings.map3d ? { pitch: 60, duration: 900 } : { pitch: 0, bearing: 0, duration: 900 });
+    applyRelief();
   });
 
   // ---------- Rejouer une sortie en 3D ----------
@@ -3404,7 +3475,28 @@
     });
   }
   async function startReplay(h) {
-    const pts = (h.track || []).filter(p => p && p.length >= 2);
+    const raw = (h.track || []).filter(p => p && p.length >= 2);
+    // Ne garder que l'effort : on retire voiture (> 25 km/h), pauses et trous GPS,
+    // et on recalcule un temps "actif" qui ne compte que ces passages.
+    const pts = [], skip = [];
+    let tAct = 0;
+    for (let i = 0; i < raw.length; i++) {
+      const q = raw[i].slice();
+      if (!pts.length) { if (q[3] != null) q[3] = 0; pts.push(q); continue; }
+      const p = raw[i - 1];
+      const dd = distPts(p, raw[i]);
+      const dt = (p[3] != null && raw[i][3] != null) ? raw[i][3] - p[3] : null;
+      const v = dt && dt > 0 ? dd / dt : 0;
+      // voiture : trop rapide, ou gros saut de distance pendant une coupure (pause auto véhicule)
+      const inactif = !!raw[i][4] || (dt != null && (dt <= 0 || v > 7 || (dt > 60 && v > 2.5)));
+      // pause sur place : on ne compte pas le temps
+      const pause = dt != null && dt > 60 && dd < 50;
+      if (!inactif && !pause && dt != null) tAct += dt;
+      if (q[3] != null) q[3] = tAct;
+      skip.push(inactif);
+      pts.push(q);
+    }
+    if (h.durationMs > 0 && tAct > 0) { const k = (h.durationMs / 1000) / tAct; pts.forEach(q => { if (q[3] != null) q[3] *= k; }); }
     if (pts.length < 2) { toast('Pas assez de points pour rejouer cette sortie.'); return; }
     closeDetail();
     if (currentView !== 1) go(1);
@@ -3412,7 +3504,7 @@
     try { await whenMapReady(); } catch (e) { toast("La carte n'est pas disponible pour le moment."); return; }
     if (replayState) stopReplay();
     const cum = [0];
-    for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + distPts(pts[i - 1], pts[i]));
+    for (let i = 1; i < pts.length; i++) cum.push(cum[i - 1] + (skip[i - 1] ? 0 : distPts(pts[i - 1], pts[i])));
     const total = cum[cum.length - 1];
     if (total < 10) { toast('Sortie trop courte pour être rejouée.'); return; }
     ['route-bord', 'route-coeur'].forEach(id => map.setLayoutProperty(id, 'visibility', 'none'));
@@ -3421,6 +3513,7 @@
     $('rpStop').textContent = 'Arrêter';
     const dur = clamp(total / 55, 12, 32) * 1000;
     replayState = { pts, cum, total, dur, t0: performance.now(), br: null, raf: 0, i: 0, frame: 0 };
+    applyRelief();
     const at = dist => {
       let i = replayState.i;
       while (i < cum.length - 2 && cum[i + 1] < dist) i++;
@@ -3442,7 +3535,7 @@
         const coords = pts.slice(0, here.i + 1).map(p => [p[1], p[0]]); coords.push([here.lon, here.lat]);
         map.getSource('replay').setData({ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: coords } });
       }
-      map.jumpTo({ center: [here.lon, here.lat], bearing: st.br, pitch: 62, zoom: 16.4 });
+      map.jumpTo({ center: [here.lon, here.lat], bearing: st.br, pitch: 55, zoom: 15.6 });
       $('rpDist').textContent = nf2.format(d / 1000) + ' km';
       $('rpTime').textContent = here.t != null ? fmtClock(here.t * 1000) : '';
       $('rpFill').style.width = (k * 100).toFixed(1) + '%';
@@ -3465,6 +3558,7 @@
     }
     if (meMarker) meMarker.getElement().style.display = '';
     $('hud').classList.remove('hidden'); $('mapBtns').classList.remove('hidden'); $('replayBar').classList.add('hidden');
+    applyRelief();
     setFollow(true); mapOnFix(true);
   }
   $('rpStop').addEventListener('click', stopReplay);
