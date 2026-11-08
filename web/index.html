@@ -1137,7 +1137,7 @@
       <div class="ed-grid">
         <div><label for="acHeight">Taille (cm)</label><input id="acHeight" type="number" min="100" max="230" inputmode="numeric" placeholder="170"></div>
         <div><label for="acWeight">Poids (kg)</label><input id="acWeight" type="number" min="30" max="250" inputmode="numeric" placeholder="70"></div>
-        <div><label for="acAge">Âge (facultatif)</label><input id="acAge" type="number" min="6" max="99" inputmode="numeric"></div>
+        <div><label for="acAge">Âge</label><input id="acAge" type="number" min="6" max="99" inputmode="numeric"></div>
       </div>
     </div>
     <button class="ac-cta" type="button" data-ac="goals">Suivant</button>
@@ -2009,7 +2009,11 @@
     const pts = (track || []).filter(p => p[2] != null);
     if (pts.length < 3) return '';
     let cum = 0; const xs = [0];
-    for (let i = 1; i < pts.length; i++) { cum += distPts(pts[i - 1], pts[i]); xs.push(cum); }
+    for (let i = 1; i < pts.length; i++) {
+      const d = distPts(pts[i - 1], pts[i]), dt = pts[i][3] != null && pts[i - 1][3] != null ? pts[i][3] - pts[i - 1][3] : null;
+      const car = pts[i][4] || (dt != null && dt > 0 && (d / dt > 7 || (dt > 60 && d / dt > 2.5))); // trajet en véhicule : pas compté
+      cum += car ? 0 : d; xs.push(cum);
+    }
     if (cum < 50) return '';
     const alts = pts.map(p => p[2]), lo = Math.min(...alts), hi = Math.max(...alts), span = Math.max(10, hi - lo);
     const W = 340, H = 120, t = 12, b = 96;
@@ -3110,6 +3114,7 @@
     const sw = e.target.closest && e.target.closest('.switch');
     if (!sw) return;
     const inp = sw.querySelector('input[type=checkbox]'); if (!inp || inp.disabled) return;
+    if (e.target === inp) return; // clic venu du texte (label) : le navigateur bascule déjà la case
     e.preventDefault(); e.stopPropagation();
     inp.checked = !inp.checked;
     inp.dispatchEvent(new Event('input', { bubbles: true }));
@@ -3160,7 +3165,10 @@
     document.body.classList.toggle('on-map', i === 1);
     document.body.classList.toggle('dim', i >= 2);
     if (i === 1) ensureMap();
+    let finished = false;
     const done = () => {
+      if (finished) return; finished = true;
+      from.getAnimations && from.getAnimations().forEach(a => a.cancel()); to.getAnimations && to.getAnimations().forEach(a => a.cancel());
       from.classList.remove('is-active'); from.inert = true;
       from.style.transform = ''; to.style.transform = ''; switching = false;
       afterShow(i);
@@ -3171,7 +3179,8 @@
     const tf = a => 'translateZ(' + (-half) + 'px) rotateY(' + a + 'deg) translateZ(' + half + 'px)';
     from.animate([{ transform: tf(0) }, { transform: tf(-90 * dir) }], { duration: dur, easing: ease, fill: 'forwards' });
     const a2 = to.animate([{ transform: tf(90 * dir) }, { transform: tf(0) }], { duration: dur, easing: ease, fill: 'forwards' });
-    a2.onfinish = () => { from.getAnimations().forEach(a => a.cancel()); a2.cancel(); done(); };
+    a2.onfinish = done;
+    setTimeout(done, dur + 400); // sécurité : si l'animation est interrompue (appli en arrière-plan…), la navigation ne reste pas bloquée
   }
   function afterShow(i) {
     if (i === 1) { relief.stop(); if (map) { map.resize(); flushRoute(); mapOnFix(true); } }
@@ -3486,7 +3495,7 @@
     else if (b.id === 'cpAdd') {
       const n = CP.sel.length;
       CP.sel.slice().reverse().forEach(e => {
-        const x = e.x, P = portionsOf(x)[e.por], cook = x.cook && e.cook ? ' ' + COOK[e.cook][0].toLowerCase() : '';
+        const x = e.x, P = portionsOf(x)[e.por], cook = x.cook && e.cook ? ' (' + COOK[e.cook][0].toLowerCase() + ')' : '';
         const f = { id: 'ing:' + x.id + ':' + P[1] + ':' + (x.cook ? e.cook : 0), fr: x.fr + cook, portion: x.t === 'plat' ? P[0] : P[0] + ' (' + P[1] + (x.t === 'boisson' ? ' ml' : ' g') + ')', kcal: compKcal(x, e.por, e.cook) };
         MS.items.unshift({ f, p: null, q: 1, on: true, mine: true });
       });
@@ -3593,7 +3602,7 @@
     if (/(semaine|sorties?|km|kilometre|distance).*(fait|combien|bilan|ou j|j'en suis)|bilan|(combien|nombre).*(sortie|km)/.test(t)) {
       const hist = store.get(K_HIST, []), ws = weekStart(Date.now()), wk = hist.filter(h => h.date >= ws), km = wk.reduce((a, h) => a + (h.distanceM || 0), 0) / 1000;
       if (!hist.length) return "Tu n'as pas encore enregistré de sortie. Lance ta première avec le bouton orange !";
-      return 'Cette semaine : ' + wk.length + ' sortie' + (wk.length > 1 ? 's' : '') + ', ' + nf2.format(km) + ' km' + (settings.goalKm ? ' sur ton objectif de ' + settings.goalKm + ' km (' + Math.round(km / settings.goalKm * 100) + ' %)' : '') + '. Au total : ' + hist.length + ' sorties, ' + nf2.format(hist.reduce((a, h) => a + (h.distanceM || 0), 0) / 1000) + ' km.';
+      return 'Cette semaine : ' + wk.length + ' sortie' + (wk.length > 1 ? 's' : '') + ', ' + nf2.format(km) + ' km' + (settings.goalKm ? ' sur ton objectif de ' + settings.goalKm + ' km (' + Math.round(km / settings.goalKm * 100) + ' %)' : '') + '. Au total : ' + hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + ', ' + nf2.format(hist.reduce((a, h) => a + (h.distanceM || 0), 0) / 1000) + ' km.';
     }
     if (/(meilleure?|record|plus longue|plus rapide)/.test(t)) {
       const hist = store.get(K_HIST, []); if (!hist.length) return "Pas encore de sortie, donc pas encore de record !";
@@ -3647,9 +3656,11 @@
   // Calories du jour : mangées (repas) et dépensées (sorties + séances)
   function dayEnergy(key) {
     const eaten = store.get(K_MEALS, []).filter(m => dayKey(m.date) === key).reduce((a, m) => a + (m.kcal || 0), 0);
-    let burned = store.get(K_HIST, []).filter(h => dayKey(h.date) === key).reduce((a, h) => a + (h.kcal || 0), 0)
-      + store.get(K_WLOG, []).filter(l => dayKey(l.date) === key).reduce((a, l) => a + (l.kcal || 0), 0);
-    if (S.status !== 'idle' && dayKey(S.startTime) === key) burned += S.kcal || 0;
+    // calories « en plus » de l'activité : on retire ce que le corps aurait brûlé au repos pendant ce temps (1 MET), déjà compté dans le besoin de base
+    const rest = ms => weightKg() * (ms || 0) / 3600000;
+    let burned = store.get(K_HIST, []).filter(h => dayKey(h.date) === key).reduce((a, h) => a + Math.max(0, (h.kcal || 0) - rest(h.durationMs)), 0)
+      + store.get(K_WLOG, []).filter(l => dayKey(l.date) === key).reduce((a, l) => a + Math.max(0, (l.kcal || 0) - (l.kind === 'muscu' ? 0 : rest(l.durationMs))), 0);
+    if (S.status !== 'idle' && dayKey(S.startTime) === key) burned += Math.max(0, (S.kcal || 0) - rest(S.activeMs + (S.status === 'running' ? Date.now() - S.resumedAt : 0)));
     return { eaten, burned };
   }
   // ---------- Besoin en calories (Mifflin-St Jeor) et objectif de poids ----------
