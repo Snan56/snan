@@ -295,6 +295,13 @@
   .mrow select{width:78px;padding:9px 6px} #mType{min-width:150px}
   .mrow{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid rgba(200,205,215,.14)}
   .mrow.off .mname,.mrow.off .mkcal{opacity:.5}
+  .csheet{display:flex;flex-direction:column;height:100%}
+  .cmsgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:6px 0 10px;min-height:200px}
+  .cmsg{max-width:85%;padding:10px 13px;border-radius:16px;line-height:1.4;font-size:15px}
+  .cmsg.user{align-self:flex-end;background:var(--rouge);color:#fff;border-bottom-right-radius:4px}
+  .cmsg.assistant{align-self:flex-start;background:var(--nuit-3);border-bottom-left-radius:4px}
+  .cform{display:flex;gap:8px;align-items:center}.cform .msearch{margin:0;flex:1}.cform .sbtn{flex:none;width:auto;padding:10px 14px}
+  .csheet .linkbtn{display:block;margin:10px auto 0}
   .cp-open{width:100%;margin-top:10px}
   .cp{margin-top:12px;padding:12px 14px;border:1px solid rgba(200,205,215,.18);border-radius:16px}
   .cp-t{font-weight:700;font-size:14px;margin:10px 0 6px}
@@ -718,7 +725,7 @@
 
 <header class="top">
   <div class="brand"><button id="brandBtn" class="brand-btn" type="button" aria-label="Ouvrir l'accueil et tes objectifs"><span class="blaze" aria-hidden="true"></span>Parcours</button></div>
-  <div class="top-right"><div id="gps" class="gps" role="status"><span class="dot"></span><span id="gpsText">GPS inactif</span></div><button id="mealBtn" class="gear" style="display:none" type="button" aria-label="Repas et calories"><svg viewBox="0 0 24 24"><path d="M4 4v6a3 3 0 0 0 3 3v7M7 4v5M10 4v6a3 3 0 0 1-3 3"/><circle cx="16.5" cy="13" r="4.5"/><path d="M16.5 4v4.5"/></svg></button><button id="gear" class="gear" type="button" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
+  <div class="top-right"><div id="gps" class="gps" role="status"><span class="dot"></span><span id="gpsText">GPS inactif</span></div><button id="chatBtn" class="gear" type="button" aria-label="Coach IA"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg></button><button id="mealBtn" class="gear" style="display:none" type="button" aria-label="Repas et calories"><svg viewBox="0 0 24 24"><path d="M4 4v6a3 3 0 0 0 3 3v7M7 4v5M10 4v6a3 3 0 0 1-3 3"/><circle cx="16.5" cy="13" r="4.5"/><path d="M16.5 4v4.5"/></svg></button><button id="gear" class="gear" type="button" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
 </header>
 <div id="banner" class="banner hidden" role="alert"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -941,6 +948,20 @@
       <button id="rpSave" class="sbtn save" type="button">Ajouter au journal</button>
       <button id="rpCancel" class="sbtn cancel" type="button">Annuler</button>
     </div>
+  </div>
+</div>
+
+<!-- Coach IA -->
+<div id="csheet" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="chTitle">
+  <div class="sheet csheet">
+    <div class="d-head"><h2 id="chTitle">Coach IA</h2><button id="chClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
+    <div id="chMsgs" class="cmsgs" aria-live="polite"></div>
+    <div id="chStatus" class="mstatus hidden" role="status"><span id="chStatusTxt"></span><div id="chBarBox" class="mbarbox hidden"><i id="chBar"></i></div></div>
+    <div id="chSetup"><p class="about">Le coach est une petite IA qui tourne directement sur ton téléphone : tes questions et tes données ne partent nulle part. Il faut la télécharger une fois (environ 600 Mo, en wifi). Pour tes chiffres (calories, sorties, objectif), le coach répond tout de suite avec tes vraies données ; pour les autres questions, l'IA met 20 à 40 secondes et reste une petite IA : ses conseils sont généraux. Elle connaît ton profil, tes repas et tes sorties, mais peut se tromper : ce n'est pas un avis médical.</p>
+      <button id="chGo" class="sbtn save" type="button">Télécharger le coach IA</button></div>
+    <div id="chQuick" class="chips cp-wrap"><button type="button" class="chip" data-q="Il me reste combien de calories à manger ?">Calories restantes</button><button type="button" class="chip" data-q="Mon bilan de la semaine ?">Bilan de la semaine</button><button type="button" class="chip" data-q="Ma meilleure sortie ?">Mon record</button><button type="button" class="chip" data-q="Une idée de dîner léger et rassasiant ?">Idée de dîner léger</button><button type="button" class="chip" data-q="Comment progresser en course à pied ?">Progresser en course</button></div>
+    <form id="chForm" class="cform"><input id="chInput" class="msearch" placeholder="Pose ta question…" autocomplete="off" aria-label="Ta question"><button id="chSend" class="sbtn save" type="submit">Envoyer</button></form>
+    <button id="chClear" class="linkbtn" type="button">Effacer la conversation</button>
   </div>
 </div>
 
@@ -3365,6 +3386,124 @@
     if (!x) { toast('Ingrédient introuvable. Essaie un nom plus simple.'); return; }
     pickIng(x, true); e.target.value = '';
   });
+
+  // ---------- Coach IA : petit modèle de langage qui tourne sur le téléphone (rien n'est envoyé sur internet) ----------
+  const CHAT_MODEL = 'onnx-community/Qwen3-0.6B-ONNX';
+  const K_CHAT = 'parcours.chat';
+  let chatAI = null, chatLoading = null, chatBusy = false;
+  const CH = { msgs: store.get(K_CHAT, []) };
+  async function loadChatAI(onProgress) {
+    if (chatAI) return chatAI;
+    if (!chatLoading) chatLoading = (async () => {
+      const T = await import(TF_URL);
+      const device = 'wasm', dtype = 'q8'; // la version compressée pour carte graphique donne du charabia : on reste sur le processeur
+      const files = {};
+      const gen = await T.pipeline('text-generation', CHAT_MODEL, { device, dtype,
+        progress_callback: p => { if (p.status === 'progress' && p.total) { files[p.file] = [p.loaded, p.total]; let a = 0, b = 0; Object.values(files).forEach(([l, t]) => { a += l; b += t; }); onProgress && onProgress(a / b); } } });
+      chatAI = { T, gen, device }; settings.chatReady = true; saveSettings(); return chatAI;
+    })();
+    try { return await chatLoading; } catch (e) { chatLoading = null; throw e; }
+  }
+  // Ce que l'IA sait de toi (calculé à chaque question)
+  function chatContext() {
+    const L = [], today = dayKey(Date.now());
+    if (settings.name) L.push('Prénom : ' + settings.name);
+    if (settings.age) L.push('Âge : ' + settings.age + ' ans');
+    if (settings.sex) L.push('Sexe : ' + (settings.sex === 'f' ? 'femme' : 'homme'));
+    if (settings.height) L.push('Taille : ' + settings.height + ' cm');
+    if (settings.weight) L.push('Poids : ' + settings.weight + ' kg');
+    L.push('Objectif de poids : ' + ['perdre du poids', 'garder son poids', 'prendre du poids'][(settings.wGoal || 0) + 1]);
+    try {
+      const en = dayEnergy(today), n = kcalNeed(Math.round(en.burned));
+      L.push("Aujourd'hui : " + Math.round(en.eaten) + ' kcal mangées, ' + Math.round(en.burned) + ' kcal dépensées en activité' + (n ? ', objectif du jour ' + Math.round(n.target) + ' kcal (il reste ' + Math.round(n.target - en.eaten) + ' kcal)' : ''));
+      const meals = store.get(K_MEALS, []).filter(m => dayKey(m.date) === today);
+      if (meals.length) L.push("Repas d'aujourd'hui : " + meals.map(m => MEAL_TYPES[m.type] + ' (' + m.items.map(i => i.fr).join(', ') + ', ' + m.kcal + ' kcal)').join(' ; '));
+    } catch (e) {}
+    const hist = store.get(K_HIST, []);
+    if (hist.length) {
+      const ws = weekStart(Date.now()), wk = hist.filter(h => h.date >= ws);
+      L.push('Cette semaine : ' + wk.length + ' sorties, ' + (wk.reduce((a, h) => a + (h.distanceM || 0), 0) / 1000).toFixed(1) + ' km' + (settings.goalKm ? ' (objectif ' + settings.goalKm + ' km)' : ''));
+      L.push('Dernières sorties : ' + hist.slice(0, 5).map(h => (ACT_LABEL[h.activity] || 'Sortie') + ' le ' + new Date(h.date).toLocaleDateString('fr-FR') + ' : ' + ((h.distanceM || 0) / 1000).toFixed(1) + ' km en ' + Math.round((h.durationMs || 0) / 60000) + ' min, ' + (h.kcal || 0) + ' kcal').join(' ; '));
+    } else L.push('Aucune sortie enregistrée pour le moment.');
+    return L.join('\n');
+  }
+  const CHAT_SYS = "Tu es le coach de l'appli Parcours (sport et nutrition). Tu réponds toujours en français, en tutoyant, de façon courte (3 à 6 phrases), concrète et bienveillante. " +
+    "Tu t'appuies sur les données de l'utilisateur ci-dessous quand c'est utile et tu n'inventes pas de chiffres. Tu ne fais pas de diagnostic médical : pour une douleur, une maladie ou un régime très strict, conseille de voir un médecin. " +
+    "Ne propose jamais de manger moins de 1200 kcal par jour.\n\nDonnées de l'utilisateur :\n";
+  function chatRender(streaming) {
+    const box = $('chMsgs');
+    let h = CH.msgs.length ? '' : '<p class="empty">Pose une question à ton coach : « Il me reste combien à manger ? », « Comment progresser en course ? », « Une idée de dîner léger ? »…</p>';
+    h += CH.msgs.map(m => '<div class="cmsg ' + m.role + '">' + esc(m.content).replace(/\n/g, '<br>') + '</div>').join('');
+    if (streaming != null) h += '<div class="cmsg assistant">' + (streaming ? esc(streaming).replace(/\n/g, '<br>') : '<span class="cdots">…</span>') + '</div>';
+    box.innerHTML = h; box.scrollTop = box.scrollHeight;
+    const ready = !!chatAI;
+    $('chSetup').classList.toggle('hidden', ready || !!chatLoading);
+    $('chQuick').classList.toggle('hidden', chatBusy);
+  }
+  function chatStatus(t, pct) { $('chStatus').classList.toggle('hidden', !t); $('chStatusTxt').textContent = t || ''; $('chBar').style.width = pct == null ? '0' : (pct * 100).toFixed(0) + '%'; $('chBarBox').classList.toggle('hidden', pct == null); }
+  async function chatStart() {
+    chatStatus("Téléchargement de l'IA (environ 600 Mo, une seule fois, en wifi de préférence)…", 0); chatRender();
+    try {
+      await loadChatAI(p => chatStatus("Téléchargement de l'IA (environ 600 Mo, une seule fois, en wifi de préférence)…", p));
+      chatStatus(''); chatRender();
+    } catch (e) {
+      chatStatus(navigator.onLine === false ? "Il faut internet pour le premier téléchargement de l'IA. Ensuite, elle marche sans connexion." : "L'IA n'a pas pu démarrer sur ce téléphone (pas assez de mémoire ?). Ferme les autres applis et réessaie.");
+      chatRender();
+    }
+  }
+  // Questions sur tes chiffres : réponse calculée, exacte et immédiate (sans IA)
+  function chatLocal(text) {
+    const t = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''), today = dayKey(Date.now());
+    const en = dayEnergy(today), n = kcalNeed(Math.round(en.burned));
+    if (/(reste|combien).*(manger|calorie|kcal)|calories.*(reste|aujourd)|kcal.*reste|objectif.*(calorie|kcal)/.test(t)) {
+      if (!n) return "Pour calculer ce qu'il te reste à manger, renseigne ta taille, ton poids, ton âge et si tu es un homme ou une femme (onglet Repas, bloc « Ton objectif calories »).";
+      const left = Math.round(n.target - en.eaten);
+      return "Aujourd'hui tu as mangé " + nf0.format(Math.round(en.eaten)) + ' kcal et dépensé ' + nf0.format(Math.round(en.burned)) + ' kcal en activité. Ton objectif du jour est de ' + nf0.format(Math.round(n.target)) + ' kcal' +
+        (n.delta < 0 ? ' (avec un déficit de ' + (-n.delta) + ' kcal pour perdre du poids)' : '') + '. ' + (left >= 0 ? 'Il te reste ' + nf0.format(left) + ' kcal à manger.' : 'Tu as dépassé ton objectif de ' + nf0.format(-left) + ' kcal : une petite marche peut compenser une partie.');
+    }
+    if (/(semaine|sorties?|km|kilometre|distance).*(fait|combien|bilan|ou j|j'en suis)|bilan|(combien|nombre).*(sortie|km)/.test(t)) {
+      const hist = store.get(K_HIST, []), ws = weekStart(Date.now()), wk = hist.filter(h => h.date >= ws), km = wk.reduce((a, h) => a + (h.distanceM || 0), 0) / 1000;
+      if (!hist.length) return "Tu n'as pas encore enregistré de sortie. Lance ta première avec le bouton orange !";
+      return 'Cette semaine : ' + wk.length + ' sortie' + (wk.length > 1 ? 's' : '') + ', ' + nf2.format(km) + ' km' + (settings.goalKm ? ' sur ton objectif de ' + settings.goalKm + ' km (' + Math.round(km / settings.goalKm * 100) + ' %)' : '') + '. Au total : ' + hist.length + ' sorties, ' + nf2.format(hist.reduce((a, h) => a + (h.distanceM || 0), 0) / 1000) + ' km.';
+    }
+    if (/(meilleure?|record|plus longue|plus rapide)/.test(t)) {
+      const hist = store.get(K_HIST, []); if (!hist.length) return "Pas encore de sortie, donc pas encore de record !";
+      const L = hist.reduce((a, h) => (h.distanceM || 0) > (a.distanceM || 0) ? h : a, hist[0]);
+      return 'Ta plus longue sortie : ' + nf2.format((L.distanceM || 0) / 1000) + ' km le ' + new Date(L.date).toLocaleDateString('fr-FR') + ' en ' + fmtDurWords(L.durationMs || 0) + '. Tes autres records sont dans l\'onglet Progrès.';
+    }
+    return null;
+  }
+  async function chatSend(text) {
+    text = text.trim(); if (!text || chatBusy) return;
+    if (!chatAI && !chatLocal(text)) { toast(chatLoading ? "L'IA est en cours de chargement, patiente un peu." : "Télécharge d'abord le coach IA pour cette question."); return; }
+    chatBusy = true; $('chSend').disabled = true;
+    CH.msgs.push({ role: 'user', content: text });
+    const loc = chatLocal(text);
+    if (loc) { CH.msgs.push({ role: 'assistant', content: loc }); store.set(K_CHAT, CH.msgs.slice(-40)); chatBusy = false; $('chSend').disabled = false; chatRender(); return; }
+    chatRender('');
+    const msgs = [{ role: 'system', content: CHAT_SYS + chatContext() }].concat(CH.msgs.slice(-6));
+    let out = '';
+    try {
+      const prompt = chatAI.gen.tokenizer.apply_chat_template(msgs, { tokenize: false, add_generation_prompt: true, enable_thinking: false });
+      const clean = x => x.replace(/<think>[\s\S]*?(<\/think>|$)/g, '').trim();
+      const streamer = new chatAI.T.TextStreamer(chatAI.gen.tokenizer, { skip_prompt: true, skip_special_tokens: true, callback_function: t => { out += t; chatRender(clean(out)); } });
+      await chatAI.gen(prompt, { max_new_tokens: 220, do_sample: false, repetition_penalty: 1.1, return_full_text: false, streamer });
+      out = clean(out);
+    } catch (e) { out = out || "Désolé, je n'ai pas réussi à répondre. Réessaie avec une question plus courte."; }
+    CH.msgs.push({ role: 'assistant', content: out.trim() || '…' });
+    store.set(K_CHAT, CH.msgs.slice(-40));
+    chatBusy = false; $('chSend').disabled = false; chatRender();
+  }
+  function openChat() {
+    $('csheet').classList.remove('hidden'); chatRender();
+    if (!chatAI && settings.chatReady && !chatLoading) chatStart(); // déjà téléchargée : on la recharge depuis le téléphone
+  }
+  $('chatBtn').addEventListener('click', openChat);
+  $('chClose').addEventListener('click', () => $('csheet').classList.add('hidden'));
+  $('chGo').addEventListener('click', chatStart);
+  $('chForm').addEventListener('submit', e => { e.preventDefault(); const t = $('chInput').value; $('chInput').value = ''; $('chInput').blur(); chatSend(t); });
+  $('chQuick').addEventListener('click', e => { const b = e.target.closest('[data-q]'); if (b) chatSend(b.dataset.q); });
+  $('chClear').addEventListener('click', () => { CH.msgs = []; store.set(K_CHAT, []); chatRender(); });
 
   // Calories du jour : mangées (repas) et dépensées (sorties + séances)
   function dayEnergy(key) {
