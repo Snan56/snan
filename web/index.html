@@ -914,6 +914,9 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
 @keyframes acLeave{0%{opacity:1}55%{opacity:1}100%{opacity:0}}@keyframes acItemOut{to{opacity:0;transform:perspective(800px) translateY(-60px) translateZ(140px) rotateX(18deg);filter:blur(5px)}}
 body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}body.app-enter .tabbar{animation:barIn .7s .45s cubic-bezier(.16,.84,.24,1) both}body.app-enter .top{animation:topIn .7s .35s cubic-bezier(.16,.84,.24,1) both}
 @keyframes appIn{from{opacity:0;scale:.9;translate:0 40px;filter:blur(6px)}to{opacity:1;scale:1;translate:0 0;filter:none}}@keyframes barIn{from{translate:0 120%}to{translate:0 0}}@keyframes topIn{from{opacity:0;translate:0 -100%}to{opacity:1;translate:0 0}}
+.focus{border-color:rgba(255,138,80,.35)!important}.fc-h{display:flex;align-items:center;gap:12px;margin-bottom:8px}.fc-h>span{font-size:26px}.fc-h>div{flex:1}.fc-h small{display:block;font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#ff8a50}.fc-h b{font-size:16.5px}
+.fc-r{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.06);font-size:14px;color:rgba(255,255,255,.75)}.fc-r b{color:#fff;text-align:right}.fc-tip{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.05);font-size:13.5px;line-height:1.45;color:rgba(255,255,255,.85)}
+.prog-card.reco{border-top:0;margin-top:12px;padding:14px;border-radius:16px;background:rgba(255,90,31,.1);border:1px solid rgba(255,90,31,.35)}.pc-reco{display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:999px;background:#ff5a1f;color:#fff;font-size:11.5px;font-weight:800}.pc-in{display:grid;grid-template-columns:auto 1fr;gap:6px 12px}.pc-in .sbtn{grid-column:1/-1}.prog-card{display:block}
 </style>
 </head>
 <body>
@@ -2253,12 +2256,59 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     return '<div class="block"><div class="bh">Statistiques<span class="seg" role="group" aria-label="Période"><button type="button" data-mode="week" aria-pressed="' + (statMode === 'week') + '">Semaines</button><button type="button" data-mode="month" aria-pressed="' + (statMode === 'month') + '">Mois</button></span></div>' +
       svg + '<div class="period"><span>' + (statMode === 'week' ? 'Cette semaine' : 'Ce mois-ci') + ' :</span><span><b>' + nf1.format(c.m / 1000) + '</b> km</span><span><b>' + c.n + '</b> sortie' + (c.n > 1 ? 's' : '') + '</span><span><b>' + nf0.format(c.k) + '</b> kcal</span><span><b>' + nf0.format(c.up) + '</b> m de montée</span></div></div>';
   }
+
+  // ---------- L'appli s'adapte à toi (objectif, sports, niveau) ----------
+  const GOAL_LBL = { lose: 'Perdre du poids', fit: 'Garder la forme', muscle: 'Prendre du muscle', endur: 'Améliorer mon endurance' };
+  const isBeginner = () => settings.sportLv != null && settings.sportLv <= 1;
+  function focusHtml(st) {
+    const goal = settings.mainGoal; if (!goal) return '';
+    const today = dayKey(Date.now()), rows = []; let tip = '';
+    const row = (ic, l, v) => rows.push('<div class="fc-r"><span>' + ic + ' ' + l + '</span><b class="num">' + v + '</b></div>');
+    if (goal === 'lose') {
+      const E = dayEnergy(today), nd = kcalNeed(Math.round(E.burned)), left = nd ? Math.round(nd.target - E.eaten) : null;
+      if (left != null) row('🍽️', left >= 0 ? 'Calories restantes' : 'Calories en trop', nf0.format(Math.abs(left)) + ' kcal');
+      const w = +settings.weight || 0, tg = +settings.targetKg || 0;
+      if (w) { let eta = ''; try { const e = weightEta(store.get(K_WEIGHTS, []), w, tg); if (tg && e && e.days && e.days < 730) eta = ' · objectif vers le ' + new Date(Date.now() + e.days * 864e5).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }); } catch (x) {} row('⚖️', 'Poids', nf1.format(w) + ' kg' + eta); }
+      row('🔥', 'Sport cette semaine', nf0.format(Math.round(st.kcal)) + ' kcal');
+      tip = left != null && left < 0 ? 'Tu as dépassé ton objectif aujourd\'hui : 30 min de marche active compensent environ 150 kcal.' : st.steps < 5000 ? '20 min de marche après un repas aident à brûler des calories et à mieux digérer.' : 'Belle journée : un déficit régulier vaut mieux qu\'un gros régime.';
+      if (!tg) tip += ' Fixe ton poids visé dans Progrès > Poids pour avoir une date.';
+    } else if (goal === 'muscle') {
+      const pg = protGoal(), P = store.get(K_MEALS, []).filter(m => dayKey(m.date) === today).reduce((a, m) => a + mealMacros(m)[0], 0);
+      if (pg) row('🥩', 'Protéines aujourd\'hui', Math.round(P) + ' / ' + pg.g + ' g');
+      const ws = weekStart(Date.now()), L = store.get(K_WLOG, []).filter(l => l.kind === 'muscu');
+      row('💪', 'Muscu cette semaine', L.filter(l => l.date >= ws).length + ' séance' + (L.filter(l => l.date >= ws).length > 1 ? 's' : ''));
+      const lastBy = {}; L.forEach(l => (l.muscles || []).forEach(m => { lastBy[m] = Math.max(lastBy[m] || 0, l.date); }));
+      const todo = MUSCLES.filter(m => m[0] !== 'abdos').map(m => [m, lastBy[m[0]] || 0]).sort((a, b) => a[1] - b[1])[0];
+      if (todo) { const d = todo[1] ? Math.floor((Date.now() - todo[1]) / 864e5) : null; tip = 'Prochaine séance conseillée : ' + todo[0][1].toLowerCase() + (d == null ? ' (jamais travaillés ici).' : d >= 2 ? ' (pas travaillés depuis ' + d + ' jours).' : '.'); }
+      if (pg && P < pg.g * 0.5 && new Date().getHours() >= 15) tip += ' Pense aux protéines ce soir : il t\'en manque ' + Math.round(pg.g - P) + ' g.';
+    } else if (goal === 'endur') {
+      row('📍', 'Km cette semaine', nf1.format(st.km) + (goalOn('km') ? ' / ' + gT(GOALS[1], settings.goalKm) : '') + ' km');
+      const H = store.get(K_HIST, []).filter(h => h.activity !== 'velo' && (h.distanceM || 0) > 800), a3 = H.slice(0, 3), b3 = H.slice(3, 6), av = A => A.reduce((x, h) => x + (h.avgKmh || 0), 0) / A.length;
+      if (a3.length === 3 && b3.length === 3) { const d = av(a3) - av(b3); row('📈', 'Vitesse moyenne (3 dernières)', (d >= 0 ? '+' : '−') + nf1.format(Math.abs(d)) + ' km/h'); }
+      row('🏁', 'Plus longue sortie à pied', nf1.format(st.longest) + ' km');
+      tip = isBeginner() ? 'Pour progresser : cours lentement, au point de pouvoir parler. La vitesse viendra toute seule.' : 'Règle des 80/20 : 80 % de tes sorties en endurance facile, 20 % plus rapides.';
+    } else {
+      row('👣', 'Pas aujourd\'hui', nf0.format(st.steps));
+      row('🔥', 'Jours d\'affilée', String(st.streak));
+      row('💪', 'Séances cette semaine', String(st.sessions));
+      tip = st.streak >= 3 ? 'Super régularité ! Bouger un peu chaque jour vaut mieux qu\'un gros effort par semaine.' : 'Objectif simple : bouger au moins 30 min aujourd\'hui, même en marchant.';
+    }
+    return '<div class="block focus"><div class="fc-h"><span>🎯</span><div><small>Pour toi</small><b>' + GOAL_LBL[goal] + '</b></div><button type="button" class="linkbtn" data-open-goals="1" style="padding:0;font-size:13px">Objectifs</button></div>' + rows.join('') + (tip ? '<p class="fc-tip">💡 ' + esc(tip) + '</p>' : '') + '</div>';
+  }
+  function progReco() {
+    const g = settings.mainGoal, sp = settings.sports || [];
+    if (g === 'lose') return 'loss';
+    if (g === 'endur' || sp.includes('course')) return isBeginner() || !sp.includes('marche') ? 'run5k' : 'hike1000';
+    if (g === 'muscle' || g === 'fit') return 'fit';
+    return sp.includes('marche') && !isBeginner() ? 'hike1000' : 'fit';
+  }
   function dashHtml() {
     const st = goalStats(), today = dayKey(Date.now()), E = dayEnergy(today), sg = +settings.goalSteps || 10000;
     const pr = Math.min(1, st.steps / sg), C = 2 * Math.PI * 42;
     const W = store.get(K_WEIGHTS, []), w = +settings.weight || 0, dW = W.length >= 2 ? W[W.length - 1].kg - W[0].kg : 0;
     let h = '<div class="block dash-today"><div class="dt-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" class="r0"/><circle cx="50" cy="50" r="42" class="r1" style="stroke-dasharray:' + (pr * C).toFixed(1) + ' ' + C.toFixed(1) + '"/></svg><div><b class="num">' + nf0.format(st.steps) + '</b><small>/ ' + nf0.format(sg) + ' pas</small></div></div>' +
       '<div class="dt-side"><div class="dt-t">Aujourd\'hui</div><div class="dt-l"><span>🍽️ Mangées</span><b class="num">' + nf0.format(Math.round(E.eaten)) + ' kcal</b></div><div class="dt-l"><span>🔥 Dépensées</span><b class="num">' + nf0.format(Math.round(E.burned)) + ' kcal</b></div><div class="dt-l"><span>🎯 Pas</span><b class="num">' + Math.round(pr * 100) + ' %</b></div></div></div>';
+    try { h += focusHtml(st); } catch (e) {}
     const tile = (ic, v, l, tab) => '<button type="button" class="dtile"' + (tab ? ' data-pgtab="' + tab + '"' : '') + '><span>' + ic + '</span><b class="num">' + v + '</b><small>' + l + '</small></button>';
     h += '<div class="dtiles">' + tile('🔥', st.streak, 'jour' + (st.streak > 1 ? 's' : '') + ' d\'affilée') + tile('📍', nf1.format(st.km), 'km cette semaine', 'hist') +
       tile('💪', st.sessions, 'séance' + (st.sessions > 1 ? 's' : '') + ' cette semaine') + tile('⚖️', w ? nf1.format(w) + '<small> kg</small>' : '–', W.length >= 2 ? (dW > 0 ? '+' : dW < 0 ? '−' : '') + nf1.format(Math.abs(dW)) + ' kg depuis le début' : 'mon poids', 'corps') + '</div>';
@@ -2529,8 +2579,8 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     if (S.status === 'paused') main = '⏸️ En pause : ' + nf2.format(km) + ' km en ' + fmtDurWords(ms) + ', ' + nf0.format(S.kcal || 0) + ' kcal. Appuie sur ▶️ pour reprendre, ou sur « Terminer » pour enregistrer.';
     else if (S.veh) main = '🚗 Trajet en voiture détecté : rien n\'est compté. Ça reprendra tout seul quand tu marcheras.';
     else if (live < 1) main = '🧍 Tu es à l\'arrêt. Le chrono continue : si tu fais une vraie pause, appuie sur ⏸ pour ne pas fausser ta moyenne.';
-    else if (a === 'marche') main = live < 3.5 ? '🚶 Balade tranquille. Pour brûler plus, accélère un peu : vise 5 km/h.' : live < 5 ? '🚶 Bon rythme de marche. Essaie de tenir autour de 5 km/h.' : live < 6.5 ? '🔥 Marche active : c\'est la meilleure zone pour brûler des calories. Garde ce rythme !' : '💨 Marche très rapide, presque du footing. Bravo !';
-    else if (a === 'course') main = live < 7 ? '🐢 Footing très doux : parfait pour t\'échauffer ou récupérer.' : live < 9.5 ? '🏃 Footing d\'endurance : tu dois pouvoir parler en courant. C\'est le rythme qui fait progresser.' : live < 12 ? '💪 Bon rythme soutenu. Si tu es essoufflé, ralentis un peu.' : '⚡ Très rapide ! Garde des forces pour finir.';
+    else if (a === 'marche') main = live < 3.5 ? (isBeginner() ? '🚶 Balade tranquille, c\'est déjà bien ! Si tu peux, accélère un peu : vise 4,5 km/h.' : '🚶 Balade tranquille. Pour brûler plus, accélère un peu : vise 5 km/h.') : live < 5 ? '🚶 Bon rythme de marche. Essaie de tenir autour de 5 km/h.' : live < 6.5 ? '🔥 Marche active : c\'est la meilleure zone pour brûler des calories. Garde ce rythme !' : '💨 Marche très rapide, presque du footing. Bravo !';
+    else if (a === 'course') main = live < 7 ? '🐢 Footing très doux : parfait pour t\'échauffer ou récupérer.' : live < 9.5 ? '🏃 Footing d\'endurance : tu dois pouvoir parler en courant. C\'est le rythme qui fait progresser.' : live < 12 ? (isBeginner() ? '💪 Ça va vite pour débuter : ralentis un peu, tu tiendras plus longtemps.' : '💪 Bon rythme soutenu. Si tu es essoufflé, ralentis un peu.') : '⚡ Très rapide ! Garde des forces pour finir.';
     else main = live < 12 ? '🚲 Balade à vélo. Pour vraiment travailler, vise 18–22 km/h.' : live < 20 ? '🚲 Rythme tranquille, idéal pour l\'endurance.' : live < 28 ? '💪 Bon rythme ! Tu travailles bien le cardio.' : '⚡ Rapide ! Attention dans les descentes.';
     if (S.status === 'running' && !S.veh && live >= 1) {
       if ((S.grade || 0) > 0.05) extra.push('⛰️ Ça monte (' + Math.round(S.grade * 100) + ' %) : ralentis et garde ton souffle, ça brûle beaucoup plus.');
@@ -3173,7 +3223,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
   function progHtml() {
     const p = progCur(), P = progDef();
     if (!p) return '<details class="block prog-pick"><summary><span class="pp-ic">🎯</span><span><b>Programmes d\'entraînement</b><small>Un plan semaine par semaine, avec la séance du jour</small></span><i>›</i></summary>' +
-      PROGS.map(x => '<div class="prog-card"><span class="pc-ic">' + x.ic + '</span><div><b>' + esc(x.t) + '</b><small>' + esc(x.d) + ' · ' + esc(x.lvl) + '</small><p>' + esc(x.desc) + '</p></div><button type="button" class="sbtn save" data-prog-start="' + x.id + '">Commencer</button></div>').join('') + '</details>';
+      PROGS.slice().sort((a, b) => (b.id === progReco()) - (a.id === progReco())).map(x => '<div class="prog-card' + (x.id === progReco() ? ' reco' : '') + '">' + (x.id === progReco() ? '<span class="pc-reco">Conseillé pour toi</span>' : '') + '<div class="pc-in"><span class="pc-ic">' + x.ic + '</span><div><b>' + esc(x.t) + '</b><small>' + esc(x.d) + ' · ' + esc(x.lvl) + '</small><p>' + esc(x.desc) + '</p></div><button type="button" class="sbtn save" data-prog-start="' + x.id + '">Commencer</button></div></div>').join('') + '</details>';
     const n = P.s.length, i = p.done.length, pct = Math.round(i / n * 100);
     let h = '<div class="block prog"><div class="bh">' + P.ic + ' ' + esc(P.t) + '<button type="button" class="linkbtn" data-prog-stop="1" style="padding:0;font-size:13px">Arrêter</button></div>' +
       '<div class="prog-top"><span>Séance <b>' + Math.min(i + 1, n) + '</b> / ' + n + (i < n ? ' · semaine ' + P.s[i].w + ' / ' + P.s[n - 1].w : '') + '</span><b class="num">' + pct + ' %</b></div><div class="goal-bar"><i style="width:' + pct + '%"></i></div>';
@@ -3674,6 +3724,8 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     } else ac.classList.add('hidden');
     if (currentView === 1) { relief.stop(); if (map) map.resize(); }
     if (currentView === 3) renderProgress();
+    // si tu ne fais que de la muscu, l'appli s'ouvre directement sur Séances
+    if (!window.__homed) { window.__homed = 1; const sp = settings.sports || []; if (sp.length && sp.every(x => x === 'muscu') && currentView === 0 && S.status === 'idle') setTimeout(() => go(2), 400); }
   }
   const SPORT_LV = [['Pas de sport'], ['1 à 2 fois par semaine'], ['3 à 4 fois par semaine'], ['5 fois ou plus']];
   const MAIN_GOALS = [['lose', 'Perdre du poids'], ['fit', 'Garder la forme'], ['muscle', 'Prendre du muscle'], ['endur', 'Améliorer mon endurance']];
@@ -5142,7 +5194,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     h += '<div class="rc-g"><div><span>Protéines</span><b class="num">' + Math.round(got[0]) + ' / ' + P + ' g</b>' + bar(got[0], P) + '</div><div><span>Glucides</span><b class="num">' + Math.round(got[1]) + ' / ' + G + ' g</b>' + bar(got[1], G) + '</div><div><span>Eau</span><b class="num">' + nf0.format(water) + ' ml</b><small>à boire</small></div></div>';
     if (!doneP) {
       const needG = Math.max(0, G - got[1]) / G, F = store.get(K_FAV, []).map(f => { const m = (f.items || []).reduce((a, x) => a.map((v, k) => v + ((x.mac || [])[k] || 0)), [0, 0, 0]); return { fav: f, n: f.name, k: f.kcal, m }; }).filter(x => x.m[0] >= 12);
-      const opts = F.concat(RECOV.map(([n, k, m]) => ({ n, k, m }))).map(x => ({ ...x, sc: (Math.min(x.m[0], P - got[0]) * 2 + Math.min(x.m[1], Math.max(0, G - got[1])) * needG * (endu ? 1.6 : 0.5)) / Math.max(80, x.k) * 100 + (x.fav ? 6 : 0) })).sort((a, b) => b.sc - a.sc).slice(0, 3);
+      const opts = F.concat(RECOV.map(([n, k, m]) => ({ n, k, m }))).map(x => ({ ...x, sc: (Math.min(x.m[0], P - got[0]) * 2 + Math.min(x.m[1], Math.max(0, G - got[1])) * needG * (endu ? 1.6 : 0.5)) / Math.max(80, x.k) * 100 + (x.fav ? 6 : 0) - (settings.mainGoal === 'lose' && x.k > 300 ? 8 : 0) })).sort((a, b) => b.sc - a.sc).slice(0, 3);
       h += '<div class="rc-t">Idées pour récupérer</div>' + opts.map(x => '<div class="rc-o"><div><b>' + (x.fav ? '⭐ ' : '') + esc(x.n) + '</b><small>' + Math.round(x.m[0]) + ' g prot. · ' + Math.round(x.m[1]) + ' g gluc. · ' + nf0.format(x.k) + ' kcal</small></div><button type="button" class="fbtn" data-recov="' + esc(x.n) + '" aria-label="Ajouter ' + esc(x.n) + '">+</button></div>').join('');
     } else h += '<p class="rc-ok">Tes muscles ont ce qu\'il faut pour se réparer. Pense quand même à boire.</p>';
     return h + '<p class="rc-n">Conseils généraux de nutrition sportive, pas un avis médical.</p></div>';
