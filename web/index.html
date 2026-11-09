@@ -899,6 +899,8 @@
 .coachline{margin:12px 0 0;padding:12px 14px;border-radius:16px;background:rgba(255,90,31,.1);border:1px solid rgba(255,90,31,.28);font-size:14px;line-height:1.4}.coachline b{display:block;font-weight:700}.coachline span{display:block;margin-top:4px;font-size:13px;color:rgba(255,255,255,.7)}
 [data-info]{cursor:pointer}#v-sortie .lbl::after,.speed-meta [data-info]::after{content:'ⓘ';margin-left:5px;font-size:.8em;opacity:.45}
 .is-p{margin:0 0 12px;font-size:15px;line-height:1.5;color:rgba(255,255,255,.88)}.is-r{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);font-size:14px;line-height:1.45;color:rgba(255,255,255,.8)}.is-r b{display:block;margin-bottom:3px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#ff8a50}.is-now{margin:12px 0 4px;font-size:15px;font-weight:700;color:#ff8a50}
+.isl{display:flex;width:100%;max-width:440px;margin:18px auto 0;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}.isl::-webkit-scrollbar{display:none}.isl-s{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;padding:6px 18px 0;box-sizing:border-box}.isl-ic{font-size:46px;line-height:1;margin-bottom:12px}.isl-s b{font-size:21px;font-weight:800}.isl-s p{margin:10px 0 0;font-size:15.5px;line-height:1.5;color:#c9ccd3;max-width:32ch}
+.isl-dots{display:flex;gap:8px;justify-content:center;margin:18px 0 22px}.isl-dots i{width:8px;height:8px;border-radius:4px;background:rgba(255,255,255,.25);transition:width .25s,background .25s}.isl-dots i.on{width:22px;background:#ff6a2b}.intro-again{display:block;margin:0 0 12px;padding:0;font-size:14px}
 </style>
 </head>
 <body>
@@ -979,6 +981,7 @@
   <!-- Réglages -->
   <section class="view" id="v-reglages" aria-label="Réglages" inert>
     <h2 class="h-title">Réglages</h2>
+    <button type="button" class="linkbtn intro-again" id="introAgain">▶ Revoir la présentation de l'appli</button>
     <div class="privacy"><span>🔒</span><div><b>100 % privé</b><p>Tes sorties, repas, poids et photos restent <b>sur ton iPhone</b>. Pas de compte, pas de pub, pas de pistage. Le coach IA réfléchit sur le téléphone. Seules les recherches (produits, météo, carte) passent par internet, sans ton identité.</p></div></div>
     <div class="set-title">Ton profil</div>
     <div class="set">
@@ -1334,8 +1337,16 @@
       <div class="ac-blaze" aria-hidden="true"><i class="bk"></i><i class="w"></i><i class="r"></i></div>
       <h1 class="ac-h1">Parcours</h1>
     </div>
-    <p class="ac-lead"><b>Ton coach sport et nutrition, 100 % privé.</b><br>Bouge, mange mieux, progresse : tout reste sur ton iPhone. Pas de compte, pas de pub, pas de pistage.</p>
-    <button class="ac-cta" type="button" data-ac="profil">Commencer</button>
+    <p class="ac-lead"><b>Ton coach sport et nutrition, 100 % privé.</b></p>
+    <div class="isl" id="isl" aria-roledescription="carrousel">
+      <div class="isl-s"><span class="isl-ic">🏃</span><b>Bouge comme tu veux</b><p>Marche, course, vélo, muscu ou séances guidées. Le GPS mesure ta vitesse, tes km, ton dénivelé et tes calories, et un coach t'explique en direct ce que veulent dire tes chiffres.</p></div>
+      <div class="isl-s"><span class="isl-ic">🍽️</span><b>Mange mieux, sans prise de tête</b><p>Scanne un code-barres, prends ton plat en photo ou compose ton assiette. Après le sport, l'appli te dit quoi manger pour bien récupérer.</p></div>
+      <div class="isl-s"><span class="isl-ic">📈</span><b>Regarde-toi progresser</b><p>Objectifs, programmes semaine par semaine, badges, courbe de poids avec la date où tu atteindras ton objectif, et la carte de tous tes parcours.</p></div>
+      <div class="isl-s"><span class="isl-ic">🔒</span><b>100 % privé</b><p>Pas de compte, pas de pub, pas de pistage. Tes sorties, tes repas et ton poids restent sur ton iPhone. Même le coach IA réfléchit sur ton téléphone.</p></div>
+    </div>
+    <div class="isl-dots" id="islDots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+    <button class="ac-cta" type="button" id="islNext">Suivant</button>
+    <button class="ac-link" type="button" data-ac="profil" id="islSkip">Passer l'intro</button>
   </section>
   <section class="ac-step hidden" id="acProfil">
     <h2 class="ac-h2">Ton profil</h2>
@@ -3611,6 +3622,20 @@
   const CA_G = 2 * Math.PI * 54, CB_G = 2 * Math.PI * 46;
   const dfDay = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   function acShow(id) { ['acIntro', 'acProfil', 'acQuiz', 'acMain'].forEach(x => $(x).classList.toggle('hidden', x !== id)); $('accueil').scrollTop = 0; }
+
+  // ---------- Intro : 4 écrans de présentation ----------
+  (() => {
+    const box = $('isl'), dots = [...$('islDots').children], n = dots.length;
+    const idx = () => Math.round(box.scrollLeft / Math.max(1, box.clientWidth));
+    const upd = () => { const i = idx(); dots.forEach((d, k) => d.classList.toggle('on', k === i)); $('islNext').textContent = i >= n - 1 ? 'Commencer' : 'Suivant'; $('islSkip').classList.toggle('hidden', i >= n - 1); };
+    box.addEventListener('scroll', () => requestAnimationFrame(upd), { passive: true });
+    $('islNext').addEventListener('click', () => {
+      const i = idx();
+      if (i >= n - 1) { const b = document.querySelector('#acIntro [data-ac="profil"]'); if (b) b.click(); return; }
+      box.scrollTo({ left: (i + 1) * box.clientWidth, behavior: 'smooth' });
+    });
+    $('introAgain').addEventListener('click', () => { box.scrollLeft = 0; upd(); openAccueil('intro'); });
+  })();
   function openAccueil(step) {
     acOpen = true; document.body.classList.add('ac-open');
     $('accueil').classList.remove('hidden');
