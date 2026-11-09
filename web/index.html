@@ -910,6 +910,10 @@
 html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}input,select,textarea{font-size:max(16px,1em)}
 *{scrollbar-width:none}*::-webkit-scrollbar{display:none;width:0;height:0;background:transparent}
 #v-repas,#v-progres,#v-seances,#v-reglages,#v-sortie{overflow-x:hidden;overscroll-behavior-x:none}
+#accueil.ac-leave{pointer-events:none;animation:acLeave .7s cubic-bezier(.55,0,.35,1) forwards}#accueil.ac-leave .ac-step>*{animation:acItemOut .5s cubic-bezier(.55,0,.6,1) both}#accueil.ac-leave .ac-step>*:nth-child(2){animation-delay:.04s}#accueil.ac-leave .ac-step>*:nth-child(3){animation-delay:.08s}#accueil.ac-leave .ac-step>*:nth-child(n+4){animation-delay:.12s}
+@keyframes acLeave{0%{opacity:1}55%{opacity:1}100%{opacity:0}}@keyframes acItemOut{to{opacity:0;transform:perspective(800px) translateY(-60px) translateZ(140px) rotateX(18deg);filter:blur(5px)}}
+body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}body.app-enter .tabbar{animation:barIn .7s .45s cubic-bezier(.16,.84,.24,1) both}body.app-enter .top{animation:topIn .7s .35s cubic-bezier(.16,.84,.24,1) both}
+@keyframes appIn{from{opacity:0;scale:.9;translate:0 40px;filter:blur(6px)}to{opacity:1;scale:1;translate:0 0;filter:none}}@keyframes barIn{from{translate:0 120%}to{translate:0 0}}@keyframes topIn{from{opacity:0;translate:0 -100%}to{opacity:1;translate:0 0}}
 </style>
 </head>
 <body>
@@ -3660,7 +3664,14 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
     else acMain(step === 'edit' ? 'edit' : 'view');
   }
   function closeAccueil() {
-    acOpen = false; document.body.classList.remove('ac-open'); $('accueil').classList.add('hidden');
+    acOpen = false; document.body.classList.remove('ac-open');
+    const ac = $('accueil');
+    if (anim() && !ac.classList.contains('hidden')) {
+      // l'accueil s'envole vers toi et l'appli arrive par-dessous
+      ac.classList.add('ac-leave'); document.body.classList.add('app-enter');
+      setTimeout(() => { ac.classList.add('hidden'); ac.classList.remove('ac-leave'); }, 700);
+      setTimeout(() => document.body.classList.remove('app-enter'), 1300);
+    } else ac.classList.add('hidden');
     if (currentView === 1) { relief.stop(); if (map) map.resize(); }
     if (currentView === 3) renderProgress();
   }
