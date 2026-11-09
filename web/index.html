@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0b0c0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -907,6 +907,7 @@
 .gl-it{margin-bottom:10px;padding:14px;border-radius:18px;background:#16171c;border:1px solid rgba(255,255,255,.09);transition:opacity .2s}.gl-it.off{opacity:.62}.gl-it.done{border-color:rgba(70,200,120,.4);background:rgba(70,200,120,.07)}
 .gl-h{display:flex;align-items:center;gap:12px;cursor:pointer}.gl-ic{font-size:26px;line-height:1;flex:none}.gl-t{flex:1;min-width:0}.gl-t b{display:block;font-size:15.5px}.gl-t small{display:block;margin-top:2px;font-size:12.5px;line-height:1.35;color:rgba(255,255,255,.6)}.gl-pct{font-size:17px;color:#ff8a50}.gl-it.done .gl-pct{color:#5fd68f}
 .gl-set{margin-top:12px}.gl-set .stepper{margin:0}.gl-m{margin:8px 2px 0;font-size:13px;color:rgba(255,255,255,.7)}.gl-it.gview .goal-bar{margin-top:10px}.gl-v{margin-top:6px;font-size:15px;font-weight:700}.gl-v small{font-weight:500;color:rgba(255,255,255,.55)}
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}input,select,textarea{font-size:max(16px,1em)}
 </style>
 </head>
 <body>
@@ -1931,6 +1932,8 @@
     } else if (M.above && M.f < th.lo) M.above = false;
   }
   window.addEventListener('devicemotion', onMotion);
+  // pas de zoom de la page (pincer ou double-toucher) ; la carte garde son propre zoom
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
   // Pas en direct par la puce de mouvement de l'iPhone (bien plus fiable que l'accéléromètre de la page)
   let pedoLiveOn = false, pedoSegBase = 0, pedoLsn = null;
   async function pedoLiveStart() {

@@ -12,6 +12,13 @@ class ParcoursViewController: CAPBridgeViewController {
         bridge?.registerPluginInstance(CoachPlugin())
         bridge?.registerPluginInstance(ScannerPlugin())
         bridge?.registerPluginInstance(PedometerPlugin())
+        // pas de zoom de la page : on désactive le pincement de la vue web (la carte garde son zoom à elle)
+        if let sv = webView?.scrollView {
+            sv.minimumZoomScale = 1
+            sv.maximumZoomScale = 1
+            sv.bouncesZoom = false
+            sv.pinchGestureRecognizer?.isEnabled = false
+        }
     }
 }
 
