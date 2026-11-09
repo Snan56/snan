@@ -901,6 +901,12 @@
 .is-p{margin:0 0 12px;font-size:15px;line-height:1.5;color:rgba(255,255,255,.88)}.is-r{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);font-size:14px;line-height:1.45;color:rgba(255,255,255,.8)}.is-r b{display:block;margin-bottom:3px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#ff8a50}.is-now{margin:12px 0 4px;font-size:15px;font-weight:700;color:#ff8a50}
 .isl{display:flex;width:100%;max-width:440px;margin:18px auto 0;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}.isl::-webkit-scrollbar{display:none}.isl-s{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;padding:6px 18px 0;box-sizing:border-box}.isl-ic{font-size:46px;line-height:1;margin-bottom:12px}.isl-s b{font-size:21px;font-weight:800}.isl-s p{margin:10px 0 0;font-size:15.5px;line-height:1.5;color:#c9ccd3;max-width:32ch}
 .isl-dots{display:flex;gap:8px;justify-content:center;margin:18px 0 22px}.isl-dots i{width:8px;height:8px;border-radius:4px;background:rgba(255,255,255,.25);transition:width .25s,background .25s}.isl-dots i.on{width:22px;background:#ff6a2b}.intro-again{display:block;margin:0 0 12px;padding:0;font-size:14px}
+#acMain.listmode .carousel,#acMain.listmode .c-nav{display:none}.glist{width:100%;max-width:440px;margin:6px auto 14px;text-align:left}
+.gl-pre{padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}.gl-pre>span{font-size:13px;color:rgba(255,255,255,.7)}.gl-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.gl-chips button{border:1px solid rgba(255,255,255,.15);background:#1b1c22;color:#fff;font:inherit;font-weight:700;font-size:13.5px;padding:8px 12px;border-radius:999px;cursor:pointer}.gl-chips button:active{background:#ff5a1f}
+.gl-count{margin:14px 2px 4px;font-size:14px;color:rgba(255,255,255,.7)}.gl-count b{color:#ff8a50}.gl-g{margin:18px 2px 8px;font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.gl-it{margin-bottom:10px;padding:14px;border-radius:18px;background:#16171c;border:1px solid rgba(255,255,255,.09);transition:opacity .2s}.gl-it.off{opacity:.62}.gl-it.done{border-color:rgba(70,200,120,.4);background:rgba(70,200,120,.07)}
+.gl-h{display:flex;align-items:center;gap:12px;cursor:pointer}.gl-ic{font-size:26px;line-height:1;flex:none}.gl-t{flex:1;min-width:0}.gl-t b{display:block;font-size:15.5px}.gl-t small{display:block;margin-top:2px;font-size:12.5px;line-height:1.35;color:rgba(255,255,255,.6)}.gl-pct{font-size:17px;color:#ff8a50}.gl-it.done .gl-pct{color:#5fd68f}
+.gl-set{margin-top:12px}.gl-set .stepper{margin:0}.gl-m{margin:8px 2px 0;font-size:13px;color:rgba(255,255,255,.7)}.gl-it.gview .goal-bar{margin-top:10px}.gl-v{margin-top:6px;font-size:15px;font-weight:700}.gl-v small{font-weight:500;color:rgba(255,255,255,.55)}
 </style>
 </head>
 <body>
@@ -1373,10 +1379,11 @@
     <button class="ac-cta" type="button" data-ac="goals">Voir mes objectifs</button>
     <button class="ac-link" type="button" data-ac="back">Retour</button>
   </section>
-  <section class="ac-step hidden" id="acMain">
+  <section class="ac-step hidden listmode" id="acMain">
     <div class="ac-hello"><h2 class="ac-h2" id="acHello">Bonjour</h2><p class="ac-sub" id="acDate"></p><p class="ac-hint" id="acHint"></p></div>
     <div class="carousel" id="acCarousel" tabindex="0" aria-roledescription="carrousel" aria-label="Tes objectifs"><div class="c-ring" id="acRing"></div></div>
     <div class="c-nav"><button id="acPrev" class="pbtn" type="button" aria-label="Objectif précédent">‹</button><div class="c-dots" id="acDots"></div><button id="acNext" class="pbtn" type="button" aria-label="Objectif suivant">›</button></div>
+    <div id="acList" class="glist"></div>
     <p class="streak ac-streak" id="acStreak"></p>
     <button class="ac-cta" id="acEnter" type="button">Entrer dans l'appli</button>
     <button class="ac-link" id="acEdit" type="button">Modifier mes objectifs</button>
@@ -2146,6 +2153,7 @@
     { k: 'navette', key: 'goalNavette', title: 'Palier au test navette', now: 'Ton meilleur palier', unit: 'palier', step: 1, min: 2, max: 20, desc: 'Ton meilleur résultat au test navette officiel.', f: v => nf0.format(v),
       left: d => 'Encore ' + nf0.format(d) + ' palier' + (d > 1 ? 's' : '') + ' à gagner', ok: 'Palier atteint, bravo !' }
   ];
+  const G_IC = { steps: '👣', km: '📍', sessions: '💪', kcal: '🔥', longest: '🏁', navette: '⚡' };
   const goalOn = k => !!(settings.goalsOn && settings.goalsOn[k]);
   const gT = (g, v) => Number.isInteger(v) ? nf0.format(v) : g.f(v); // objectif : « 20 km » plutôt que « 20,0 km »
   function goalStats() {
@@ -2182,7 +2190,7 @@
     if (!active.length) h += '<p class="empty">Aucun objectif choisi. Touche « Modifier » pour t\'en fixer un.</p>';
     active.forEach(g => {
       const target = settings[g.key], cur = st[g.k], p = Math.min(1, cur / target);
-      h += '<div class="goal' + (p >= 1 ? ' done' : '') + '"><div class="goal-top"><span>' + g.now + '</span><b>' + g.f(cur) + ' / ' + gT(g, target) + '</b></div><div class="goal-bar"><i style="width:' + (p * 100).toFixed(1) + '%"></i></div></div>';
+      h += '<div class="goal' + (p >= 1 ? ' done' : '') + '"><div class="goal-top"><span>' + (p >= 1 ? '✅ ' : (G_IC[g.k] || '') + ' ') + g.now + '</span><b>' + g.f(cur) + ' / ' + gT(g, target) + '</b></div><div class="goal-bar"><i style="width:' + (p * 100).toFixed(1) + '%"></i></div></div>';
     });
     return h + '<p class="streak">' + streakText(st.streak) + '</p></div>';
   }
@@ -3732,7 +3740,7 @@
     const st = goalStats();
     $('acHello').textContent = mode === 'edit' ? 'Tes objectifs' : 'Bonjour' + (settings.name ? ' ' + settings.name : '');
     $('acDate').textContent = cap(dfDay.format(new Date()));
-    $('acHint').textContent = mode === 'edit' ? 'Fais tourner les cartes, active les objectifs que tu veux et règle leur valeur.' : '';
+    $('acHint').textContent = mode === 'edit' ? 'Active les objectifs qui te motivent et règle-les. Commence petit : tu pourras toujours augmenter.' : '';
     $('acStreak').innerHTML = mode === 'edit' ? '' : streakText(st.streak);
     $('acEnter').textContent = mode === 'edit' ? 'Valider mes objectifs' : "Entrer dans l'appli";
     $('acEdit').textContent = mode === 'edit' ? (settings.onboarded ? 'Annuler' : '') : 'Modifier mes objectifs';
@@ -3740,8 +3748,62 @@
     AC.cards = mode === 'edit' ? GOALS.slice() : GOALS.filter(g => goalOn(g.k));
     AC.draftOn = Object.assign({}, settings.goalsOn); AC.draftVal = {};
     GOALS.forEach(g => AC.draftVal[g.k] = settings[g.key]);
-    buildRing(st);
+    buildList(st);
   }
+
+  // ---------- Objectifs : liste claire (remplace le carrousel 3D) ----------
+  const G_GRP = [['Chaque jour', ['steps']], ['Chaque semaine', ['km', 'sessions', 'kcal']], ['Défis à relever', ['longest', 'navette']]];
+  const G_PRE = {
+    debut: ['🌱 Je débute', { steps: 6000, km: 8, sessions: 2, kcal: 1000 }, ['steps', 'km', 'sessions']],
+    regulier: ['🚶 Régulier', { steps: 8000, km: 15, sessions: 3, kcal: 2000 }, ['steps', 'km', 'sessions', 'kcal']],
+    perf: ['🔥 Je me dépasse', { steps: 12000, km: 30, sessions: 5, kcal: 3500 }, ['steps', 'km', 'sessions', 'kcal']]
+  };
+  function gMeaning(k, v) {
+    if (k === 'steps') return '≈ ' + nf1.format(v * 0.75 / 1000) + ' km de marche par jour, environ ' + Math.round(v / 100) + ' min en tout.';
+    if (k === 'km') return '≈ ' + nf1.format(v / 4) + ' km par sortie si tu sors 4 fois par semaine.';
+    if (k === 'sessions') return v <= 2 ? 'Parfait pour démarrer en douceur.' : v <= 4 ? 'Un bon rythme régulier, avec des jours de repos.' : 'Rythme soutenu : garde au moins 1 jour de repos.';
+    if (k === 'kcal') return '≈ ' + nf0.format(v / 7) + ' kcal de sport par jour en moyenne.';
+    if (k === 'longest') return 'En une seule sortie à pied (marche ou course), sans t\'arrêter de l\'enregistrer.';
+    return 'Ton meilleur palier au test navette officiel (onglet Séances).';
+  }
+  function buildList(st) {
+    const box = $('acList'), edit = AC.mode === 'edit';
+    if (edit) {
+      const nOn = GOALS.filter(g => AC.draftOn[g.k]).length;
+      let h = '<div class="gl-pre"><span>Règle tout d\'un coup selon ton niveau :</span><div class="gl-chips">' + Object.entries(G_PRE).map(([k, [l]]) => '<button type="button" data-gpre="' + k + '">' + l + '</button>').join('') + '</div></div>';
+      h += '<p class="gl-count">' + (nOn ? '<b>' + nOn + '</b> objectif' + (nOn > 1 ? 's' : '') + ' actif' + (nOn > 1 ? 's' : '') : 'Aucun objectif actif pour l\'instant') + '</p>';
+      G_GRP.forEach(([t, ks]) => {
+        h += '<div class="gl-g">' + t + '</div>';
+        ks.forEach(k => {
+          const g = GOALS.find(x => x.k === k); if (!g) return;
+          const on = !!AC.draftOn[k], v = AC.draftVal[k];
+          h += '<div class="gl-it' + (on ? '' : ' off') + '"><label class="gl-h"><span class="gl-ic">' + G_IC[k] + '</span><span class="gl-t"><b>' + g.title + '</b><small>' + g.desc + '</small></span>' +
+            '<span class="switch"><input type="checkbox" data-gon="' + k + '"' + (on ? ' checked' : '') + ' aria-label="Activer : ' + g.title + '"><span></span></span></label>' +
+            (on ? '<div class="gl-set"><div class="stepper"><button type="button" data-gk="' + k + '" data-d="-1" aria-label="Diminuer"' + (v <= g.min ? ' disabled' : '') + '>−</button><div class="num"><span>' + gT(g, v) + '</span><small>' + g.unit + '</small></div><button type="button" data-gk="' + k + '" data-d="1" aria-label="Augmenter"' + (v >= g.max ? ' disabled' : '') + '>+</button></div><p class="gl-m">' + gMeaning(k, v) + '</p></div>' : '') + '</div>';
+        });
+      });
+      box.innerHTML = h; return;
+    }
+    const act = GOALS.filter(g => goalOn(g.k));
+    if (!act.length) { box.innerHTML = '<p class="ac-empty">Tu n\'as pas encore d\'objectif. Touche « Modifier mes objectifs » pour en choisir.</p>'; return; }
+    const done = act.filter(g => st[g.k] >= settings[g.key]).length;
+    box.innerHTML = '<p class="gl-count"><b>' + done + ' / ' + act.length + '</b> objectif' + (act.length > 1 ? 's' : '') + ' atteint' + (act.length > 1 ? 's' : '') + '</p>' + act.map(g => {
+      const target = settings[g.key], cur = st[g.k], p = Math.min(1, cur / target), ok = p >= 1;
+      const sub = ok ? g.ok : (g.k === 'navette' && !cur ? 'Fais le test dans l\'onglet Séances' : g.left(Math.max(0, target - cur)));
+      return '<div class="gl-it gview' + (ok ? ' done' : '') + '"><div class="gl-h"><span class="gl-ic">' + (ok ? '✅' : G_IC[g.k]) + '</span><span class="gl-t"><b>' + g.now + '</b><small>' + sub + '</small></span><b class="gl-pct num">' + Math.round(p * 100) + ' %</b></div>' +
+        '<div class="goal-bar"><i style="width:' + (p * 100).toFixed(1) + '%"></i></div><div class="gl-v num">' + g.f(cur) + ' <small>/ ' + gT(g, target) + ' ' + g.unit + '</small></div></div>';
+    }).join('');
+  }
+  $('acList').addEventListener('change', e => {
+    const k = e.target.dataset && e.target.dataset.gon; if (!k) return;
+    AC.draftOn[k] = e.target.checked; buildList(goalStats());
+  });
+  $('acList').addEventListener('click', e => {
+    const pr = e.target.closest('[data-gpre]');
+    if (pr) { const [l, vals, on] = G_PRE[pr.dataset.gpre]; Object.assign(AC.draftVal, vals); GOALS.forEach(g => { if (on.includes(g.k)) AC.draftOn[g.k] = true; else if (g.k in vals) AC.draftOn[g.k] = false; }); buildList(goalStats()); toast('Niveau « ' + l.replace(/^\S+\s/, '') + ' » appliqué : ajuste si besoin'); return; }
+    const b = e.target.closest('[data-gk]'); if (!b) return;
+    const g = GOALS.find(x => x.k === b.dataset.gk); AC.draftVal[g.k] = clamp(AC.draftVal[g.k] + (+b.dataset.d) * g.step, g.min, g.max); buildList(goalStats());
+  });
   function cardHtml(g, st, i) {
     if (AC.mode === 'edit') {
       const on = !!AC.draftOn[g.k], v = AC.draftVal[g.k];
