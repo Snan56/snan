@@ -5652,7 +5652,7 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
     let renderer;
     try { renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: false, powerPreference: 'low-power' }); }
     catch (e) { relief.loading = false; document.body.classList.add('no-relief'); return; }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    renderer.setPixelRatio(1); // le relief est flou et sombre en fond : pas besoin de la pleine résolution Retina
     renderer.setClearColor(0x000000, 0);
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 90);
@@ -5672,7 +5672,7 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
     relief.frame = (t) => {
       if (!relief.running) return;
       relief.raf = requestAnimationFrame(relief.frame);
-      if (t - lastRender < 31) return; // ~30 images/s pour la batterie
+      if (t - lastRender < 41) return; // ~24 images/s pour la batterie
       const dt = Math.min(0.1, (t - relief.lastT) / 1000); relief.lastT = t; lastRender = t;
       slowAvg = slowAvg * 0.95 + dt * 0.05;
       if (++frames > 90 && slowAvg > 0.05 && quality > 0) {
@@ -5810,7 +5810,7 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
     if (need && !motionOn) { addEventListener('devicemotion', onMotion); motionOn = true; }
     else if (!need && motionOn) { removeEventListener('devicemotion', onMotion); motionOn = false; }
   }
-  setInterval(() => { if (relief.running && Date.now() - lastTouch > 15000) relief.stop(); motionSync(); }, 2000);
+  setInterval(() => { if (relief.running && Date.now() - lastTouch > 8000) relief.stop(); motionSync(); }, 2000);
   document.addEventListener('visibilitychange', motionSync);
 
   // ---------- Démarrage ----------
