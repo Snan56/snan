@@ -896,6 +896,9 @@
 .recov{border-color:rgba(255,90,31,.35)!important;background:linear-gradient(160deg,rgba(255,90,31,.12),rgba(255,90,31,.03))!important}.recov.ok{border-color:rgba(70,200,120,.35)!important;background:rgba(70,200,120,.08)!important}.rc-h{display:flex;gap:12px;align-items:center}.rc-h>span{font-size:28px}.rc-h b{display:block;font-size:16px}.rc-h small{font-size:12.5px;color:rgba(255,255,255,.6)}
 .rc-g{display:grid;grid-template-columns:1fr 1fr .8fr;gap:12px;margin:14px 0 4px}.rc-g span{display:block;font-size:12px;color:rgba(255,255,255,.6)}.rc-g b{font-size:15px}.rc-g small{display:block;font-size:11.5px;color:rgba(255,255,255,.5)}.rc-g .goal-bar{margin-top:5px}
 .rc-t{margin:14px 0 4px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#ff8a50}.rc-o{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.06)}.rc-o>div{flex:1}.rc-o b{display:block;font-size:14.5px}.rc-o small{font-size:12px;color:rgba(255,255,255,.6)}.rc-ok{margin:10px 0 0;font-size:14px;color:rgba(255,255,255,.8)}.rc-n{margin:10px 0 0;font-size:11px;color:rgba(255,255,255,.4)}
+.coachline{margin:12px 0 0;padding:12px 14px;border-radius:16px;background:rgba(255,90,31,.1);border:1px solid rgba(255,90,31,.28);font-size:14px;line-height:1.4}.coachline b{display:block;font-weight:700}.coachline span{display:block;margin-top:4px;font-size:13px;color:rgba(255,255,255,.7)}
+[data-info]{cursor:pointer}#v-sortie .lbl::after,.speed-meta [data-info]::after{content:'ⓘ';margin-left:5px;font-size:.8em;opacity:.45}
+.is-p{margin:0 0 12px;font-size:15px;line-height:1.5;color:rgba(255,255,255,.88)}.is-r{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);font-size:14px;line-height:1.45;color:rgba(255,255,255,.8)}.is-r b{display:block;margin-bottom:3px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#ff8a50}.is-now{margin:12px 0 4px;font-size:15px;font-weight:700;color:#ff8a50}
 </style>
 </head>
 <body>
@@ -919,17 +922,18 @@
       <button class="act" type="button" data-act="velo">Vélo</button>
     </div>
     <div class="speed">
-      <div class="speed-num num"><span id="speed">0,0</span><span class="unit">km/h</span></div>
+      <div class="speed-num num" data-info="speed"><span id="speed">0,0</span><span class="unit">km/h</span></div>
       <div class="speed-bar" aria-hidden="true"><i id="bar"></i></div>
-      <div class="speed-meta"><span>Max <b id="maxSpeed">0,0</b></span><span>Moyenne <b id="avgSpeed">0,0</b></span><span id="metaUp">Montée <b id="dplus">0</b> m</span></div>
+      <div class="speed-meta"><span data-info="max">Max <b id="maxSpeed">0,0</b></span><span data-info="avg">Moyenne <b id="avgSpeed">0,0</b></span><span id="metaUp" data-info="up">Montée <b id="dplus">0</b> m</span></div>
     </div>
+    <div id="coach" class="coachline hidden" role="status" aria-live="polite"></div>
     <div class="post intro" id="post">
       <div class="pole" aria-hidden="true"></div>
-      <div class="po" style="--ry:-13deg;--i:0" id="pDist"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Distance</span><span class="val num"><span id="dist">0,00</span><small>km</small></span></div></div></div>
-      <div class="po" style="--ry:9deg;--i:1"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Durée</span><span class="val num" id="time">0:00</span></div></div></div>
-      <div class="po" style="--ry:-5deg;--i:2"><div class="plate"><div class="back"></div><div class="face"><span class="lbl" id="p3Lbl">Pas</span><span class="val num" id="p3Val">0</span></div></div></div>
-      <div class="po" style="--ry:15deg;--i:3" id="pPace"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Allure</span><span class="val num"><span id="pace">–</span><small>min/km</small></span></div></div></div>
-      <div class="po" style="--ry:-9deg;--i:4"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Calories</span><span class="val num"><span id="kcal">0</span><small>kcal</small></span></div></div></div>
+      <div class="po" style="--ry:-13deg;--i:0" id="pDist" data-info="dist"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Distance</span><span class="val num"><span id="dist">0,00</span><small>km</small></span></div></div></div>
+      <div class="po" style="--ry:9deg;--i:1" data-info="time"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Durée</span><span class="val num" id="time">0:00</span></div></div></div>
+      <div class="po" style="--ry:-5deg;--i:2" data-info="steps"><div class="plate"><div class="back"></div><div class="face"><span class="lbl" id="p3Lbl">Pas</span><span class="val num" id="p3Val">0</span></div></div></div>
+      <div class="po" style="--ry:15deg;--i:3" id="pPace" data-info="pace"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Allure</span><span class="val num"><span id="pace">–</span><small>min/km</small></span></div></div></div>
+      <div class="po" style="--ry:-9deg;--i:4" data-info="kcal"><div class="plate"><div class="back"></div><div class="face"><span class="lbl">Calories</span><span class="val num"><span id="kcal">0</span><small>kcal</small></span></div></div></div>
     </div>
     <button type="button" id="photoBtn" class="photobtn hidden"><span>📷</span>Prendre une photo<small id="photoN"></small></button>
     <input type="file" id="photoIn" accept="image/*" capture="environment" hidden>
@@ -1111,6 +1115,7 @@
     <button id="amAdd" class="sbtn save" type="button">📷 Ajouter une photo ici</button><small class="am-tip" id="amTip">Déplace la carte pour viser l'endroit (la croix au centre), puis ajoute ta photo.</small></div>
   <input type="file" id="amIn" accept="image/*" hidden>
 </div>
+<div id="infoSheet" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="isT"><div class="sheet"><div class="d-head"><h2 id="isT"></h2><button id="isClose" class="xbtn" type="button" aria-label="Fermer">×</button></div><p id="isP" class="is-p"></p><div id="isR" class="is-r"></div><p id="isNow" class="is-now"></p></div></div>
 <div id="phView" class="phview hidden" role="dialog" aria-label="Photo"><img id="phImg" alt="Photo"><small id="phCap"></small><button type="button" id="phDel" class="sbtn del hidden">Supprimer cette photo</button></div>
 <div id="detail" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dTitle">
   <div class="sheet">
@@ -1632,10 +1637,11 @@
     $('metaUp').classList.toggle('hidden', velo);
     $('pace').textContent = fmtPace(ms, S.distance);
     $('kcal').textContent = nf0.format(S.kcal || 0);
+    try { coachLine(live, ms); } catch (e) {}
     $('hudSpeed').textContent = nf1.format(live);
     $('hudDist').textContent = nf2.format(S.distance / 1000);
     $('hint').textContent = {
-      idle: 'Choisis ton activité, puis appuie sur le bouton orange pour démarrer.',
+      idle: 'Choisis ton activité, puis appuie sur le bouton orange pour démarrer. Astuce : pendant la sortie, touche n\'importe quel chiffre pour savoir ce qu\'il veut dire.',
       running: isNative ? 'Sortie en cours. Tu peux verrouiller l\'écran : le suivi continue.' : "Sortie en cours. Garde l'écran allumé pour que le GPS continue.",
       paused: ''
     }[S.status];
@@ -2466,6 +2472,55 @@
     return new Promise((res, rej) => cv.toBlob(bl => bl ? res(bl) : rej(new Error('toBlob')), 'image/png'));
   }
 
+
+  // ---------- Écran Sortie : une phrase qui explique ce que disent les chiffres ----------
+  let coachAt = 0;
+  function coachLine(live, ms) {
+    const el = $('coach'); if (!el) return;
+    if (S.status === 'idle') { el.classList.add('hidden'); return; }
+    const now = Date.now(); if (now - coachAt < 2500 && el.textContent) return; coachAt = now;
+    const a = actNow(), km = S.distance / 1000; let main = '', extra = [];
+    if (S.status === 'paused') main = '⏸️ En pause : ' + nf2.format(km) + ' km en ' + fmtDurWords(ms) + ', ' + nf0.format(S.kcal || 0) + ' kcal. Appuie sur ▶️ pour reprendre, ou sur « Terminer » pour enregistrer.';
+    else if (S.veh) main = '🚗 Trajet en voiture détecté : rien n\'est compté. Ça reprendra tout seul quand tu marcheras.';
+    else if (live < 1) main = '🧍 Tu es à l\'arrêt. Le chrono continue : si tu fais une vraie pause, appuie sur ⏸ pour ne pas fausser ta moyenne.';
+    else if (a === 'marche') main = live < 3.5 ? '🚶 Balade tranquille. Pour brûler plus, accélère un peu : vise 5 km/h.' : live < 5 ? '🚶 Bon rythme de marche. Essaie de tenir autour de 5 km/h.' : live < 6.5 ? '🔥 Marche active : c\'est la meilleure zone pour brûler des calories. Garde ce rythme !' : '💨 Marche très rapide, presque du footing. Bravo !';
+    else if (a === 'course') main = live < 7 ? '🐢 Footing très doux : parfait pour t\'échauffer ou récupérer.' : live < 9.5 ? '🏃 Footing d\'endurance : tu dois pouvoir parler en courant. C\'est le rythme qui fait progresser.' : live < 12 ? '💪 Bon rythme soutenu. Si tu es essoufflé, ralentis un peu.' : '⚡ Très rapide ! Garde des forces pour finir.';
+    else main = live < 12 ? '🚲 Balade à vélo. Pour vraiment travailler, vise 18–22 km/h.' : live < 20 ? '🚲 Rythme tranquille, idéal pour l\'endurance.' : live < 28 ? '💪 Bon rythme ! Tu travailles bien le cardio.' : '⚡ Rapide ! Attention dans les descentes.';
+    if (S.status === 'running' && !S.veh && live >= 1) {
+      if ((S.grade || 0) > 0.05) extra.push('⛰️ Ça monte (' + Math.round(S.grade * 100) + ' %) : ralentis et garde ton souffle, ça brûle beaucoup plus.');
+      else if ((S.grade || 0) < -0.06) extra.push('⬇️ Descente : petits pas, genoux souples.');
+      const next = 1000 - (S.distance % 1000); if (km >= 0.2) extra.push('Prochain kilomètre dans ' + nf0.format(Math.round(next)) + ' m.');
+      try { if (a !== 'velo' && goalOn('steps')) { const st = goalStats(), left = (+settings.goalSteps || 10000) - st.steps; if (left > 0) extra.push('Objectif du jour : encore ' + nf0.format(left) + ' pas.'); else extra.push('🎯 Objectif de pas du jour atteint !'); } } catch (e) {}
+    }
+    el.innerHTML = '<b>' + esc(main) + '</b>' + (extra.length ? '<span>' + esc(extra.join(' ')) + '</span>' : '');
+    el.classList.remove('hidden');
+  }
+  const INFO = {
+    speed: ['Vitesse', 'Ta vitesse en ce moment, en km/h. La barre en dessous la compare à ta vitesse max de la sortie.', { marche: 'Marche : 3 à 4 km/h = balade · 5 à 6 km/h = marche active (la meilleure pour les calories).', course: 'Course : 7 à 9 km/h = footing facile · 10 à 12 km/h = rythme soutenu.', velo: 'Vélo : 15 à 20 km/h = tranquille · 20 à 28 km/h = bon rythme.' }],
+    max: ['Vitesse max', 'La plus grande vitesse atteinte pendant cette sortie. Elle sert surtout à voir tes pointes (sprint, descente).', null],
+    avg: ['Vitesse moyenne', 'La distance divisée par le temps en mouvement (les pauses ne comptent pas). C\'est le meilleur chiffre pour comparer tes sorties entre elles : si elle monte au fil des semaines, tu progresses.', null],
+    up: ['Montée (D+)', 'Le total des mètres grimpés depuis le départ. Ça fatigue beaucoup plus que le plat.', { all: 'Repère : 100 m de montée demandent à peu près le même effort qu\'1 km de plat.' }],
+    dist: ['Distance', 'Les kilomètres parcourus pendant la sortie. Les trajets en voiture sont retirés automatiquement.', { marche: 'Repère santé : 3 à 5 km de marche par jour.', course: 'Pour débuter : 3 à 5 km, puis augmente de 10 % par semaine maximum.', velo: 'Une sortie de 20 km à vélo = un bon entraînement cardio.' }],
+    time: ['Durée', 'Le temps passé à bouger, sans les pauses.', { all: 'Repère santé (OMS) : 150 minutes d\'activité par semaine, soit environ 30 min, 5 jours sur 7.' }],
+    steps: ['Pas', 'Le nombre de pas faits pendant la sortie, comptés par le capteur de l\'iPhone (« estimés » si le capteur n\'est pas dispo).', { all: 'Repère : 1 000 pas ≈ 700 à 800 m. 8 000 à 10 000 pas par jour, c\'est un bon objectif santé.' }],
+    pace: ['Allure', 'Le temps qu\'il te faut pour faire 1 km (en minutes par km). Attention : plus le chiffre est petit, plus tu vas vite.', { marche: 'Marche : 12 min/km = 5 km/h (bon rythme) · 10 min/km = 6 km/h (rapide).', course: 'Course : 8 min/km = footing doux · 6 min/km = bon rythme · 5 min/km = rapide.' }],
+    kcal: ['Calories', 'L\'énergie dépensée pendant la sortie, calculée avec ton poids, ta vitesse et la pente. C\'est une estimation (environ ±20 %).', { all: 'Elles sont ajoutées à ton objectif dans l\'onglet Repas, et une carte « Récupération » t\'aide à bien manger après.' }]
+  };
+  function infoNow(k) {
+    const ms = elapsed();
+    return { speed: nf1.format(S.status === 'running' ? curKmh : 0) + ' km/h', max: nf1.format(S.maxKmh) + ' km/h', avg: nf1.format(avgKmh()) + ' km/h', up: nf0.format(S.dplus || 0) + ' m',
+      dist: nf2.format(S.distance / 1000) + ' km', time: fmtDurWords(ms), steps: nf0.format(steps()) + ' pas', pace: fmtPace(ms, S.distance) + ' min/km', kcal: nf0.format(S.kcal || 0) + ' kcal' }[k];
+  }
+  $('v-sortie').addEventListener('click', e => {
+    const t = e.target.closest('[data-info]'); if (!t) return;
+    let k = t.dataset.info; if (k === 'steps' && actNow() === 'velo') k = 'up';
+    const [title, txt, rep] = INFO[k]; const r = rep ? rep[actNow()] || rep.all : '';
+    $('isT').textContent = title; $('isP').textContent = txt; $('isR').innerHTML = r ? '<b>Bon repère</b>' + esc(r) : ''; $('isR').classList.toggle('hidden', !r);
+    $('isNow').textContent = S.status !== 'idle' ? 'Toi, maintenant : ' + infoNow(k) : '';
+    $('infoSheet').classList.remove('hidden');
+  });
+  $('isClose').addEventListener('click', () => $('infoSheet').classList.add('hidden'));
+  $('infoSheet').addEventListener('click', e => { if (e.target.id === 'infoSheet') $('infoSheet').classList.add('hidden'); });
 
   // ---------- Podomètre de l'iPhone : vrais pas, distance et étages, même quand l'appli dort ----------
   const pedo = () => isNative && plugin('Pedometer');
