@@ -1790,14 +1790,14 @@
       S.track.length = Math.min(S.track.length, snap.seg + 1);
       S.activeMs = snap.ms;
     } else S.activeMs += Date.now() - S.resumedAt;
-    S.altSmooth = S.altAnchor = S.gradeAlt = null; S.grade = 0; S.veh = true; S.vehCount = (S.vehCount || 0) + 1; VEH.steps = 0; VEH.stepHist = []; lastKcalAt = 0;
+    S.altSmooth = S.altAnchor = S.gradeAlt = null; S.grade = 0; pedoLiveStop(); S.veh = true; S.vehCount = (S.vehCount || 0) + 1; VEH.steps = 0; VEH.stepHist = []; lastKcalAt = 0;
     banner('Déplacement en véhicule détecté : l\'enregistrement est en pause. Il reprendra tout seul quand tu marcheras de nouveau.', 'info', 'OK', { tag: 'veh', label: 'Je ne suis pas en voiture', fn: () => { settings.vehPause = false; saveSettings(); vehExit(true); $('vehPause').checked = false; toast('Pause automatique désactivée pour l\'instant (Réglages)'); } });
     speak('Déplacement en véhicule détecté. Enregistrement en pause.');
     save(true); queueRender();
   }
   function vehExit(manual, fromPt) {
     if (!S.veh) return;
-    S.veh = false; S.resumedAt = Date.now(); lastKcalAt = Date.now(); S.altSmooth = S.altAnchor = S.gradeAlt = null; S.grade = 0; 
+    S.veh = false; S.resumedAt = Date.now(); lastKcalAt = Date.now(); pedoLiveStart(); S.altSmooth = S.altAnchor = S.gradeAlt = null; S.grade = 0; 
     S.track.push([]); last = null; vehReset();
     // on compte la marche depuis le début de la fenêtre lente (elle a servi à détecter la sortie du véhicule)
     if (fromPt) { last = fromPt; S.lastPtMs = elapsed(); S.track[S.track.length - 1].push([r6(fromPt.lat), r6(fromPt.lon), null, Math.round((fromPt.ts - S.startTime) / 1000)]); }
@@ -1898,15 +1898,32 @@
     if (!M.above && M.f > th.hi) {
       M.above = true;
       if (now - M.lastStep > 280) {
-        if (S.veh) VEH.steps++; else S.sensorSteps++;
-        M.lastStep = now;
-        if (!M.cadStart) M.cadStart = now;
-        M.times.push(now); if (M.times.length > 60) M.times.shift();
-        queueRender();
+        const gap = now - M.lastStep; M.lastStep = now;
+        // anti-secousses : il faut 5 pas réguliers d'affilée, et que le GPS voie que tu avances
+        M.run = gap < 1300 ? (M.run || 0) + 1 : 1;
+        const still = curKmh < 1 && Date.now() - lastMoveTs > 8000;
+        const add = still ? 0 : M.run === 5 ? 5 : M.run > 5 ? 1 : 0;
+        if (add) {
+          if (S.veh) VEH.steps += add; else if (!pedoLiveOn) S.sensorSteps += add;
+          if (!M.cadStart) M.cadStart = now;
+          M.times.push(now); if (M.times.length > 60) M.times.shift();
+          queueRender();
+        }
       }
     } else if (M.above && M.f < th.lo) M.above = false;
   }
   window.addEventListener('devicemotion', onMotion);
+  // Pas en direct par la puce de mouvement de l'iPhone (bien plus fiable que l'accéléromètre de la page)
+  let pedoLiveOn = false, pedoSegBase = 0, pedoLsn = null;
+  async function pedoLiveStart() {
+    const P = isNative && plugin('Pedometer'); if (!P) return;
+    try {
+      if (!pedoLsn) pedoLsn = await P.addListener('steps', d => { if (!pedoLiveOn || S.status !== 'running' || S.veh) return; S.sensorSteps = pedoSegBase + (d.steps || 0); S.motionOk = true; queueRender(); });
+      pedoSegBase = S.sensorSteps || 0;
+      await P.start({ from: Date.now() }); pedoLiveOn = true;
+    } catch (e) { pedoLiveOn = false; }
+  }
+  function pedoLiveStop() { const P = isNative && plugin('Pedometer'); pedoLiveOn = false; if (P) { try { P.stop(); } catch (e) {} } }
   function queueTilt() {
     if (T.queued || !anim()) return;
     T.queued = true;
@@ -1949,7 +1966,7 @@
     S.status = 'running'; S.resumedAt = Date.now(); lastKcalAt = Date.now(); S.veh = false; vehReset(); S.altSmooth = S.altAnchor = S.gradeAlt = null; S.grade = 0; 
     M.times = []; M.cadStart = 0;
     S.track.push([]); last = null; curKmh = 0; lastMoveTs = Date.now();
-    startGeo(); if (!isNative) requestWake();
+    startGeo(); if (!isNative) requestWake(); pedoLiveStart(); M.run = 0;
     speak(resuming ? 'Reprise.' : "C'est parti !");
     if ((window.isSecureContext || isNative) && !hasProfile() && !profileAsked) {
       profileAsked = true;
@@ -1962,12 +1979,12 @@
     accrueKcal();
     if (!S.veh) S.activeMs += Date.now() - S.resumedAt;
     S.veh = false; vehReset(); if ($('banner').dataset.tag === 'veh') banner('');
-    S.status = 'paused'; curKmh = 0; last = null; lastKcalAt = 0;
+    S.status = 'paused'; curKmh = 0; last = null; lastKcalAt = 0; pedoLiveStop();
     stopGeo(); if (!WK.w) releaseWake(); save(true); render();
     if (!silent) speak('Pause.');
   }
   function reset() {
-    stopGeo(); releaseWake(); setGps('', 'GPS inactif');
+    pedoLiveStop(); stopGeo(); releaseWake(); setGps('', 'GPS inactif');
     S = fresh(); curKmh = 0; last = null; store.del(K_CUR); mapRouteDirty = true; flushRoute(); render();
   }
   $('fab').addEventListener('click', () => { if (S.status === 'running') pause(); else startOrResume(); });

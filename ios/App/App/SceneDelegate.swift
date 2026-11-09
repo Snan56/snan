@@ -73,9 +73,32 @@ public class PedometerPlugin: CAPPlugin, CAPBridgedPlugin {
     public let jsName = "Pedometer"
     public let pluginMethods: [CAPPluginMethod] = [
         CAPPluginMethod(name: "available", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "query", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "query", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "start", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "stop", returnType: CAPPluginReturnPromise)
     ]
     private let pedo = CMPedometer()
+    private let live = CMPedometer()
+
+    // Pas en direct pendant une sortie : l'iPhone ne compte que la vraie marche (secouer le téléphone ne compte pas)
+    @objc func start(_ call: CAPPluginCall) {
+        guard CMPedometer.isStepCountingAvailable() else { call.reject("unavailable"); return }
+        let from = call.getDouble("from").map { Date(timeIntervalSince1970: $0 / 1000) } ?? Date()
+        live.stopUpdates()
+        live.startUpdates(from: from) { [weak self] data, error in
+            guard let d = data, error == nil else { return }
+            var r: [String: Any] = ["steps": d.numberOfSteps.intValue]
+            if let x = d.distance { r["distance"] = x.doubleValue }
+            if let c = d.currentCadence { r["cadence"] = c.doubleValue }
+            self?.notifyListeners("steps", data: r)
+        }
+        call.resolve()
+    }
+
+    @objc func stop(_ call: CAPPluginCall) {
+        live.stopUpdates()
+        call.resolve()
+    }
 
     @objc func available(_ call: CAPPluginCall) {
         call.resolve(["steps": CMPedometer.isStepCountingAvailable(), "floors": CMPedometer.isFloorCountingAvailable(),
