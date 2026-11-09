@@ -18,6 +18,8 @@ class ParcoursViewController: CAPBridgeViewController {
             sv.maximumZoomScale = 1
             sv.bouncesZoom = false
             sv.pinchGestureRecognizer?.isEnabled = false
+            sv.showsVerticalScrollIndicator = false
+            sv.showsHorizontalScrollIndicator = false
         }
     }
 }
