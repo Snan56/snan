@@ -887,6 +887,11 @@
 .prog-top{display:flex;justify-content:space-between;align-items:baseline;margin:2px 0 6px;font-size:14px;color:rgba(255,255,255,.7)}.prog-top b{color:#fff}.prog-today{margin-top:14px;padding:14px;border-radius:16px;background:rgba(255,90,31,.1);border:1px solid rgba(255,90,31,.3)}.prog-today.rest,.prog-today.done{background:rgba(70,200,120,.1);border-color:rgba(70,200,120,.3)}.prog-today p{margin:8px 0 0;font-size:14px;line-height:1.45;color:rgba(255,255,255,.85)}
 .pt-h{display:flex;gap:12px;align-items:center}.pt-h>span{font-size:30px}.pt-h small{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:#ff8a50;font-weight:800}.pt-h b{font-size:16.5px}.pt-b{display:grid;grid-template-columns:1.3fr 1fr;gap:8px;margin-top:12px}.pt-n{display:block;margin-top:8px;font-size:12px;color:rgba(255,255,255,.5)}
 .prog-all{margin-top:12px}.prog-all summary{cursor:pointer;font-size:14px;font-weight:700;color:#ff8a50}.pa-w{margin:12px 0 4px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.5)}.pa-s{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:14px;color:rgba(255,255,255,.75)}.pa-s i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:800;background:rgba(255,255,255,.08)}.pa-s.ok i{background:#3fbf73;color:#fff}.pa-s.ok span{color:rgba(255,255,255,.45);text-decoration:line-through}.pa-s.cur i{background:#ff5a1f;color:#fff}.pa-s.cur span{color:#fff;font-weight:700}
+.wtarget{margin-top:14px;padding:14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}.wtarget>b{font-size:15.5px}.wtarget>p{margin:6px 0 10px;font-size:13.5px;color:rgba(255,255,255,.7)}.wt-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}.wt-h b{font-size:15.5px}.wt-h span{font-size:13px;color:#ff8a50;font-weight:700}.wt-eta{margin:10px 0 0;font-size:14.5px;line-height:1.4}.wt-eta.ok{color:#5fd68f;font-weight:700}.wt-eta small{display:block;margin-top:4px;font-size:12.5px;color:rgba(255,255,255,.55)}.wt-edit{margin-top:10px}.wt-edit summary{cursor:pointer;font-size:13px;color:rgba(255,255,255,.55)}.wt-edit .wform{margin-top:8px}.wtform{margin-top:6px}
+.allmap-btn{display:grid;grid-template-columns:auto 1fr auto;grid-template-rows:auto auto;column-gap:12px;align-items:center;width:100%;margin:0 0 14px;padding:14px 16px;border:1px solid rgba(255,255,255,.1);border-radius:18px;background:#18181e;color:#fff;font:inherit;text-align:left;cursor:pointer}.allmap-btn span{grid-row:1/3;font-size:28px}.allmap-btn b{font-size:15.5px}.allmap-btn small{font-size:12.5px;color:rgba(255,255,255,.6)}.allmap-btn i{grid-row:1/3;grid-column:3;font-style:normal;font-size:24px;color:rgba(255,255,255,.4)}
+.allmap{position:fixed;inset:0;z-index:150;background:#0b0c0f}#amMap{position:absolute;inset:0}.am-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:calc(var(--safe-t, 0px) + 14px) 16px 14px;background:linear-gradient(rgba(11,12,15,.92),rgba(11,12,15,0))}.am-top b{display:block;font-size:20px;font-weight:800}.am-top small{font-size:13px;color:rgba(255,255,255,.7)}
+.am-cross{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;pointer-events:none}.am-cross::before,.am-cross::after{content:'';position:absolute;background:#fff;box-shadow:0 0 4px rgba(0,0,0,.8)}.am-cross::before{left:14px;top:0;width:2px;height:30px}.am-cross::after{top:14px;left:0;height:2px;width:30px}
+.am-bot{position:absolute;left:0;right:0;bottom:0;padding:16px 16px calc(var(--safe-b, 0px) + 16px);background:linear-gradient(rgba(11,12,15,0),rgba(11,12,15,.95) 30%)}.am-bot .sbtn{width:100%}.am-leg{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;font-size:12.5px;color:rgba(255,255,255,.75)}.am-leg i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}.am-tip{display:block;margin-top:8px;text-align:center;font-size:12px;color:rgba(255,255,255,.55)}.phmk.mine{border-color:#ff8a50}
 </style>
 </head>
 <body>
@@ -1093,7 +1098,15 @@
 </div>
 
 <!-- Détail d'une sortie -->
-<div id="phView" class="phview hidden" role="dialog" aria-label="Photo"><img id="phImg" alt="Photo de la sortie"><small id="phCap"></small></div>
+<div id="allmap" class="allmap hidden" role="dialog" aria-label="Carte de tous mes parcours">
+  <div id="amMap"></div>
+  <div class="am-top"><div><b>Mes parcours</b><small id="amStats"></small></div><button id="amClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
+  <div class="am-cross" id="amCross" aria-hidden="true"></div>
+  <div class="am-bot"><div class="am-leg"><span><i style="background:#ff5a1f"></i>Marche</span><span><i style="background:#ff2d55"></i>Course</span><span><i style="background:#3d8bff"></i>Vélo</span><span>📷 Photos</span></div>
+    <button id="amAdd" class="sbtn save" type="button">📷 Ajouter une photo ici</button><small class="am-tip" id="amTip">Déplace la carte pour viser l'endroit (la croix au centre), puis ajoute ta photo.</small></div>
+  <input type="file" id="amIn" accept="image/*" hidden>
+</div>
+<div id="phView" class="phview hidden" role="dialog" aria-label="Photo"><img id="phImg" alt="Photo"><small id="phCap"></small><button type="button" id="phDel" class="sbtn del hidden">Supprimer cette photo</button></div>
 <div id="detail" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dTitle">
   <div class="sheet">
     <div class="d-head"><h2 id="dTitle"></h2><button id="dClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
@@ -2222,6 +2235,7 @@
     }
     if (tab === 'corps') { box.innerHTML = html + weightHtml(); return; }
     if (tab === 'badges') { box.innerHTML = html + badgesHtml(); return; }
+    html += '<button type="button" class="allmap-btn" data-allmap="1"><span>🗺️</span><b>Carte de tous mes parcours</b><small>Tes sorties superposées, avec tes photos</small><i>›</i></button>';
     if (!hist.length) { box.innerHTML = html + '<div class="block"><p class="empty">Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.</p></div>'; return; }
     html += '<ul class="runs">';
     hist.forEach((h, i) => {
@@ -2495,7 +2509,9 @@
     if (!P || !P.length) return '';
     return '<div class="d-sub">Photos (' + P.length + ')</div><div class="phrow">' + P.map((f, i) => '<button type="button" class="phth" data-ph="' + i + '"><img src="' + phSrc(f) + '" alt="Photo ' + (i + 1) + '" loading="lazy"></button>').join('') + '</div>';
   }
-  function phOpen(f) { if (!f) return; $('phImg').src = phSrc(f); $('phCap').textContent = f.t ? new Date(f.t).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : ''; $('phView').classList.remove('hidden'); }
+  let phDelFn = null;
+  function phOpen(f, del) { if (!f) return; $('phImg').src = phSrc(f); $('phCap').textContent = (f.note ? f.note + ' · ' : '') + (f.t ? new Date(f.t).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''); phDelFn = del || null; $('phDel').classList.toggle('hidden', !del); $('phView').classList.remove('hidden'); }
+  $('phDel').addEventListener('click', e => { e.stopPropagation(); if (phDelFn && confirm('Supprimer cette photo de la carte ?')) { phDelFn(); $('phView').classList.add('hidden'); } });
   $('phView').addEventListener('click', () => $('phView').classList.add('hidden'));
   $('dBody').addEventListener('click', e => {
     const t = e.target.closest('[data-ph]'); if (!t) return;
@@ -2542,6 +2558,75 @@
     });
   }
   setInterval(() => { try { photoUi(); mapPhotos(); } catch (e) {} }, 1500);
+
+  // ---------- Carte de tous mes parcours ----------
+  const K_MAPPH = 'parcours.mapPhotos';
+  async function storePhotoFile(file) {
+    const fs = plugin('Filesystem'), t = Date.now();
+    if (isNative && fs) { const data = await shrinkImage(file, 1400, 0.8); const r = await fs.writeFile({ path: 'photos/' + t + '.jpg', data: data.split(',')[1], directory: 'DATA', recursive: true }); return { t, uri: r.uri }; }
+    return { t, d: await shrinkImage(file, 700, 0.65) };
+  }
+  let amMap = null, amMk = [];
+  const AM_COL = { marche: '#ff5a1f', course: '#ff2d55', velo: '#3d8bff' };
+  function amData() {
+    const H = store.get(K_HIST, []);
+    return { type: 'FeatureCollection', features: H.map((h, i) => ({ type: 'Feature', properties: { i, c: AM_COL[h.activity] || '#ff5a1f' },
+      geometry: { type: 'LineString', coordinates: (h.track || []).filter(p => !p[4]).map(p => [p[1], p[0]]) } })).filter(f => f.geometry.coordinates.length >= 2) };
+  }
+  function amPhotos() {
+    amMk.forEach(m => m.remove()); amMk = [];
+    if (!amMap) return;
+    const H = store.get(K_HIST, []), list = [];
+    H.forEach(h => (h.photos || []).forEach(f => f.lat != null && list.push([f, null])));
+    store.get(K_MAPPH, []).forEach((f, k) => list.push([f, () => { const A = store.get(K_MAPPH, []); A.splice(k, 1); store.set(K_MAPPH, A); amPhotos(); amStats(); }]));
+    list.forEach(([f, del]) => {
+      const el = document.createElement('button'); el.type = 'button'; el.className = 'phmk' + (del ? ' mine' : ''); el.innerHTML = '<img src="' + phSrc(f) + '" alt="">';
+      el.addEventListener('click', ev => { ev.stopPropagation(); phOpen(f, del); });
+      amMk.push(new maplibregl.Marker({ element: el }).setLngLat([f.lon, f.lat]).addTo(amMap));
+    });
+  }
+  function amStats() {
+    const H = store.get(K_HIST, []), km = H.reduce((a, h) => a + (h.distanceM || 0), 0) / 1000;
+    const np = H.reduce((a, h) => a + (h.photos || []).length, 0) + store.get(K_MAPPH, []).length;
+    $('amStats').textContent = H.length + ' sortie' + (H.length > 1 ? 's' : '') + ' · ' + nf1.format(km) + ' km · ' + np + ' photo' + (np > 1 ? 's' : '');
+  }
+  async function openAllMap() {
+    $('allmap').classList.remove('hidden'); amStats();
+    if (typeof maplibregl === 'undefined') { try { await loadScript(MAPLIBRE_URL); } catch (e) { toast('La carte n\'a pas pu se charger (pas de connexion ?).'); $('allmap').classList.add('hidden'); return; } }
+    const D = amData();
+    if (!amMap) {
+      const here = lastFix ? [lastFix.lon, lastFix.lat] : (settings.meteoPos ? [settings.meteoPos.lon, settings.meteoPos.lat] : [2.4, 46.6]);
+      amMap = new maplibregl.Map({ container: 'amMap', style: STYLE_URL, center: here, zoom: lastFix || settings.meteoPos ? 12 : 5, attributionControl: false });
+      amMap.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-left');
+      let fell = false; amMap.on('error', () => { if (!fell && !amMap.isStyleLoaded()) { fell = true; amMap.setStyle(RASTER_STYLE); } });
+      amMap.on('style.load', () => {
+        if (!amMap.getSource('all')) amMap.addSource('all', { type: 'geojson', data: amData() });
+        amMap.addLayer({ id: 'all-halo', type: 'line', source: 'all', layout: { 'line-join': 'round', 'line-cap': 'round' }, paint: { 'line-color': '#ffffff', 'line-width': 7, 'line-opacity': 0.55 } });
+        amMap.addLayer({ id: 'all-line', type: 'line', source: 'all', layout: { 'line-join': 'round', 'line-cap': 'round' }, paint: { 'line-color': ['get', 'c'], 'line-width': 4 } });
+        amMap.on('click', 'all-line', ev => { const f = ev.features && ev.features[0]; if (f) { $('allmap').classList.add('hidden'); openDetail(+f.properties.i); } });
+        amMap.on('mouseenter', 'all-line', () => { amMap.getCanvas().style.cursor = 'pointer'; });
+      });
+    } else { const src = amMap.getSource('all'); if (src) src.setData(D); setTimeout(() => amMap.resize(), 50); }
+    if (D.features.length) {
+      const b = new maplibregl.LngLatBounds(D.features[0].geometry.coordinates[0], D.features[0].geometry.coordinates[0]);
+      D.features.forEach(f => f.geometry.coordinates.forEach(c => b.extend(c)));
+      amMap.fitBounds(b, { padding: { top: 110, bottom: 190, left: 40, right: 40 }, maxZoom: 15, duration: 0 });
+    }
+    amPhotos();
+  }
+  $('amClose').addEventListener('click', () => $('allmap').classList.add('hidden'));
+  $('amAdd').addEventListener('click', () => { $('amIn').value = ''; $('amIn').click(); });
+  $('amIn').addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0]; if (!file || !amMap) return;
+    const c = amMap.getCenter(); let f;
+    try { f = await storePhotoFile(file); } catch (err) { toast('La photo n\'a pas pu être enregistrée.'); return; }
+    let note = ''; try { note = (prompt('Un petit mot pour cette photo ? (facultatif)', '') || '').trim().slice(0, 60); } catch (err) {}
+    Object.assign(f, { lat: r6(c.lat), lon: r6(c.lng), note });
+    const A = store.get(K_MAPPH, []); A.push(f);
+    if (!store.set(K_MAPPH, A)) { toast('Mémoire pleine : la photo n\'a pas pu être gardée.'); return; }
+    amPhotos(); amStats(); toast('Photo épinglée sur ta carte 📍');
+  });
+  $('progress').addEventListener('click', e => { if (e.target.closest('[data-allmap]')) openAllMap(); });
 
   // ---------- Météo (Open-Meteo, gratuit, sans compte) ----------
   const WMO = c => c === 0 ? ['☀️', 'Grand soleil'] : c <= 2 ? ['🌤️', 'Éclaircies'] : c === 3 ? ['☁️', 'Couvert'] : c <= 48 ? ['🌫️', 'Brouillard'] : c <= 57 ? ['🌦️', 'Bruine'] : c <= 67 ? ['🌧️', 'Pluie'] : c <= 77 ? ['🌨️', 'Neige'] : c <= 82 ? ['🌧️', 'Averses'] : c <= 86 ? ['🌨️', 'Averses de neige'] : ['⛈️', 'Orage'];
@@ -3675,7 +3760,7 @@
   $('acEdit').addEventListener('click', () => { if (AC.mode === 'edit') acMain('view'); else { AC.cur = 0; acMain('edit'); } });
   $('brandBtn').addEventListener('click', () => { AC.cur = 0; openAccueil('view'); });
   $('openGoals').addEventListener('click', () => { AC.cur = 0; openAccueil('edit'); });
-  $('pname').addEventListener('change', e => { settings.name = e.target.value.trim().slice(0, 24); saveSettings(); });
+  $('pname').addEventListener('change', e => { settings.name = e.target.value.trim().slice(0, 24); saveSettings(); try { remindersApply(false); } catch (err) {} });
   $('showWelcome').addEventListener('change', e => { settings.showWelcome = e.target.checked; saveSettings(); });
 
   // Interrupteurs (réglages, objectifs) : on bascule nous-mêmes au toucher
@@ -3784,6 +3869,7 @@
         h += '<p class="wverdict ' + (ok ? 'ok' : '') + '">' + (ok ? (g < 0 ? '✓ Ton objectif marche : tu perds du poids.' : '✓ Ton objectif marche : tu prends du poids.') : (g < 0 ? 'Pas encore de baisse sur 30 jours : vérifie tes repas et bouge un peu plus.' : 'Pas encore de hausse sur 30 jours : mange un peu plus.')) + '</p>';
       }
     } else h += '<p class="empty">Note ton poids une fois par semaine, le matin à jeun : une courbe apparaîtra ici pour voir si ton objectif marche.</p>';
+    try { h += targetHtml(L, w); } catch (e) {}
     h += '<button type="button" class="wremind" data-wremind="1"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>' + (settings.remWeigh ? 'Rappel de pesée : ' + ({ 1: 'le dimanche', 2: 'le lundi', 3: 'le mardi', 4: 'le mercredi', 5: 'le jeudi', 6: 'le vendredi', 7: 'le samedi' }[+settings.remWeighDay || 1]) + ' à ' + String(settings.remWeighAt || '09:00').replace(/^0?(\d+):(\d+)$/, (m, h, mn) => h + ' h' + (mn !== '00' ? ' ' + mn : '')) : 'Me rappeler de me peser') + '</span><i>›</i></button>';
     return h + '</div>';
   }
@@ -3804,6 +3890,51 @@
     settings.weight = Math.round(v * 10) / 10; $('weight').value = settings.weight; store.set(K_SET, settings); weightTrack(true);
     renderProgress(); toast('Poids noté : ' + nf1.format(settings.weight) + ' kg');
   });
+
+  // ---------- Poids visé : date prévue ----------
+  function weightEta(L, w, tg) {
+    const left = tg - w;
+    if (Math.abs(left) < 0.25) return { done: true };
+    const R = L.filter(x => x.t >= Date.now() - 42 * 864e5);
+    if (R.length >= 3 && R[R.length - 1].t - R[0].t >= 10 * 864e5) { // tendance réelle : droite des moindres carrés sur 6 semaines
+      const n = R.length, mx = R.reduce((a, x) => a + x.t, 0) / n, my = R.reduce((a, x) => a + x.kg, 0) / n;
+      const sl = R.reduce((a, x) => a + (x.t - mx) * (x.kg - my), 0) / R.reduce((a, x) => a + (x.t - mx) ** 2, 0) * 864e5; // kg par jour
+      if (Math.abs(sl) > 0.004 && Math.sign(sl) === Math.sign(left)) return { days: left / sl, perWeek: sl * 7, src: 'courbe' };
+      if (Math.abs(sl) > 0.004) return { wrong: true, perWeek: sl * 7 };
+    }
+    const g = +settings.weightGoal || 0;
+    if (settings.age && settings.age < 18) return null;
+    if (g < 0 && left < 0) { const def = (PACE[settings.wPace != null ? settings.wPace : 1] || PACE[1])[1]; return { days: -left * 7700 / def, perWeek: -def * 7 / 7700, src: 'plan', def }; }
+    if (g > 0 && left > 0) return { days: left / (0.25 / 7), perWeek: 0.25, src: 'plan' };
+    return null;
+  }
+  function targetHtml(L, w) {
+    const tg = +settings.targetKg || 0;
+    const form = '<form id="wtForm" class="wform wtform"><input id="wtIn" type="number" inputmode="decimal" step="0.5" min="30" max="250" placeholder="' + (tg ? nf1.format(tg) : 'ex. 75') + '" aria-label="Poids visé en kg"><button class="sbtn save" type="submit">' + (tg ? 'Changer' : 'Valider') + '</button></form>';
+    if (!tg) return '<div class="wtarget"><b>🎯 Ton poids visé</b><p>Indique le poids que tu veux atteindre : l\'appli estimera la date où tu y seras.</p>' + form + '</div>';
+    let h = '<div class="wtarget"><div class="wt-h"><b>🎯 Objectif : ' + nf1.format(tg) + ' kg</b>' + (w ? '<span>' + (Math.abs(tg - w) < 0.25 ? 'atteint' : 'encore ' + nf1.format(Math.abs(tg - w)) + ' kg') + '</span>' : '') + '</div>';
+    if (w) {
+      const first = L.length ? L[0].kg : w, tot = Math.abs(tg - first) || 1, p = Math.max(0, Math.min(1, 1 - Math.abs(tg - w) / tot));
+      h += '<div class="goal-bar"><i style="width:' + (p * 100).toFixed(0) + '%"></i></div>';
+      const e = weightEta(L, w, tg), wk = v => nf1.format(Math.abs(v)) + ' kg par semaine';
+      if (!e) h += '<p class="wt-eta">Note ton poids au moins 3 fois sur 2 semaines pour avoir une date prévue.</p>';
+      else if (e.done) h += '<p class="wt-eta ok">🎉 Objectif atteint, bravo ! Tu peux en fixer un nouveau.</p>';
+      else if (e.wrong) h += '<p class="wt-eta">Pour l\'instant ta courbe va dans l\'autre sens (' + (e.perWeek > 0 ? '+' : '−') + wk(e.perWeek) + ') : pas de date possible. Regarde tes repas de la semaine.</p>';
+      else {
+        const d = new Date(Date.now() + e.days * 864e5), far = e.days > 730;
+        h += '<p class="wt-eta">' + (far ? 'À ce rythme, il faudrait <b>plus de 2 ans</b>.' : 'Objectif atteint vers le <b>' + d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: d.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined }) + '</b>') +
+          '<small>' + (e.src === 'courbe' ? 'D\'après ta courbe des 6 dernières semaines : ' + (e.perWeek > 0 ? '+' : '−') + wk(e.perWeek) + '.' : 'D\'après ton objectif de calories' + (e.def ? ' (−' + e.def + ' kcal par jour)' : '') + ', si tu le respectes. La date s\'affinera avec tes pesées.') + '</small></p>';
+      }
+    }
+    return h + '<details class="wt-edit"><summary>Changer mon poids visé</summary>' + form + '<button type="button" class="linkbtn" data-wt-del="1">Supprimer l\'objectif</button></details></div>';
+  }
+  $('progress').addEventListener('submit', e => {
+    if (e.target.id !== 'wtForm') return; e.preventDefault();
+    const v = parseFloat(String($('wtIn').value).replace(',', '.'));
+    if (!(v >= 30 && v <= 250)) { toast('Entre un poids entre 30 et 250 kg.'); return; }
+    settings.targetKg = Math.round(v * 10) / 10; saveSettings(); renderProgress(); toast('Poids visé : ' + nf1.format(settings.targetKg) + ' kg');
+  });
+  $('progress').addEventListener('click', e => { if (e.target.closest('[data-wt-del]')) { settings.targetKg = 0; saveSettings(); renderProgress(); } });
 
   // ---------- Repas favoris ----------
   const K_FAV = 'parcours.mealFavs';
@@ -3844,15 +3975,16 @@
     try {
       if (any) { const p = await LN.requestPermissions(); if (p.display !== 'granted') { toast('Autorise les notifications de Parcours dans les Réglages de l\'iPhone.'); return; } }
       await LN.cancel({ notifications: [1, 2, 3, 4, 5, 6].map(id => ({ id })) });
+      const nm = (settings.name || '').trim(), hi = nm ? nm + ', ' : '', Hi = t => nm ? nm + ', ' + t.charAt(0).toLowerCase() + t.slice(1) : t;
       const hm = (v, d) => String(v || d).split(':').map(Number), [hh, mm] = hm(settings.remWalkAt, '18:00'), [lh, lm] = hm(settings.remLunchAt, '13:30'), [dh, dm] = hm(settings.remDinnerAt, '20:30'), [wh, wm] = hm(settings.remWeighAt, '09:00'), N = [];
-      if (settings.remWalk) N.push({ id: 1, title: 'Parcours · Marche', body: 'Votre séance de marche est prévue maintenant. 20 minutes suffisent pour progresser.', schedule: { on: { hour: hh, minute: mm }, repeats: true, allowWhileIdle: true } });
+      if (settings.remWalk) N.push({ id: 1, title: 'Parcours · Marche', body: Hi('Votre séance de marche est prévue maintenant. 20 minutes suffisent pour progresser.'), schedule: { on: { hour: hh, minute: mm }, repeats: true, allowWhileIdle: true } });
       if (settings.remMeals) {
-        N.push({ id: 2, title: 'Parcours · Repas', body: 'Enregistrez votre déjeuner pour suivre vos apports du jour.', schedule: { on: { hour: lh, minute: lm }, repeats: true } });
-        N.push({ id: 3, title: 'Parcours · Repas', body: 'Enregistrez votre dîner pour compléter votre bilan du jour.', schedule: { on: { hour: dh, minute: dm }, repeats: true } });
+        N.push({ id: 2, title: 'Parcours · Repas', body: Hi('Enregistrez votre déjeuner pour suivre vos apports du jour.'), schedule: { on: { hour: lh, minute: lm }, repeats: true } });
+        N.push({ id: 3, title: 'Parcours · Repas', body: Hi('Enregistrez votre dîner pour compléter votre bilan du jour.'), schedule: { on: { hour: dh, minute: dm }, repeats: true } });
       }
-      if (settings.remWeigh) N.push({ id: 4, title: 'Parcours · Pesée', body: 'Jour de pesée : enregistrez votre poids du matin.', schedule: { on: { weekday: +settings.remWeighDay || 1, hour: wh, minute: wm }, repeats: true } });
-      if (settings.remWeek) N.push({ id: 5, title: 'Parcours · Bilan hebdomadaire', body: weekSummaryText(), schedule: { on: { weekday: 1, hour: 20, minute: 0 }, repeats: true } });
-      if (settings.remSteps !== false) N.push({ id: 6, title: 'Parcours · Suivi des pas', body: 'Bonjour. Ouvrez Parcours pour activer le suivi de vos pas de la journée.', schedule: { on: { hour: 6, minute: 0 }, repeats: true, allowWhileIdle: true } });
+      if (settings.remWeigh) N.push({ id: 4, title: 'Parcours · Pesée', body: Hi('C\'est le jour de pesée : enregistrez votre poids du matin.'), schedule: { on: { weekday: +settings.remWeighDay || 1, hour: wh, minute: wm }, repeats: true } });
+      if (settings.remWeek) N.push({ id: 5, title: 'Parcours · Bilan hebdomadaire', body: Hi(weekSummaryText()), schedule: { on: { weekday: 1, hour: 20, minute: 0 }, repeats: true } });
+      if (settings.remSteps !== false) N.push({ id: 6, title: 'Parcours · Suivi des pas', body: 'Bonjour' + (nm ? ' ' + nm : '') + '. Ouvrez Parcours pour activer le suivi de vos pas de la journée.', schedule: { on: { hour: 6, minute: 0 }, repeats: true, allowWhileIdle: true } });
       if (N.length) await LN.schedule({ notifications: N });
       if (fromUser) toast(N.length ? 'Rappels programmés' : 'Rappels désactivés');
     } catch (e) { if (fromUser) toast('Les rappels n\'ont pas pu être programmés.'); }
@@ -3874,7 +4006,7 @@
     try {
       const p = await LN.requestPermissions();
       if (p.display !== 'granted') { info("Notifications refusées : Réglages de l'iPhone > Parcours > Notifications > Autoriser."); return; }
-      await LN.schedule({ notifications: [{ id: 99, title: 'Parcours', body: 'Notification de test : vos rappels sont correctement configurés.', schedule: { at: new Date(Date.now() + 10000), allowWhileIdle: true } }] });
+      await LN.schedule({ notifications: [{ id: 99, title: 'Parcours', body: ((settings.name || '').trim() ? settings.name.trim() + ', vos' : 'Vos') + ' rappels sont correctement configurés.', schedule: { at: new Date(Date.now() + 10000), allowWhileIdle: true } }] });
       const pend = await LN.getPending();
       info('Rappel de test programmé. Verrouille ton iPhone ou quitte l\'appli : il arrive dans 10 s. Rappels prévus : ' + ((pend.notifications || []).length) + '.');
     } catch (e) { info('Erreur : ' + (e && e.message || e)); }
