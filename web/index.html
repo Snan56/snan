@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Parcours">
-<title>Parcours – GPS, vitesse et pas</title>
+<title>Parcours – ton coach sport et nutrition, 100 % privé</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -892,6 +892,10 @@
 .allmap{position:fixed;inset:0;z-index:150;background:#0b0c0f}#amMap{position:absolute;inset:0}.am-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:calc(var(--safe-t, 0px) + 14px) 16px 14px;background:linear-gradient(rgba(11,12,15,.92),rgba(11,12,15,0))}.am-top b{display:block;font-size:20px;font-weight:800}.am-top small{font-size:13px;color:rgba(255,255,255,.7)}
 .am-cross{position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;pointer-events:none}.am-cross::before,.am-cross::after{content:'';position:absolute;background:#fff;box-shadow:0 0 4px rgba(0,0,0,.8)}.am-cross::before{left:14px;top:0;width:2px;height:30px}.am-cross::after{top:14px;left:0;height:2px;width:30px}
 .am-bot{position:absolute;left:0;right:0;bottom:0;padding:16px 16px calc(var(--safe-b, 0px) + 16px);background:linear-gradient(rgba(11,12,15,0),rgba(11,12,15,.95) 30%)}.am-bot .sbtn{width:100%}.am-leg{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;font-size:12.5px;color:rgba(255,255,255,.75)}.am-leg i{display:inline-block;width:14px;height:4px;border-radius:2px;margin-right:5px;vertical-align:middle}.am-tip{display:block;margin-top:8px;text-align:center;font-size:12px;color:rgba(255,255,255,.55)}.phmk.mine{border-color:#ff8a50}
+.privacy{display:flex;gap:12px;align-items:flex-start;margin:0 0 18px;padding:14px 16px;border-radius:18px;background:rgba(70,200,120,.08);border:1px solid rgba(70,200,120,.25)}.privacy>span{font-size:26px}.privacy b{font-size:15px}.privacy p{margin:4px 0 0;font-size:13px;line-height:1.45;color:rgba(255,255,255,.75)}
+.recov{border-color:rgba(255,90,31,.35)!important;background:linear-gradient(160deg,rgba(255,90,31,.12),rgba(255,90,31,.03))!important}.recov.ok{border-color:rgba(70,200,120,.35)!important;background:rgba(70,200,120,.08)!important}.rc-h{display:flex;gap:12px;align-items:center}.rc-h>span{font-size:28px}.rc-h b{display:block;font-size:16px}.rc-h small{font-size:12.5px;color:rgba(255,255,255,.6)}
+.rc-g{display:grid;grid-template-columns:1fr 1fr .8fr;gap:12px;margin:14px 0 4px}.rc-g span{display:block;font-size:12px;color:rgba(255,255,255,.6)}.rc-g b{font-size:15px}.rc-g small{display:block;font-size:11.5px;color:rgba(255,255,255,.5)}.rc-g .goal-bar{margin-top:5px}
+.rc-t{margin:14px 0 4px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#ff8a50}.rc-o{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.06)}.rc-o>div{flex:1}.rc-o b{display:block;font-size:14.5px}.rc-o small{font-size:12px;color:rgba(255,255,255,.6)}.rc-ok{margin:10px 0 0;font-size:14px;color:rgba(255,255,255,.8)}.rc-n{margin:10px 0 0;font-size:11px;color:rgba(255,255,255,.4)}
 </style>
 </head>
 <body>
@@ -971,6 +975,7 @@
   <!-- Réglages -->
   <section class="view" id="v-reglages" aria-label="Réglages" inert>
     <h2 class="h-title">Réglages</h2>
+    <div class="privacy"><span>🔒</span><div><b>100 % privé</b><p>Tes sorties, repas, poids et photos restent <b>sur ton iPhone</b>. Pas de compte, pas de pub, pas de pistage. Le coach IA réfléchit sur le téléphone. Seules les recherches (produits, météo, carte) passent par internet, sans ton identité.</p></div></div>
     <div class="set-title">Ton profil</div>
     <div class="set">
       <div class="row"><label for="pname">Ton pseudo<small>Pour te dire bonjour sur l'accueil</small></label><input id="pname" type="text" maxlength="24" autocomplete="given-name" style="width:150px"></div>
@@ -1324,7 +1329,7 @@
       <div class="ac-blaze" aria-hidden="true"><i class="bk"></i><i class="w"></i><i class="r"></i></div>
       <h1 class="ac-h1">Parcours</h1>
     </div>
-    <p class="ac-lead">Marche, cours, roule et entraîne-toi. Fixe-toi des objectifs et regarde-toi progresser.</p>
+    <p class="ac-lead"><b>Ton coach sport et nutrition, 100 % privé.</b><br>Bouge, mange mieux, progresse : tout reste sur ton iPhone. Pas de compte, pas de pub, pas de pistage.</p>
     <button class="ac-cta" type="button" data-ac="profil">Commencer</button>
   </section>
   <section class="ac-step hidden" id="acProfil">
@@ -2011,6 +2016,7 @@
     entry.kcal = Math.round(Math.max(entry.kcal, summaryKcal(entry)));
     hist.unshift(entry);
     setTimeout(() => { try { pedoAfterSave(entry.date); } catch (e) {} }, 800);
+    setTimeout(() => { try { if (lastEffort()) toast('⚡ Récupération : regarde l\'onglet Repas pour savoir quoi manger'); } catch (e) {} }, 2600);
     let kept = hist.slice(0, 150);
     while (!store.set(K_HIST, kept) && kept.length > 10) kept = kept.slice(0, Math.floor(kept.length * 0.8)); // mémoire pleine : on garde les plus récentes
     const msr = measuredStepM();
@@ -4932,6 +4938,46 @@
     store.set(K_MEALS, all.slice(0, 300)); renderRepas(); toast(MEAL_TYPES[m.type] + ' recopié aujourd\'hui (' + nf0.format(m.kcal) + ' kcal)'); try { healthChanged(); } catch (err) {}
   });
   let mealDelArmed = -1;
+
+  // ---------- Récupération : relie ton sport et ton assiette ----------
+  const RECOV = [
+    ['Skyr nature (150 g)', 95, [16, 6, 0.3]], ['Fromage blanc + banane', 210, [12, 33, 0.5]], ['2 œufs durs', 150, [13, 1, 10]],
+    ['Lait chocolaté (25 cl)', 165, [8, 26, 3]], ['Poulet + riz (assiette)', 450, [38, 55, 7]], ['Thon + pain complet', 290, [26, 32, 5]],
+    ['Banane', 105, [1, 27, 0.4]], ['Shake protéiné (eau)', 120, [24, 3, 1.5]], ['Pâtes + jambon', 480, [24, 75, 8]], ['Yaourt grec + miel', 190, [9, 22, 8]]
+  ];
+  function lastEffort() {
+    const now = Date.now(), H = store.get(K_HIST, []), WL = store.get(K_WLOG, []), c = [];
+    H.slice(0, 5).forEach(h => c.push({ end: h.date + Math.max(h.durationMs || 0, (h.track || []).reduce((m, p) => Math.max(m, p[3] || 0), 0) * 1000), min: (h.durationMs || 0) / 60000, kcal: h.kcal || 0, kind: h.activity, label: (ACT_LABEL[h.activity] || 'sortie').toLowerCase() }));
+    WL.slice(0, 5).forEach(l => c.push({ end: l.date + (l.durationMs || 0), min: (l.durationMs || 0) / 60000, kcal: l.kcal || 0, kind: l.kind === 'muscu' ? 'muscu' : 'seance', label: l.kind === 'muscu' ? 'séance de muscu' : l.kind === 'navette' ? 'test navette' : 'séance' }));
+    const e = c.filter(x => x.end <= now + 6e4 && now - x.end < 6 * 3600e3).sort((a, b) => b.end - a.end)[0];
+    if (!e || (e.kind !== 'muscu' && (e.kcal < 120 || e.min < 15))) return null;
+    return e;
+  }
+  function recovHtml() {
+    const e = lastEffort(); if (!e) return '';
+    const kg = weightKg(), endu = ['course', 'velo', 'marche'].includes(e.kind) && (e.min >= 60 || e.kcal >= 500);
+    const P = Math.max(20, Math.min(40, Math.round(kg * 0.3))), G = endu ? Math.max(40, Math.min(100, Math.round(kg * 0.8))) : e.kind === 'muscu' ? 30 : 20;
+    const water = Math.max(300, Math.round((e.min / 60 * 500) / 50) * 50);
+    const since = store.get(K_MEALS, []).filter(m => m.date >= e.end);
+    const got = [0, 1, 2].map(k => since.reduce((a, m) => a + (m.items || []).reduce((b, x) => b + ((x.mac || [])[k] || 0), 0), 0));
+    const doneP = got[0] >= P * 0.85, ago = Math.round((Date.now() - e.end) / 60000), when = ago < 60 ? 'il y a ' + Math.max(1, ago) + ' min' : 'il y a ' + Math.round(ago / 60) + ' h';
+    const bar = (v, t) => '<div class="goal-bar"><i style="width:' + Math.min(100, v / t * 100).toFixed(0) + '%"></i></div>';
+    let h = '<div class="block recov' + (doneP ? ' ok' : '') + '"><div class="rc-h"><span>' + (doneP ? '✅' : '⚡') + '</span><div><b>' + (doneP ? 'Récupération réussie' : 'Récupère après ta ' + esc(e.label)) + '</b><small>Terminée ' + when + ' · ' + nf0.format(Math.round(e.kcal)) + ' kcal' + (ago < 120 && !doneP ? ' · idéal dans les 2 h' : '') + '</small></div></div>';
+    h += '<div class="rc-g"><div><span>Protéines</span><b class="num">' + Math.round(got[0]) + ' / ' + P + ' g</b>' + bar(got[0], P) + '</div><div><span>Glucides</span><b class="num">' + Math.round(got[1]) + ' / ' + G + ' g</b>' + bar(got[1], G) + '</div><div><span>Eau</span><b class="num">' + nf0.format(water) + ' ml</b><small>à boire</small></div></div>';
+    if (!doneP) {
+      const needG = Math.max(0, G - got[1]) / G, F = store.get(K_FAV, []).map(f => { const m = (f.items || []).reduce((a, x) => a.map((v, k) => v + ((x.mac || [])[k] || 0)), [0, 0, 0]); return { fav: f, n: f.name, k: f.kcal, m }; }).filter(x => x.m[0] >= 12);
+      const opts = F.concat(RECOV.map(([n, k, m]) => ({ n, k, m }))).map(x => ({ ...x, sc: (Math.min(x.m[0], P - got[0]) * 2 + Math.min(x.m[1], Math.max(0, G - got[1])) * needG * (endu ? 1.6 : 0.5)) / Math.max(80, x.k) * 100 + (x.fav ? 6 : 0) })).sort((a, b) => b.sc - a.sc).slice(0, 3);
+      h += '<div class="rc-t">Idées pour récupérer</div>' + opts.map(x => '<div class="rc-o"><div><b>' + (x.fav ? '⭐ ' : '') + esc(x.n) + '</b><small>' + Math.round(x.m[0]) + ' g prot. · ' + Math.round(x.m[1]) + ' g gluc. · ' + nf0.format(x.k) + ' kcal</small></div><button type="button" class="fbtn" data-recov="' + esc(x.n) + '" aria-label="Ajouter ' + esc(x.n) + '">+</button></div>').join('');
+    } else h += '<p class="rc-ok">Tes muscles ont ce qu\'il faut pour se réparer. Pense quand même à boire.</p>';
+    return h + '<p class="rc-n">Conseils généraux de nutrition sportive, pas un avis médical.</p></div>';
+  }
+  $('repas').addEventListener('click', e => {
+    const b = e.target.closest('[data-recov]'); if (!b) return;
+    const name = b.dataset.recov, F = store.get(K_FAV, []), fav = F.find(f => f.name === name), meals = store.get(K_MEALS, []), now = Date.now();
+    if (fav) meals.unshift({ date: now, type: mealTypeFor(now), items: fav.items.map(x => ({ id: x.id, fr: x.fr, q: x.q, kcal: x.kcal, mac: x.mac })), kcal: fav.kcal, thumb: '' });
+    else { const r = RECOV.find(x => x[0] === name); if (!r) return; meals.unshift({ date: now, type: mealTypeFor(now), items: [{ id: 'rec:' + r[0], fr: r[0], q: 1, kcal: r[1], mac: r[2] }], kcal: r[1], thumb: '' }); }
+    store.set(K_MEALS, meals); renderRepas(); toast('« ' + name + ' » ajouté à tes repas');
+  });
   function renderRepas() {
     const today = dayKey(Date.now()), en = dayEnergy(today), meals = store.get(K_MEALS, []);
     const todays = meals.map((m, i) => [m, i]).filter(([m]) => dayKey(m.date) === today);
@@ -4943,6 +4989,7 @@
       '<div class="rcenter"><b class="num">' + (left == null ? nf0.format(en.eaten) : nf0.format(Math.abs(left))) + '</b><span>' + (left == null ? 'kcal mangées' : left >= 0 ? 'kcal restantes' : 'kcal en trop') + '</span></div>' +
       '<div class="rstats"><div><b class="num">' + nf0.format(en.eaten) + '</b><span>mangées</span></div><div><b class="num">' + (tgt ? nf0.format(Math.round(tgt)) : '–') + '</b><span>objectif</span></div><div><b class="num">' + nf0.format(Math.round(en.burned)) + '</b><span>sport</span></div></div>' +
       macrosHtml(today) + '</div>';
+    try { h += recovHtml(); } catch (e) {}
     // 2. Ajouter un repas
     h += '<div class="radd"><label class="rtile main"><input id="mCameraP" type="file" accept="image/*" capture="environment" hidden><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><b>Photo</b></label>' +
       '<label class="rtile"><input id="mGalleryP" type="file" accept="image/*" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg><b>Galerie</b></label>' +
