@@ -2433,6 +2433,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
       '<tr class="' + (s === best && h.splits.length > 1 ? 'best' : '') + '"><td>' + (i + 1) + ' km</td><td><div class="bar" style="width:' + (Math.max(0.25, best / s) * 100).toFixed(0) + '%"></div></td><td>' + fmtClock(s * 1000) + '</td></tr>').join('') + '</tbody></table>';
   }
   function openDetail(i) {
+    if (typeof maplibregl === 'undefined') loadScript(MAPLIBRE_URL).catch(() => {}); // la carte se prépare pendant que tu lis la fiche : le replay démarre plus vite
     const hist = store.get(K_HIST, []), h = hist[i];
     if (!h) return;
     detailIdx = i; deleteArmed = false; $('dDelete').textContent = 'Supprimer la sortie';
@@ -5484,8 +5485,10 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
   // ---------- Carte 3D (MapLibre + OpenFreeMap) ----------
   let map = null, mapLoading = false, styleLoaded = false, styleFellBack = false, meMarker = null, mapFollow = true, mapRouteDirty = true, lastRouteFlush = 0;
   function mapMsg(t) { const m = $('mapMsg'); m.textContent = t; m.classList.toggle('hidden', !t); }
-  function loadScript(src) {
-    return new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); });
+  function loadScript(src) { // une seule fois par fichier, même si on le demande à plusieurs endroits en même temps
+    const scriptLoads = window.__sl || (window.__sl = {});
+    if (!scriptLoads[src]) scriptLoads[src] = new Promise((res, rej) => { const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = e => { delete scriptLoads[src]; rej(e); }; document.head.appendChild(s); });
+    return scriptLoads[src];
   }
   function routeData() {
     return { type: 'Feature', properties: {}, geometry: { type: 'MultiLineString',
@@ -5619,8 +5622,9 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     }
     if (h.durationMs > 0 && tAct > 0) { const k = (h.durationMs / 1000) / tAct; pts.forEach(q => { if (q[3] != null) q[3] *= k; }); }
     if (pts.length < 2) { toast('Pas assez de points pour rejouer cette sortie.'); return; }
-    closeDetail();
+    closeDetail(); $('histPage').classList.add('hidden'); $('allmap').classList.add('hidden'); // on dégage tout ce qui cache la carte
     if (currentView !== 1) go(1);
+    if (!map) toast('Chargement de la carte…');
     await ensureMap();
     try { await whenMapReady(); } catch (e) { toast("La carte n'est pas disponible pour le moment."); return; }
     if (replayState) stopReplay();
