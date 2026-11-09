@@ -1026,7 +1026,7 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
     <div class="set">
       <div class="row"><label for="showWelcome">Accueil au démarrage<small>Affiche tes objectifs à l'ouverture de l'appli</small></label>
         <span class="switch"><input id="showWelcome" type="checkbox" role="switch"><span></span></span></div>
-      <div class="row"><label for="anim3d">Animations 3D<small>Relief animé et transitions. Coupe-les pour économiser la batterie.</small></label>
+      <div class="row"><label for="anim3d">Animations 3D<small>Relief animé et transitions (le relief se met en pause tout seul quand tu ne touches pas l'écran). Coupe-les pour économiser encore plus la batterie.</small></label>
         <span class="switch"><input id="anim3d" type="checkbox" role="switch"><span></span></span></div>
       <div class="row"><label for="sens">Sensibilité du podomètre<small>Augmente-la si des pas sont oubliés</small></label>
         <select id="sens"><option value="faible">Faible</option><option value="moyenne">Moyenne</option><option value="forte">Forte</option></select></div>
@@ -1659,6 +1659,7 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
     $('pace').textContent = fmtPace(ms, S.distance);
     $('kcal').textContent = nf0.format(S.kcal || 0);
     try { coachLine(live, ms); } catch (e) {}
+    try { photoUi(); } catch (e) {}
     $('hudSpeed').textContent = nf1.format(live);
     $('hudDist').textContent = nf2.format(S.distance / 1000);
     $('hint').textContent = {
@@ -1705,7 +1706,7 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
     if (bg) {
       // Appli Android : suivi qui continue écran verrouillé (notification affichée)
       nativeWatcher = 'pending';
-      bg.addWatcher({ backgroundMessage: 'Ta sortie est en cours d\'enregistrement.', backgroundTitle: 'Parcours', requestPermissions: true, stale: false, distanceFilter: 0 },
+      bg.addWatcher({ backgroundMessage: 'Ta sortie est en cours d\'enregistrement.', backgroundTitle: 'Parcours', requestPermissions: true, stale: false, distanceFilter: actNow() === 'velo' ? 8 : 3 }, // un point tous les 3 m à pied (8 m à vélo) : assez précis, bien moins gourmand
         (loc, err) => {
           if (err) { onGeoErr({ code: err.code === 'NOT_AUTHORIZED' ? 1 : 2 }); return; }
           if (!loc) return;
@@ -2659,7 +2660,7 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
       return new maplibregl.Marker({ element: el }).setLngLat([f.lon, f.lat]).addTo(map);
     });
   }
-  setInterval(() => { try { photoUi(); mapPhotos(); } catch (e) {} }, 1500);
+  setInterval(() => { if (document.hidden || (S.status === 'idle' && !phMarkers.length)) return; try { photoUi(); mapPhotos(); } catch (e) {} }, 3000);
 
   // ---------- Carte de tous mes parcours ----------
   const K_MAPPH = 'parcours.mapPhotos';
@@ -5784,8 +5785,8 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
   setInterval(() => {
     if (S.status !== 'running') return;
     if (lastFixAt && Date.now() - lastFixAt > 10000) { curKmh = 0; setGps('weak', 'Signal GPS perdu'); }
-    accrueKcal(); render(); save();
-    if (currentView === 1 && mapRouteDirty) flushRoute();
+    accrueKcal(); if (!document.hidden) render(); save(); // écran éteint : on calcule, mais on ne dessine rien
+    if (!document.hidden && currentView === 1 && mapRouteDirty) flushRoute();
     // objectif de pas atteint aujourd'hui : on le dit une fois
     const today = dayKey(Date.now());
     if (settings.goalSaidDay !== today && S.activity !== 'velo' && goalOn('steps')) {
@@ -5796,8 +5797,21 @@ html,body{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adju
         speak('Bravo, objectif de ' + nf0.format(settings.goalSteps) + ' pas atteint aujourd\'hui.'); toast('Objectif de pas atteint aujourd\'hui');
       }
     }
-    if (currentView === 3 && Date.now() % 5000 < 1000) renderProgress();
+    if (!document.hidden && currentView === 3 && Date.now() % 5000 < 1000) renderProgress();
   }, 1000);
+  // ---------- Économie de batterie ----------
+  // 1. Le relief 3D s'arrête après 15 s sans toucher l'écran (la dernière image reste affichée), et repart au moindre geste
+  let lastTouch = Date.now();
+  ['pointerdown', 'touchstart', 'wheel', 'keydown', 'scroll'].forEach(t => addEventListener(t, () => { lastTouch = Date.now(); if (!relief.running) relief.resume(); motionSync(); }, { passive: true, capture: true }));
+  // 2. Le capteur de mouvement n'est allumé que s'il sert (pas comptés par la page, ou effet d'inclinaison du relief)
+  let motionOn = true;
+  function motionSync() {
+    const need = !document.hidden && ((S.status === 'running' && !pedoLiveOn && actNow() !== 'velo') || (anim() && relief.running));
+    if (need && !motionOn) { addEventListener('devicemotion', onMotion); motionOn = true; }
+    else if (!need && motionOn) { removeEventListener('devicemotion', onMotion); motionOn = false; }
+  }
+  setInterval(() => { if (relief.running && Date.now() - lastTouch > 15000) relief.stop(); motionSync(); }, 2000);
+  document.addEventListener('visibilitychange', motionSync);
 
   // ---------- Démarrage ----------
   const saved = store.get(K_CUR, null);
