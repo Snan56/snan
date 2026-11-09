@@ -875,7 +875,7 @@
 .dtiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.dtile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.08);background:#18181e;color:#fff;font:inherit;text-align:left;cursor:pointer}.dtile span{font-size:20px}.dtile b{font-size:26px;line-height:1.1}.dtile b small{font-size:14px;color:rgba(255,255,255,.6)}.dtile>small{font-size:12px;color:rgba(255,255,255,.55)}
 .wkbars{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;height:130px;align-items:end}.wkb{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}.wkb i{width:100%;max-width:26px;border-radius:8px 8px 4px 4px;background:rgba(255,255,255,.12)}.wkb.t i{background:linear-gradient(#ff8a50,#ff5a1f)}.wkb span{font-size:12px;color:rgba(255,255,255,.5);font-weight:700}.wkb.t span{color:#ff8a50}.wkb em{font-style:normal;font-size:10px;color:rgba(255,255,255,.55)}
 .dbadge{display:block;width:100%;text-align:left;color:#fff;font:inherit;cursor:pointer}.dbn{display:flex;gap:12px;align-items:center}.dbn .bic{font-size:30px}.dbn>div{flex:1}.dbn b{display:block}.dbn small{color:rgba(255,255,255,.55);font-size:13px}.dbn .bbar{display:block;margin-top:6px}.dbn em{font-style:normal;font-size:22px;color:rgba(255,255,255,.4)}
-.pgtabs{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:4px;margin:0 0 14px;border-radius:16px;background:#141418;border:1px solid rgba(255,255,255,.08)}.pgtabs button{border:0;border-radius:12px;padding:10px 4px;background:none;color:rgba(255,255,255,.55);font:inherit;font-weight:700;font-size:13.5px;cursor:pointer;transition:background .2s,color .2s}.pgtabs button[aria-selected="true"]{background:linear-gradient(135deg,#ff5a1f,#ff8a50);color:#fff;box-shadow:0 4px 14px rgba(255,90,31,.35)}.pgtabs i{font-style:normal;font-size:11px;opacity:.8;margin-left:2px}
+.pgtabs{position:relative;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:4px;margin:0 0 14px;border-radius:16px;background:#141418;border:1px solid rgba(255,255,255,.08)}.pgtabs button{border:0;border-radius:12px;padding:10px 4px;background:none;color:rgba(255,255,255,.55);font:inherit;font-weight:700;font-size:13.5px;cursor:pointer;transition:background .2s,color .2s}.pgtabs button[aria-selected="true"]{background:linear-gradient(135deg,#ff5a1f,#ff8a50);color:#fff;box-shadow:0 4px 14px rgba(255,90,31,.35)}.pgtabs i{font-style:normal;font-size:11px;opacity:.8;margin-left:2px}
 .scanbtn{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;width:100%;padding:14px 16px;margin:0 0 12px;border:0;border-radius:16px;background:linear-gradient(135deg,#ff5a1f,#ff8a50);color:#fff;font:inherit;text-align:left;cursor:pointer;box-shadow:0 6px 18px rgba(255,90,31,.3)}.scanbtn span{grid-row:1/3;font-size:30px;line-height:1;transform:rotate(90deg)}.scanbtn b{font-size:16px}.scanbtn small{font-size:12.5px;opacity:.9}
 .photobtn{display:flex;align-items:center;gap:10px;width:100%;margin:12px 0 0;padding:12px 16px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:#18181e;color:#fff;font:inherit;font-weight:700;font-size:15px;cursor:pointer}.photobtn span{font-size:22px}.photobtn small{margin-left:auto;color:#ff8a50;font-weight:700}
 .meteo{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:4px 12px;margin:12px 0 0;padding:12px 16px;border:1px solid rgba(255,255,255,.08);border-radius:18px;background:#18181e}.mt-ic{font-size:34px;line-height:1}.mt-m b{font-size:26px;display:block;line-height:1.1}.mt-m span{font-size:12.5px;color:rgba(255,255,255,.6)}.mt-s{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:13px;color:rgba(255,255,255,.7)}.mt-s b{color:#fff}.mt-tip{grid-column:1/-1;margin:6px 0 0;padding-top:8px;border-top:1px solid rgba(255,255,255,.06);font-size:13px;color:rgba(255,255,255,.75)}
@@ -917,6 +917,9 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
 .focus{border-color:rgba(255,138,80,.35)!important}.fc-h{display:flex;align-items:center;gap:12px;margin-bottom:8px}.fc-h>span{font-size:26px}.fc-h>div{flex:1}.fc-h small{display:block;font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#ff8a50}.fc-h b{font-size:16.5px}
 .fc-r{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid rgba(255,255,255,.06);font-size:14px;color:rgba(255,255,255,.75)}.fc-r b{color:#fff;text-align:right}.fc-tip{margin:10px 0 0;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.05);font-size:13.5px;line-height:1.45;color:rgba(255,255,255,.85)}
 .prog-card.reco{border-top:0;margin-top:12px;padding:14px;border-radius:16px;background:rgba(255,90,31,.1);border:1px solid rgba(255,90,31,.35)}.pc-reco{display:inline-block;margin-bottom:8px;padding:3px 9px;border-radius:999px;background:#ff5a1f;color:#fff;font-size:11.5px;font-weight:800}.pc-in{display:grid;grid-template-columns:auto 1fr;gap:6px 12px}.pc-in .sbtn{grid-column:1/-1}.prog-card{display:block}
+.histpage{position:fixed;inset:0;z-index:55;background:#0b0c0f;display:flex;flex-direction:column}.hp-head{display:flex;align-items:center;justify-content:space-between;padding:calc(var(--safe-t) + 14px) 18px 8px}.hp-head .h-title{margin:0}.hp-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:4px 18px calc(var(--safe-b) + 24px)}
+.hp-tot{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 14px}.hp-tot div{padding:12px 6px;border-radius:16px;background:#16171c;border:1px solid rgba(255,255,255,.08);text-align:center}.hp-tot b{display:block;font-size:20px}.hp-tot span{font-size:11.5px;color:rgba(255,255,255,.6)}
+.hp-chips{margin-bottom:12px}.hp-chips .chip[aria-pressed="true"]{background:#ff5a1f;color:#fff;border-color:#ff5a1f}.hp-m{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:18px 2px 8px}.hp-m b{font-size:16px}.hp-m span{font-size:12.5px;color:rgba(255,255,255,.55);text-align:right}
 </style>
 </head>
 <body>
@@ -925,7 +928,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
 
 <header class="top">
   <div class="brand"><button id="brandBtn" class="brand-btn" type="button" aria-label="Ouvrir l'accueil et tes objectifs"><span class="blaze" aria-hidden="true"></span>Parcours</button></div>
-  <div class="top-right"><div id="gps" class="gps" role="status"><span class="dot"></span><span id="gpsText">GPS inactif</span></div><button id="mealBtn" class="gear" style="display:none" type="button" aria-label="Repas et calories"><svg viewBox="0 0 24 24"><path d="M4 4v6a3 3 0 0 0 3 3v7M7 4v5M10 4v6a3 3 0 0 1-3 3"/><circle cx="16.5" cy="13" r="4.5"/><path d="M16.5 4v4.5"/></svg></button><button id="gear" class="gear" type="button" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
+  <div class="top-right"><div id="gps" class="gps" role="status"><span class="dot"></span><span id="gpsText">GPS inactif</span></div><button id="mealBtn" class="gear" style="display:none" type="button" aria-label="Repas et calories"><svg viewBox="0 0 24 24"><path d="M4 4v6a3 3 0 0 0 3 3v7M7 4v5M10 4v6a3 3 0 0 1-3 3"/><circle cx="16.5" cy="13" r="4.5"/><path d="M16.5 4v4.5"/></svg></button><button id="histBtn" class="gear" type="button" aria-label="Historique de mes sorties"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></button><button id="gear" class="gear" type="button" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
 </header>
 <div id="banner" class="banner hidden" role="alert"></div>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -1126,6 +1129,10 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
 </div>
 
 <!-- Détail d'une sortie -->
+<div id="histPage" class="histpage hidden" role="dialog" aria-modal="true" aria-labelledby="hpTitle">
+  <div class="hp-head"><h2 id="hpTitle" class="h-title">Historique</h2><button id="hpClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
+  <div id="hpBody" class="hp-body"></div>
+</div>
 <div id="allmap" class="allmap hidden" role="dialog" aria-label="Carte de tous mes parcours">
   <div id="amMap"></div>
   <div class="am-top"><div><b>Mes parcours</b><small id="amStats"></small></div><button id="amClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
@@ -2078,8 +2085,8 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     const after = computeRecords(kept);
     const beaten = Object.keys(after).filter(k => after[k].date === entry.date && before[k] && before[k].v !== after[k].v);
     closeModal(); reset();
-    renderProgress(true);
-    go(3); healthChanged();
+    renderProgress();
+    go(3); healthChanged(); setTimeout(() => openHist(true), anim() ? 450 : 0);
     speak('Sortie enregistrée : ' + sayKm(Math.round(entry.distanceM / 10) * 10) + ' en ' + sayDur(entry.durationMs / 1000) + '.');
     if (beaten.length) setTimeout(() => showMedal(beaten, after), anim() ? 700 : 50);
   }
@@ -2324,11 +2331,43 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     } catch (e) {}
     return h;
   }
+
+  // ---------- Page Historique des sorties ----------
+  let hpFilter = 'tout', hpNew = false;
+  const runRow = (h, i, isNew) => {
+    const act = ACT_LABEL[h.activity] || 'Sortie';
+    return '<li><button type="button" class="run' + (isNew ? ' new' : '') + '" data-i="' + i + '">' + thumbSvg(h.track) +
+      '<div><div class="run-date">' + act + ', ' + df.format(new Date(h.date)) + (h.photos && h.photos.length ? ' · 📷 ' + h.photos.length : '') + '</div>' +
+      '<div class="run-dist num">' + nf2.format((h.distanceM || 0) / 1000) + '<small>km</small></div>' +
+      '<div class="run-meta"><span>' + fmtDurWords(h.durationMs || 0) + '</span>' +
+      (h.activity === 'velo' ? '<span>' + nf1.format(h.avgKmh || 0) + ' km/h</span>' : '<span>' + nf0.format(h.steps || 0) + (h.stepsEstimated ? ' pas estimés' : ' pas') + '</span>') +
+      (h.kcal != null ? '<span>' + nf0.format(h.kcal) + ' kcal</span>' : '') + (h.dplus ? '<span>+' + nf0.format(h.dplus) + ' m</span>' : '') + '</div></div></button></li>';
+  };
+  function renderHist() {
+    const H = store.get(K_HIST, []), L = H.map((h, i) => [h, i]).filter(([h]) => hpFilter === 'tout' || h.activity === hpFilter);
+    const sum = (A, f) => A.reduce((a, [h]) => a + (f(h) || 0), 0);
+    let x = '<div class="hp-tot"><div><b class="num">' + L.length + '</b><span>sortie' + (L.length > 1 ? 's' : '') + '</span></div><div><b class="num">' + nf1.format(sum(L, h => h.distanceM) / 1000) + '</b><span>km</span></div><div><b class="num">' + nf0.format(Math.round(sum(L, h => h.durationMs) / 3600e3)) + '</b><span>heures</span></div><div><b class="num">' + nf0.format(sum(L, h => h.kcal)) + '</b><span>kcal</span></div></div>';
+    x += '<div class="chips hp-chips">' + [['tout', 'Tout'], ['marche', '🚶 Marche'], ['course', '🏃 Course'], ['velo', '🚲 Vélo']].map(([k, l]) => '<button type="button" class="chip" data-hpf="' + k + '" aria-pressed="' + (hpFilter === k) + '">' + l + '</button>').join('') + '</div>';
+    x += '<button type="button" class="allmap-btn" data-allmap="1"><span>🗺️</span><b>Carte de tous mes parcours</b><small>Tes sorties superposées, avec tes photos</small><i>›</i></button>';
+    if (!L.length) { $('hpBody').innerHTML = x + '<div class="block"><p class="empty">' + (H.length ? 'Aucune sortie de ce type pour l\'instant.' : 'Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.') + '</p></div>'; return; }
+    const months = []; L.forEach(([h, i]) => { const d = new Date(h.date), k = d.getFullYear() + '-' + d.getMonth(); let m = months[months.length - 1]; if (!m || m.k !== k) { m = { k, d, items: [] }; months.push(m); } m.items.push([h, i]); });
+    months.forEach(m => {
+      x += '<div class="hp-m"><b>' + cap(m.d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })) + '</b><span>' + m.items.length + ' sortie' + (m.items.length > 1 ? 's' : '') + ' · ' + nf1.format(sum(m.items, h => h.distanceM) / 1000) + ' km · ' + nf0.format(sum(m.items, h => h.kcal)) + ' kcal</span></div><ul class="runs">' + m.items.map(([h, i]) => runRow(h, i, hpNew && i === 0)).join('') + '</ul>';
+    });
+    $('hpBody').innerHTML = x; hpNew = false;
+  }
+  function openHist(isNew) { hpNew = !!isNew; renderHist(); $('histPage').classList.remove('hidden'); $('hpBody').scrollTop = 0; }
+  $('histBtn').addEventListener('click', () => openHist());
+  $('hpClose').addEventListener('click', () => $('histPage').classList.add('hidden'));
+  $('hpBody').addEventListener('click', e => {
+    const f = e.target.closest('[data-hpf]'); if (f) { hpFilter = f.dataset.hpf; renderHist(); return; }
+    if (e.target.closest('[data-allmap]')) { openAllMap(); return; }
+    const r = e.target.closest('.run'); if (r) openDetail(+r.dataset.i);
+  });
   function renderProgress(highlightFirst) {
-    if (highlightFirst) window.__pgTab = 'hist';
     const hist = store.get(K_HIST, []), box = $('progress');
-    const T = [['res', 'Résumé'], ['corps', 'Poids'], ['badges', 'Badges'], ['hist', 'Sorties']];
-    let tab = window.__pgTab || 'res';
+    const T = [['res', 'Résumé'], ['corps', 'Poids'], ['badges', 'Badges']];
+    let tab = window.__pgTab && window.__pgTab !== 'hist' ? window.__pgTab : 'res';
     let html = '<div class="pgtabs" role="tablist">' + T.map(([k, l]) => '<button type="button" role="tab" data-pgtab="' + k + '" aria-selected="' + (k === tab) + '">' + l + (k === 'hist' && hist.length ? ' <i>' + hist.length + '</i>' : '') + '</button>').join('') + '</div>';
     let totalM = 0, totalKcal = 0;
     hist.forEach(h => { totalM += h.distanceM || 0; totalKcal += h.kcal || 0; });
@@ -2336,7 +2375,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
       html += dashHtml();
       if (hist.length) html += '<div class="total"><div class="po"><div class="plate"><div class="back"></div><div class="face">' +
         '<span class="lbl">' + hist.length + ' sortie' + (hist.length > 1 ? 's' : '') + '<br>' + nf0.format(totalKcal) + ' kcal</span>' +
-        '<span class="val num">' + nf2.format(totalM / 1000) + '<small>km</small></span></div></div></div></div>' + weekBilanHtml(hist);
+        '<span class="val num">' + nf2.format(totalM / 1000) + '<small>km</small></span></div></div></div></div>' + '<button type="button" class="allmap-btn" data-openhist="1"><span>🕘</span><b>Historique de mes sorties</b><small>Toutes tes sorties, mois par mois</small><i>›</i></button>' + weekBilanHtml(hist);
       html += goalsHtml();
       if (hist.length) html += statsHtml(hist) + recordsHtml(hist);
       box.innerHTML = html; return;
@@ -2358,6 +2397,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     box.innerHTML = html + '</ul>';
   }
   $('progress').addEventListener('click', e => {
+    if (e.target.closest('[data-openhist]')) { openHist(); return; }
     const pt = e.target.closest('[data-pgtab]'); if (pt) { window.__pgTab = pt.dataset.pgtab; renderProgress(); return; }
     if (e.target.closest('[data-open-goals]')) { openAccueil('edit'); return; }
     const mode = e.target.closest('[data-mode]');
@@ -2414,7 +2454,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
   $('dDelete').addEventListener('click', () => {
     if (!deleteArmed) { deleteArmed = true; $('dDelete').textContent = 'Touche encore pour supprimer'; return; }
     const hist = store.get(K_HIST, []); hist.splice(detailIdx, 1); store.set(K_HIST, hist);
-    closeDetail(); renderProgress(); toast('Sortie supprimée');
+    closeDetail(); renderProgress(); if (!$('histPage').classList.contains('hidden')) renderHist(); toast('Sortie supprimée');
   });
   $('dReplay').addEventListener('click', () => { const h = store.get(K_HIST, [])[detailIdx]; if (h) startReplay(h); });
   $('dGpx').addEventListener('click', () => { const h = store.get(K_HIST, [])[detailIdx]; if (h) exportGpx(h); });
