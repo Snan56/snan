@@ -2251,7 +2251,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     if (!active.length) h += '<p class="empty">Aucun objectif choisi. Touche « Modifier » pour t\'en fixer un.</p>';
     active.forEach(g => {
       const target = settings[g.key], cur = st[g.k], p = Math.min(1, cur / target);
-      h += '<div class="goal' + (p >= 1 ? ' done' : '') + '"><div class="goal-top"><span>' + (p >= 1 ? '✅ ' : (G_IC[g.k] || '') + ' ') + g.now + '</span><b>' + g.f(cur) + ' / ' + gT(g, target) + '</b></div><div class="goal-bar"><i style="width:' + (p * 100).toFixed(1) + '%"></i></div></div>';
+      h += '<div class="goal' + (p >= 1 ? ' done' : '') + '"><div class="goal-top"><span>' + g.now + (p >= 1 ? ' ✓' : '') + '</span><b>' + g.f(cur) + ' / ' + gT(g, target) + '</b></div><div class="goal-bar"><i style="width:' + (p * 100).toFixed(1) + '%"></i></div></div>';
     });
     return h + '<p class="streak">' + streakText(st.streak) + '</p></div>';
   }
