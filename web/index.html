@@ -1540,13 +1540,13 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
   // marche VO2 = 0,1·v + 1,8·v·pente + 3,5 ; course VO2 = 0,2·v + 0,9·v·pente + 3,5 (v en m/min) ; 1 L d'O2 ≈ 5 kcal
   function kcalPerMin(kmh) {
     const kg = weightKg();
-    if (actNow() === 'velo') return bikeMet(kmh) * kg * 0.0175;
+    if (actNow() === 'velo') return Math.max(0, bikeMet(kmh) - 1) * kg * 0.0175; // calories actives : on retire le repos (1 MET)
     let vo2 = 3.5; // arrêt, ou trop rapide pour être à pied (véhicule)
     if (kmh >= 1 && kmh <= 25) {
       const v = Math.min(kmh, 20) * 1000 / 60, g = Math.max(0, S.grade || 0), r = runShare(kmh);
       vo2 = (0.1 * v + 1.8 * v * g + 3.5) * (1 - r) + (0.2 * v + 0.9 * v * g + 3.5) * r;
     }
-    return vo2 * kg / 1000 * 5;
+    return Math.max(0, vo2 - 3.5) * kg / 1000 * 5; // calories actives : à l'arrêt = 0
   }
   function accrueKcal() {
     if (S.status !== 'running' || S.veh || !lastKcalAt) return;
@@ -2060,9 +2060,20 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     const run = h.activity === 'course', d = h.distanceM || 0, min = (h.durationMs || 0) / 60000;
     // garde-fous : on ne monte pas plus de ~900 m/h ni ne descend plus de ~1 200 m/h à pied, ni plus de 35 % de la distance
     const up = Math.min(h.dplus || 0, min / 60 * 900, d * 0.35), down = Math.min(h.dminus || 0, min / 60 * 1200, d * 0.35);
-    const vo2 = (run ? 0.2 : 0.1) * d + (run ? 0.9 : 1.8) * up + 0.5 * down + 3.5 * min; // ml O2 / kg sur toute la sortie
+    const vo2 = (run ? 0.2 : 0.1) * d + (run ? 0.9 : 1.8) * up + 0.5 * down; // ml O2 / kg dépensés EN PLUS du repos : rester immobile n'ajoute rien
     const terrain = !run && d > 0 && up / d > 0.03 ? 1.15 : 1; // sentier de montagne
     return vo2 * terrain * weightKg() / 1000 * 5;
+  }
+
+  // Temps réellement en mouvement : si la sortie est restée lancée à l'arrêt, on l'estime avec les pas et la distance
+  function fixMoving(h) {
+    const d = h.distanceM || 0, dur = h.durationMs || 0; if (!dur) return false;
+    const est = h.activity === 'velo' ? d / (14 / 3.6) * 1000 : Math.max(d / (5 / 3.6) * 1000, (h.steps || 0) / 105 * 60000); // vélo 14 km/h, marche 5 km/h ou ~105 pas/min
+    if (est > 0 && dur > est * 1.8 && dur - est > 20 * 60000) {
+      h.totalMs = h.totalMs || dur; h.durationMs = Math.round(est * 1.25); // marge pour une allure plus lente
+      h.avgKmh = Math.round(d / 1000 / (h.durationMs / 3600e3) * 10) / 10; return true;
+    }
+    return false;
   }
   function saveSortie() {
     const hist = store.get(K_HIST, []);
@@ -2074,6 +2085,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
       stepCm: S.activity === 'velo' ? null : Math.round((measuredStepM() || stepLenM(avgKmh())) * 100),
       dplus: Math.round(S.dplus || 0), dminus: Math.round(S.dminus || 0), splits: S.splits.slice(), track: simplifyTrack(S.track), photos: (S.photos || []).slice()
     };
+    fixMoving(entry); entry.kcalNet = 1;
     entry.kcal = Math.round(Math.max(entry.kcal, summaryKcal(entry)));
     hist.unshift(entry);
     setTimeout(() => { try { pedoAfterSave(entry.date); } catch (e) {} }, 800);
@@ -2339,9 +2351,9 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     return '<li><button type="button" class="run' + (isNew ? ' new' : '') + '" data-i="' + i + '">' + thumbSvg(h.track) +
       '<div><div class="run-date">' + act + ', ' + df.format(new Date(h.date)) + (h.photos && h.photos.length ? ' · 📷 ' + h.photos.length : '') + '</div>' +
       '<div class="run-dist num">' + nf2.format((h.distanceM || 0) / 1000) + '<small>km</small></div>' +
-      '<div class="run-meta"><span>' + fmtDurWords(h.durationMs || 0) + '</span>' +
+      '<div class="run-meta"><span>' + fmtDurWords(h.durationMs || 0) + (h.totalMs ? ' en mouvement' : '') + '</span>' +
       (h.activity === 'velo' ? '<span>' + nf1.format(h.avgKmh || 0) + ' km/h</span>' : '<span>' + nf0.format(h.steps || 0) + (h.stepsEstimated ? ' pas estimés' : ' pas') + '</span>') +
-      (h.kcal != null ? '<span>' + nf0.format(h.kcal) + ' kcal</span>' : '') + (h.dplus ? '<span>+' + nf0.format(h.dplus) + ' m</span>' : '') + '</div></div></button></li>';
+      (h.kcal != null ? '<span>' + nf0.format(h.kcal) + ' kcal actives</span>' : '') + (h.dplus ? '<span>+' + nf0.format(h.dplus) + ' m</span>' : '') + '</div></div></button></li>';
   };
   function renderHist() {
     const H = store.get(K_HIST, []), L = H.map((h, i) => [h, i]).filter(([h]) => hpFilter === 'tout' || h.activity === hpFilter);
@@ -2439,10 +2451,10 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     detailIdx = i; deleteArmed = false; $('dDelete').textContent = 'Supprimer la sortie';
     const velo = h.activity === 'velo';
     $('dTitle').textContent = (ACT_LABEL[h.activity] || 'Sortie') + ', ' + dfLong.format(new Date(h.date));
-    let g = cell('Distance', nf2.format((h.distanceM || 0) / 1000) + ' km') + cell('Durée', fmtClock(h.durationMs || 0));
+    let g = cell('Distance', nf2.format((h.distanceM || 0) / 1000) + ' km') + cell(h.totalMs ? 'En mouvement' : 'Durée', fmtClock(h.durationMs || 0)) + (h.totalMs ? cell('Lancée pendant', fmtDurWords(h.totalMs)) : '');
     g += velo ? cell('Vitesse moyenne', nf1.format(h.avgKmh || 0) + ' km/h') + cell('Vitesse max', nf1.format(h.maxKmh || 0) + ' km/h')
               : cell('Allure moyenne', fmtPace(h.durationMs || 0, h.distanceM || 0) + ' /km') + cell(h.stepsEstimated ? 'Pas estimés' : 'Pas', nf0.format(h.steps || 0));
-    g += cell('Calories', nf0.format(h.kcal || 0) + ' kcal') + cell('Montée', nf0.format(h.dplus || 0) + ' m');
+    g += cell(h.kcalNet ? 'Calories actives' : 'Calories', nf0.format(h.kcal || 0) + ' kcal') + cell('Montée', nf0.format(h.dplus || 0) + ' m');
     if (!velo && h.stepCm) g += cell('Longueur de pas', h.stepCm + ' cm') + cell('Vitesse moyenne', nf1.format(h.avgKmh || 0) + ' km/h');
     $('dBody').innerHTML = thumbSvg(h.track, 340, 200, 'd-route', h.photos) + photosHtml(h.photos) + '<div class="sum">' + g + '</div>' + altSvg(h.track) + splitsHtml(h) + '<div style="height:14px"></div>';
     const ok = h.track && h.track.length >= 2;
@@ -2641,7 +2653,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     time: ['Durée', 'Le temps passé à bouger, sans les pauses.', { all: 'Repère santé (OMS) : 150 minutes d\'activité par semaine, soit environ 30 min, 5 jours sur 7.' }],
     steps: ['Pas', 'Le nombre de pas faits pendant la sortie, comptés par le capteur de l\'iPhone (« estimés » si le capteur n\'est pas dispo).', { all: 'Repère : 1 000 pas ≈ 700 à 800 m. 8 000 à 10 000 pas par jour, c\'est un bon objectif santé.' }],
     pace: ['Allure', 'Le temps qu\'il te faut pour faire 1 km (en minutes par km). Attention : plus le chiffre est petit, plus tu vas vite.', { marche: 'Marche : 12 min/km = 5 km/h (bon rythme) · 10 min/km = 6 km/h (rapide).', course: 'Course : 8 min/km = footing doux · 6 min/km = bon rythme · 5 min/km = rapide.' }],
-    kcal: ['Calories', 'L\'énergie dépensée pendant la sortie, calculée avec ton poids, ta vitesse et la pente. C\'est une estimation (environ ±20 %).', { all: 'Elles sont ajoutées à ton objectif dans l\'onglet Repas, et une carte « Récupération » t\'aide à bien manger après.' }]
+    kcal: ['Calories actives', 'Les calories brûlées EN PLUS grâce à l\'effort, calculées avec ton poids, ta vitesse et la pente. Le temps passé à l\'arrêt ne compte pas. C\'est une estimation (environ ±20 %).', { all: 'Elles sont ajoutées à ton objectif dans l\'onglet Repas, et une carte « Récupération » t\'aide à bien manger après.' }]
   };
   function infoNow(k) {
     const ms = elapsed();
@@ -5085,9 +5097,9 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     const eaten = store.get(K_MEALS, []).filter(m => dayKey(m.date) === key).reduce((a, m) => a + (m.kcal || 0), 0);
     // calories « en plus » de l'activité : on retire ce que le corps aurait brûlé au repos pendant ce temps (1 MET), déjà compté dans le besoin de base
     const rest = ms => weightKg() * (ms || 0) / 3600000;
-    let burned = store.get(K_HIST, []).filter(h => dayKey(h.date) === key).reduce((a, h) => a + Math.max(0, (h.kcal || 0) - rest(h.durationMs)), 0)
+    let burned = store.get(K_HIST, []).filter(h => dayKey(h.date) === key).reduce((a, h) => a + (h.kcalNet ? (h.kcal || 0) : Math.max(0, (h.kcal || 0) - rest(h.durationMs))), 0)
       + store.get(K_WLOG, []).filter(l => dayKey(l.date) === key).reduce((a, l) => a + Math.max(0, l.kind === 'muscu' ? (({ 'Légère': 2.5, 'Normale': 3.5, 'Intense': 5 }[l.intensity] || 3.5) + ((l.muscles || []).includes('jambes') ? 0.5 : 0)) * weightKg() * (l.durationMs || 0) / 3600000 : (l.kcal || 0) - rest(l.durationMs)), 0);
-    if (S.status !== 'idle' && dayKey(S.startTime) === key) burned += Math.max(0, (S.kcal || 0) - rest(S.activeMs + (S.status === 'running' ? Date.now() - S.resumedAt : 0)));
+    if (S.status !== 'idle' && dayKey(S.startTime) === key) burned += S.kcal || 0; // déjà des calories actives
     return { eaten, burned };
   }
   // ---------- Besoin en calories (Mifflin-St Jeor) et objectif de poids ----------
@@ -5889,8 +5901,19 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
   }
 
   // ---------- Horloge ----------
+  let stepsSeen = 0, stepsAt = Date.now(), distMark = { t: Date.now(), d: 0 };
   setInterval(() => {
-    if (S.status !== 'running') return;
+    if (S.status !== 'running') { stepsAt = Date.now(); distMark = { t: Date.now(), d: S.distance }; return; }
+    const stNow = S.sensorSteps || 0; if (stNow - stepsSeen >= 10) { stepsSeen = stNow; stepsAt = Date.now(); } // quelques pas isolés ne comptent pas
+    if (S.distance - distMark.d > 60) distMark = { t: Date.now(), d: S.distance }; // le GPS qui « tremble » sur place ne compte pas
+    const lastAct = Math.max(distMark.t, stepsAt, S.resumedAt || 0);
+    if (!S.veh && Date.now() - lastAct > 10 * 60000) { // 10 min sans pas ni déplacement : pause auto, sans compter ce temps
+      S.resumedAt += Date.now() - lastAct; pause(true);
+      const msg = 'Tu ne bouges plus depuis 10 minutes : ta sortie est en pause. Reprends-la ou termine-la.';
+      toast(msg); speak('Sortie mise en pause.');
+      const LN = plugin('LocalNotifications'); if (LN && document.hidden) { try { LN.schedule({ notifications: [{ id: 98, title: 'Parcours · Pause automatique', body: msg, schedule: { at: new Date(Date.now() + 1000) } }] }); } catch (e) {} }
+      return;
+    }
     if (lastFixAt && Date.now() - lastFixAt > 10000) { curKmh = 0; setGps('weak', 'Signal GPS perdu'); }
     accrueKcal(); if (!document.hidden) render(); save(); // écran éteint : on calcule, mais on ne dessine rien
     if (!document.hidden && currentView === 1 && mapRouteDirty) flushRoute();
@@ -5936,6 +5959,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
   } else post.classList.remove('intro');
   applyAnim();
   syncSettingsForm();
+  try { const H = store.get(K_HIST, []), kg = weightKg(); let ch = 0; H.forEach(h => { if (h.kcalNet) return; const tot = h.durationMs || 0; fixMoving(h); h.kcal = h.activity === 'velo' ? Math.max(0, Math.round((h.kcal || 0) - kg * tot / 3600e3)) : Math.round(summaryKcal(h)); h.kcalNet = 1; h.kcalFix2 = 1; ch = 1; }); if (ch) store.set(K_HIST, H); } catch (e) {}
   try { const H = store.get(K_HIST, []); let ch = 0; H.forEach(h => { if (h.kcalFix2) return; const k = summaryKcal(h); if (k > (h.kcal || 0) * 1.1) { h.kcal = Math.round(k); ch = 1; } h.kcalFix2 = 1; }); if (ch || H.length) store.set(K_HIST, H); } catch (e) {}
   renderProgress();
   renderSeances();
