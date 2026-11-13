@@ -926,22 +926,22 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
 
 /* ================= Habillage sobre : couleurs franches, pas d'effets ================= */
 :root{--card:#14151a;--line:rgba(255,255,255,.07);--line-2:rgba(255,255,255,.12);--txt-2:rgba(236,240,248,.62);--accent:#ff5a1f}
-#v-sortie,#v-carte{--accent:#ff5a1f}#v-seances{--accent:#8b7cf6}#v-repas{--accent:#2fbf71}#v-progres{--accent:#4c8df6}#v-reglages{--accent:#9aa3b2}
+#v-sortie,#v-carte,#v-seances,#v-repas,#v-progres,#v-reglages{--accent:#ff5a1f}
 .set,.block{background:var(--card)!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important;border:1px solid var(--line)!important;border-radius:16px!important;box-shadow:none!important}
 .linkbtn{color:var(--accent)!important}
 .goal-bar{height:8px!important;border-radius:4px;background:rgba(255,255,255,.08)!important;overflow:hidden}.goal-bar i{border-radius:4px;background:var(--accent)!important;box-shadow:none}
-.goal.done .goal-bar i,.gl-it.done .goal-bar i{background:#2fbf71!important}
+.goal.done .goal-bar i,.gl-it.done .goal-bar i{background:#ff5a1f!important}
 .sbtn.save{background:var(--accent)!important;box-shadow:none!important;color:#fff}
 .sbtn.cancel{background:rgba(255,255,255,.06)!important;border:1px solid var(--line-2)!important;color:#fff}
 .chips .chip[aria-pressed="true"],.hp-chips .chip[aria-pressed="true"]{background:var(--accent)!important;border-color:var(--accent)!important;color:#fff!important}
 .tabbar{background:#0b0c0f!important;-webkit-backdrop-filter:none;backdrop-filter:none;border-top:1px solid var(--line)!important}
-.tab[data-view="0"],.tab[data-view="1"]{--accent:#ff5a1f}.tab[data-view="2"]{--accent:#8b7cf6}.tab[data-view="5"]{--accent:#2fbf71}.tab[data-view="3"]{--accent:#4c8df6}
+.tab{--accent:#ff5a1f}
 .tab[aria-current="page"]{color:var(--accent)!important}.tab[aria-current="page"]::after{width:16px!important;height:3px!important;border-radius:2px;background:var(--accent)!important;bottom:4px!important}
 .dtile,.gl-it,.allmap-btn,.hp-tot div,.gl-pre,.wtarget,.photobtn,.meteo{background:var(--card)!important;border:1px solid var(--line)!important;box-shadow:none!important}
 .wkb.t i{background:var(--accent)!important}.dt-ring .r1{stroke:var(--accent)}
 .pgtabs{background:var(--card)!important;border:1px solid var(--line)!important}.pgtabs button[aria-selected="true"]{background:var(--accent)!important;box-shadow:none!important}
 .recov,.focus,.prog-today,.coachline,.gp-it.now,.privacy,.prog-card.reco{background:var(--card)!important;border:1px solid var(--line)!important;border-left:3px solid var(--accent)!important;box-shadow:none!important}
-.recov.ok,.prog-today.rest,.prog-today.done{border-left-color:#2fbf71!important}.gp-it.now{margin:6px 0 0;padding:12px}
+.recov.ok,.prog-today.rest,.prog-today.done{border-left-color:#ff5a1f!important}.gp-it.now{margin:6px 0 0;padding:12px}
 .rc-t,.fc-h small,.pt-h small,.gp-d b i,.gp-d small,.pc-reco+*,.wt-h span,.gl-count b{color:var(--accent)!important}.pc-reco{background:var(--accent)!important}
 .rtile.main,.wtile.main{background:var(--accent)!important;border-color:var(--accent)!important;box-shadow:none!important;color:#fff!important}.rtile.main svg,.wtile.main svg{stroke:#fff!important}
 .rr-a{stroke:var(--accent)!important}.rr-a.over{stroke:#e5484d!important}
@@ -949,6 +949,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
 .toast{background:#1b1c22!important;color:#fff!important;border:1px solid var(--line-2)}
 .sky{background:#0b0c0f!important}.gl-chips button:active{background:var(--accent)}
 .isl-dots i.on{background:#ff5a1f}.allmap-btn span,.fc-h>span,.rc-h>span,.pt-h>span,.gl-ic,.pp-ic{filter:grayscale(.15)}
+.gl-it.done{border-color:var(--line)!important;background:var(--card)!important}.gl-it.done .gl-pct,.wt-eta.ok{color:#ff8a50!important}.privacy{border-left-color:#ff5a1f!important}
 </style>
 </head>
 <body>
@@ -5294,7 +5295,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     const tot = store.get(K_MEALS, []).filter(m => dayKey(m.date) === key).reduce((a, m) => { const x = mealMacros(m); return a.map((v, k) => v + x[k]); }, [0, 0, 0]);
     const pg = protGoal(), kc = tot[0] * 4 + tot[1] * 4 + tot[2] * 9 || 1;
     const row = (lbl, v, goal, col, pct) => '<div class="mac"><span>' + lbl + '</span><div class="mac-bar"><i style="width:' + Math.min(100, goal ? v / goal * 100 : pct).toFixed(0) + '%;background:' + col + '"></i></div><b class="num">' + nf0.format(v) + (goal ? ' / ' + nf0.format(goal) : '') + ' g</b></div>';
-    return '<div class="macs">' + row('Protéines', tot[0], pg ? pg.g : 0, '#4ade80', 0) + row('Glucides', tot[1], 0, '#60a5fa', tot[1] * 4 / kc * 100) + row('Lipides', tot[2], 0, '#facc15', tot[2] * 9 / kc * 100) +
+    return '<div class="macs">' + row('Protéines', tot[0], pg ? pg.g : 0, '#ff5a1f', 0) + row('Glucides', tot[1], 0, '#ffa27a', tot[1] * 4 / kc * 100) + row('Lipides', tot[2], 0, '#c9cdd6', tot[2] * 9 / kc * 100) +
       (pg ? '<p class="mac-note">Objectif protéines : ' + pg.per.toString().replace('.', ',') + ' g par kg de poids' + (pg.per >= 1.8 ? ' (prise de muscle)' : pg.per >= 1.6 ? ' (pour garder tes muscles en perdant du poids)' : '') + '. Valeurs estimées.</p>' : '') + '</div>';
   }
   // ---------- Refaire un repas d'hier ----------
