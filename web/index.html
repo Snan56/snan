@@ -963,6 +963,49 @@ body.no-relief .sky{background:repeating-radial-gradient(ellipse 120% 70% at 30%
 .tab[aria-current="page"]{color:#a7c99a!important}.tab[aria-current="page"]::after{background:#a7c99a!important}
 .sbtn.save,.rtile.main,.wtile.main,.pgtabs button[aria-selected="true"],.chips .chip[aria-pressed="true"],.hp-chips .chip[aria-pressed="true"]{color:#f6f0e2!important}
 .toast{background:#1d281f!important;color:#efe7d4!important}
+
+/* ================= Animations v2 (toutes coupées si « Animations 3D » est désactivé) ================= */
+@keyframes riseIn{from{opacity:0;translate:0 18px}}
+@keyframes barGrow{from{transform:scaleX(0)}}
+@keyframes ringDraw{from{stroke-dasharray:0 999}}
+@keyframes ringDraw2{from{stroke-dashoffset:440}}
+@keyframes colGrow{from{transform:scaleY(0)}}
+@keyframes badgeIn{0%{opacity:0;scale:.6}70%{scale:1.06}100%{opacity:1;scale:1}}
+@keyframes tabPop{0%{scale:.7}55%{scale:1.2}100%{scale:1}}
+@keyframes tabLine{from{scale:0 1}}
+@keyframes detIn{from{opacity:0;translate:0 -8px}}
+body:not(.anim-off) .fx>*{animation:riseIn .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:750ms}
+body:not(.anim-off) .fx>:nth-child(1){animation-delay:200ms}body:not(.anim-off) .fx>:nth-child(2){animation-delay:255ms}body:not(.anim-off) .fx>:nth-child(3){animation-delay:310ms}body:not(.anim-off) .fx>:nth-child(4){animation-delay:365ms}body:not(.anim-off) .fx>:nth-child(5){animation-delay:420ms}body:not(.anim-off) .fx>:nth-child(6){animation-delay:475ms}body:not(.anim-off) .fx>:nth-child(7){animation-delay:530ms}body:not(.anim-off) .fx>:nth-child(8){animation-delay:585ms}body:not(.anim-off) .fx>:nth-child(9){animation-delay:640ms}body:not(.anim-off) .fx>:nth-child(10){animation-delay:695ms}
+body:not(.anim-off) .fx .goal-bar i,body:not(.anim-off) .fx .mac-bar i{transform-origin:0 50%;animation:barGrow .9s .45s cubic-bezier(.2,.8,.2,1) both}
+body:not(.anim-off) .fx .dt-ring .r1{animation:ringDraw 1.1s .3s cubic-bezier(.2,.8,.2,1) both}
+body:not(.anim-off) .fx .rr-a{animation:ringDraw2 1.1s .3s cubic-bezier(.2,.8,.2,1) both}
+body:not(.anim-off) .fx .wkb i,body:not(.anim-off) .fx .wbars i{transform-origin:50% 100%;animation:colGrow .7s .5s cubic-bezier(.2,.8,.2,1) both}
+body:not(.anim-off) .fx .badge{animation:badgeIn .45s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.25s + var(--bi,0)*28ms)}
+/* appui : tout ce qui se touche réagit */
+body:not(.anim-off) :is(.sbtn,.chip,.dtile,.rtile,.wtile,.allmap-btn,.run,.gear,.fbtn,.photobtn,.scanbtn,.pgtabs button,.act,.offr,.grecb,.ac-cta,.xbtn,.stepper button,.gl-chips button,.wcard,.badge,.linkbtn){transition:scale .16s cubic-bezier(.2,.8,.2,1),opacity .16s}
+body:not(.anim-off) :is(.sbtn,.chip,.dtile,.rtile,.wtile,.allmap-btn,.run,.gear,.fbtn,.photobtn,.scanbtn,.pgtabs button,.act,.offr,.grecb,.ac-cta,.xbtn,.stepper button,.gl-chips button,.wcard):active{scale:.95;opacity:.85}
+body:not(.anim-off) .tab svg{transition:scale .16s}body:not(.anim-off) .tab:active svg{scale:.82}
+body:not(.anim-off) .tab[aria-current="page"] svg{animation:tabPop .45s cubic-bezier(.2,.8,.2,1)}
+body:not(.anim-off) .tab[aria-current="page"]::after{animation:tabLine .35s .05s cubic-bezier(.2,.8,.2,1) both}
+body:not(.anim-off) .pgtabs button{transition:background-color .25s,color .25s,scale .16s}
+body:not(.anim-off) .chip{transition:background-color .2s,border-color .2s,color .2s,scale .16s}
+body:not(.anim-off) .switch input+span,body:not(.anim-off) .switch input+span::before,body:not(.anim-off) .switch input+span::after{transition-duration:.28s;transition-timing-function:cubic-bezier(.3,1.4,.5,1)}
+body:not(.anim-off) details[open]>*:not(summary){animation:detIn .3s cubic-bezier(.2,.8,.2,1) both}
+/* fenêtres : montent du bas et redescendent en se fermant */
+body:not(.anim-off) .modal{transition:opacity .26s ease,display .26s allow-discrete}
+body:not(.anim-off) .modal.hidden{opacity:0;pointer-events:none}
+body:not(.anim-off) .modal .sheet{animation:none;transition:translate .4s cubic-bezier(.2,.9,.25,1),opacity .26s ease}
+body:not(.anim-off) .modal.hidden .sheet{translate:0 56px;opacity:0}
+@starting-style{body:not(.anim-off) .modal:not(.hidden){opacity:0}body:not(.anim-off) .modal:not(.hidden) .sheet{translate:0 72px;opacity:0}}
+body:not(.anim-off) .histpage{transition:translate .38s cubic-bezier(.2,.9,.25,1),opacity .26s ease,display .38s allow-discrete}
+body:not(.anim-off) .histpage.hidden{translate:100% 0;opacity:0;pointer-events:none}
+@starting-style{body:not(.anim-off) .histpage:not(.hidden){translate:100% 0;opacity:0}}
+body:not(.anim-off) .allmap,body:not(.anim-off) .phview{transition:opacity .28s ease,display .28s allow-discrete}
+body:not(.anim-off) .allmap.hidden,body:not(.anim-off) .phview.hidden{opacity:0;pointer-events:none}
+body:not(.anim-off) .phview img{transition:scale .35s cubic-bezier(.2,.9,.25,1)}body:not(.anim-off) .phview.hidden img{scale:.9}
+@starting-style{body:not(.anim-off) .allmap:not(.hidden),body:not(.anim-off) .phview:not(.hidden){opacity:0}body:not(.anim-off) .phview:not(.hidden) img{scale:.9}}
+body:not(.anim-off) .toast{transition:opacity .25s,transform .45s cubic-bezier(.2,1.5,.4,1)}
+body:not(.anim-off) .coachline,body:not(.anim-off) .meteo,body:not(.anim-off) .photobtn{animation:riseIn .45s cubic-bezier(.2,.8,.2,1)}
 </style>
 </head>
 <body>
@@ -2411,14 +2454,33 @@ body.no-relief .sky{background:repeating-radial-gradient(ellipse 120% 70% at 30%
     });
     $('hpBody').innerHTML = x; hpNew = false;
   }
-  function openHist(isNew) { hpNew = !!isNew; renderHist(); $('histPage').classList.remove('hidden'); $('hpBody').scrollTop = 0; }
+  function openHist(isNew) { hpNew = !!isNew; renderHist(); $('histPage').classList.remove('hidden'); $('hpBody').scrollTop = 0; fx($('hpBody')); }
   $('histBtn').addEventListener('click', () => openHist());
   $('hpClose').addEventListener('click', () => $('histPage').classList.add('hidden'));
   $('hpBody').addEventListener('click', e => {
-    const f = e.target.closest('[data-hpf]'); if (f) { hpFilter = f.dataset.hpf; renderHist(); return; }
+    const f = e.target.closest('[data-hpf]'); if (f) { hpFilter = f.dataset.hpf; renderHist(); fx($('hpBody')); return; }
     if (e.target.closest('[data-allmap]')) { openAllMap(); return; }
     const r = e.target.closest('.run'); if (r) openDetail(+r.dataset.i);
   });
+
+  // ---------- Animations d'entrée : cartes en cascade, barres qui se remplissent, chiffres qui montent ----------
+  function countUp(root) {
+    root.querySelectorAll('.dt-ring b,.dtile>b,.rcenter b,.rstats b,.hp-tot b').forEach(el => {
+      const tn = el.firstChild; if (!tn || tn.nodeType !== 3) return;
+      const txt = tn.nodeValue, m = txt.match(/^(\D*?)(\d[\d\s  ]*(?:,\d+)?)(.*)$/); if (!m) return;
+      const dec = (m[2].split(',')[1] || '').length, target = parseFloat(m[2].replace(/[\s  ]/g, '').replace(',', '.')); if (!(target > 0)) return;
+      const fmt = dec === 0 ? nf0 : dec === 1 ? nf1 : nf2, t0 = performance.now() + 220, dur = 750;
+      tn.nodeValue = m[1] + fmt.format(0) + m[3];
+      const step = t => { if (!el.isConnected) return; const k = Math.max(0, Math.min(1, (t - t0) / dur)), e = 1 - Math.pow(1 - k, 3); if (k >= 1) { tn.nodeValue = txt; return; } tn.nodeValue = m[1] + fmt.format(target * e) + m[3]; requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    });
+  }
+  function fx(el) {
+    if (!el || !anim()) return;
+    el.classList.remove('fx'); void el.offsetWidth; el.classList.add('fx');
+    clearTimeout(el.__fx); el.__fx = setTimeout(() => el.classList.remove('fx'), 1500);
+    try { countUp(el); } catch (e) {}
+  }
   function renderProgress(highlightFirst) {
     const hist = store.get(K_HIST, []), box = $('progress');
     const T = [['res', 'Résumé'], ['corps', 'Poids'], ['badges', 'Badges']];
@@ -2453,7 +2515,7 @@ body.no-relief .sky{background:repeating-radial-gradient(ellipse 120% 70% at 30%
   }
   $('progress').addEventListener('click', e => {
     if (e.target.closest('[data-openhist]')) { openHist(); return; }
-    const pt = e.target.closest('[data-pgtab]'); if (pt) { window.__pgTab = pt.dataset.pgtab; renderProgress(); return; }
+    const pt = e.target.closest('[data-pgtab]'); if (pt) { window.__pgTab = pt.dataset.pgtab; renderProgress(); fx($('progress')); return; }
     if (e.target.closest('[data-open-goals]')) { openAccueil('edit'); return; }
     const mode = e.target.closest('[data-mode]');
     if (mode) { statMode = mode.dataset.mode; renderProgress(); return; }
@@ -4521,9 +4583,9 @@ body.no-relief .sky{background:repeating-radial-gradient(ellipse 120% 70% at 30%
   function badgesHtml() {
     const got = badgesCheck(); let s; try { s = badgeStats(); } catch (e) { s = {}; }
     const n = BADGES.filter(b => got[b[0]]).length;
-    return '<div class="block"><div class="bh">Mes badges <small class="bcount">' + n + ' / ' + BADGES.length + '</small></div><div class="bgrid">' + BADGES.map(([id, ic, t, d, f, goal]) => {
+    return '<div class="block"><div class="bh">Mes badges <small class="bcount">' + n + ' / ' + BADGES.length + '</small></div><div class="bgrid">' + BADGES.map(([id, ic, t, d, f, goal], bi) => {
       const on = !!got[id], v = Math.min(goal, f(s) || 0), p = Math.round(v / goal * 100);
-      return '<div class="badge' + (on ? ' on' : '') + '" title="' + esc(d) + '"><span class="bic">' + ic + '</span><b>' + esc(t) + '</b><small>' + esc(d) + '</small>' +
+      return '<div class="badge' + (on ? ' on' : '') + '" style="--bi:' + bi + '" title="' + esc(d) + '"><span class="bic">' + ic + '</span><b>' + esc(t) + '</b><small>' + esc(d) + '</small>' +
         (on ? '<i class="bdate">' + new Date(got[id]).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + '</i>' : '<i class="bbar"><u style="width:' + p + '%"></u></i>') + '</div>';
     }).join('') + '</div></div>';
   }
@@ -4563,6 +4625,7 @@ body.no-relief .sky{background:repeating-radial-gradient(ellipse 120% 70% at 30%
     if (i === 3) renderProgress();
     if (i === 5) renderRepas();
     to.classList.add('is-active'); to.inert = false;
+    if (i !== 1) fx(i === 3 ? $('progress') : i === 5 ? $('repas') : i === 2 ? $('seances') : to);
     document.body.classList.toggle('on-map', i === 1);
     document.body.classList.toggle('dim', i >= 2);
     if (i === 1) ensureMap();
@@ -4576,7 +4639,7 @@ body.no-relief .sky{background:repeating-radial-gradient(ellipse 120% 70% at 30%
     };
     if (!anim() || !to.animate) { done(); return; }
     switching = true;
-    const half = innerWidth / 2, ease = 'cubic-bezier(.62,.04,.3,1)', dur = 620;
+    const half = innerWidth / 2, ease = 'cubic-bezier(.65,0,.22,1)', dur = 560;
     const tf = a => 'translateZ(' + (-half) + 'px) rotateY(' + a + 'deg) translateZ(' + half + 'px)';
     from.animate([{ transform: tf(0) }, { transform: tf(-90 * dir) }], { duration: dur, easing: ease, fill: 'forwards' });
     const a2 = to.animate([{ transform: tf(90 * dir) }, { transform: tf(0) }], { duration: dur, easing: ease, fill: 'forwards' });
