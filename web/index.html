@@ -922,6 +922,40 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
 .hp-chips{margin-bottom:12px}.hp-chips .chip[aria-pressed="true"]{background:#ff5a1f;color:#fff;border-color:#ff5a1f}.hp-m{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:18px 2px 8px}.hp-m b{font-size:16px}.hp-m span{font-size:12.5px;color:rgba(255,255,255,.55);text-align:right}
 .gplan{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:14px;background:rgba(255,255,255,.04)}.gplan input[type=datetime-local]{width:100%;box-sizing:border-box;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,.15);background:#111216;color:#fff;font:inherit;font-size:16px;color-scheme:dark}.gp-rep{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14.5px}.gplan small{color:rgba(255,255,255,.55);font-size:12.5px}
 .gp-it{display:flex;flex-direction:column;gap:10px;padding:12px 0;border-top:1px solid rgba(255,255,255,.07)}.gp-it.now{margin:6px -8px 0;padding:12px 8px;border-radius:14px;background:rgba(255,90,31,.1);border:1px solid rgba(255,90,31,.3)}.gp-d b{display:block;font-size:15px}.gp-d b i{font-style:normal;font-weight:600;font-size:12px;color:#ff8a50}.gp-d span{display:block;margin-top:2px;font-size:13px;color:rgba(255,255,255,.65)}.gp-d small{display:block;margin-top:4px;font-size:12.5px;font-weight:700;color:#ff8a50}.gp-b{display:flex;gap:8px;align-items:center}.gp-b .sbtn{flex:1;padding:10px}
+
+/* ================= Habillage visuel v2 : palette, cartes, couleurs par section ================= */
+:root{--bg:#090a0e;--card:rgba(24,26,33,.86);--card-2:rgba(17,18,24,.9);--line:rgba(255,255,255,.07);--line-2:rgba(255,255,255,.12);
+  --or:#ff6a2b;--or-2:#ff3d5e;--grad:linear-gradient(135deg,#ff7a2f 0%,#ff4d4d 55%,#ff2e74 100%);
+  --vert:#34d399;--bleu:#60a5fa;--violet:#a78bfa;--ambre:#fbbf24;--txt-2:rgba(236,240,248,.66);--accent:var(--or)}
+#v-sortie,#v-carte{--accent:#ff6a2b;--accent-2:#ff3d5e}#v-seances{--accent:#a78bfa;--accent-2:#7c3aed}#v-repas{--accent:#34d399;--accent-2:#10b981}#v-progres{--accent:#60a5fa;--accent-2:#3b82f6}#v-reglages{--accent:#94a3b8;--accent-2:#64748b}
+.sky{background:radial-gradient(120% 60% at 0% 0%,rgba(255,106,43,.16),transparent 55%),radial-gradient(90% 55% at 100% 100%,rgba(124,58,237,.14),transparent 60%),linear-gradient(#0a0b10,#08090c)!important}
+.set,.block{background:linear-gradient(180deg,var(--card),var(--card-2))!important;border:1px solid var(--line)!important;border-radius:22px!important;box-shadow:0 12px 30px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.05)}
+.bh{display:flex;align-items:center}.bh::before{content:"";flex:none;width:4px;height:16px;margin-right:9px;border-radius:3px;background:linear-gradient(var(--accent),var(--accent-2,var(--accent)))}
+.bh{justify-content:flex-start!important}.bh>.linkbtn,.bh>small,.bh>button{margin-left:auto}
+.linkbtn{color:var(--accent)!important}
+.goal-bar{height:10px!important;border-radius:999px;background:rgba(255,255,255,.08)!important;overflow:hidden}.goal-bar i{border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent-2,var(--accent)))!important;box-shadow:0 0 12px color-mix(in srgb,var(--accent) 55%,transparent)}
+.goal.done .goal-bar i,.gl-it.done .goal-bar i{background:linear-gradient(90deg,#34d399,#10b981)!important}
+.sbtn{border-radius:16px!important}.sbtn.save{background:var(--grad)!important;box-shadow:0 8px 22px rgba(255,61,94,.32)!important;border:0}.sbtn.save:active{transform:translateY(1px);filter:brightness(.95)}
+.sbtn.cancel{background:rgba(255,255,255,.07)!important;border:1px solid var(--line-2)!important;color:#fff}
+.chips .chip[aria-pressed="true"],.hp-chips .chip[aria-pressed="true"]{background:linear-gradient(135deg,var(--accent),var(--accent-2,var(--accent)))!important;border-color:transparent!important;color:#fff!important}
+.tabbar{background:rgba(9,10,14,.86)!important;-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);border-top:1px solid var(--line)!important}
+.tab[data-view="0"]{--accent:#ff6a2b}.tab[data-view="1"]{--accent:#fb923c}.tab[data-view="2"]{--accent:#a78bfa}.tab[data-view="5"]{--accent:#34d399}.tab[data-view="3"]{--accent:#60a5fa}
+.tab[aria-current="page"]{color:var(--accent)!important}.tab[aria-current="page"] svg{filter:drop-shadow(0 0 8px color-mix(in srgb,var(--accent) 70%,transparent))}
+.tab[aria-current="page"]::after{width:20px!important;height:4px!important;border-radius:3px;background:var(--accent)!important;bottom:4px!important}
+.gear{background:rgba(24,26,33,.72)!important;border:1px solid var(--line-2)!important}
+.h-title{background:linear-gradient(90deg,#fff 30%,color-mix(in srgb,var(--accent) 80%,#fff));-webkit-background-clip:text;background-clip:text;color:transparent}
+.dtile,.gl-it,.allmap-btn,.hp-tot div{background:linear-gradient(180deg,rgba(28,30,38,.9),rgba(18,19,25,.92))!important;border:1px solid var(--line)!important;box-shadow:0 8px 22px rgba(0,0,0,.28)}
+.dtile span{filter:saturate(1.2)}.wkb.t i{background:linear-gradient(var(--accent),var(--accent-2,var(--accent)))!important}
+.dt-ring .r1{stroke:url(#ringGrad)}
+.pgtabs{background:rgba(17,18,24,.9)!important;border:1px solid var(--line)!important}.pgtabs button[aria-selected="true"]{background:linear-gradient(135deg,var(--accent),var(--accent-2,var(--accent)))!important;box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 35%,transparent)!important}
+.recov{background:linear-gradient(160deg,rgba(52,211,153,.13),rgba(16,185,129,.03))!important;border-color:rgba(52,211,153,.32)!important}.rc-t{color:#34d399!important}
+.focus{background:linear-gradient(160deg,rgba(96,165,250,.13),rgba(24,26,33,.9))!important;border-color:rgba(96,165,250,.3)!important}.fc-h small{color:#60a5fa!important}
+.prog-today{background:linear-gradient(160deg,rgba(167,139,250,.16),rgba(124,58,237,.04))!important;border-color:rgba(167,139,250,.35)!important}.pt-h small{color:#a78bfa!important}.gp-it.now{background:rgba(167,139,250,.12)!important;border-color:rgba(167,139,250,.35)!important}.gp-d b i,.gp-d small{color:#c4b5fd!important}
+.coachline{background:linear-gradient(135deg,rgba(255,106,43,.14),rgba(255,46,116,.06))!important;border-color:rgba(255,106,43,.3)!important}
+.toast{background:rgba(24,26,33,.95)!important;color:#fff!important;border:1px solid var(--line-2);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.rtile.main,.wtile.main{background:linear-gradient(135deg,var(--accent),var(--accent-2,var(--accent)))!important;border-color:transparent!important;box-shadow:0 10px 24px color-mix(in srgb,var(--accent) 35%,transparent)!important;color:#fff!important}.rtile.main svg,.wtile.main svg{stroke:#fff!important}
+.rr-a{stroke:var(--accent)!important}.rr-a.over{stroke:#ff4d4d!important}.radd1{border-color:color-mix(in srgb,var(--accent) 60%,transparent)!important;color:var(--accent)!important}
+.badge.on{border-color:color-mix(in srgb,var(--accent) 55%,transparent)!important;background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 22%,transparent),rgba(24,26,33,.9))!important}.badge.on .bdate{color:var(--accent)!important}
 </style>
 </head>
 <body>
@@ -2327,7 +2361,7 @@ body.app-enter .stage{animation:appIn 1s .25s cubic-bezier(.16,.84,.24,1) both}b
     const st = goalStats(), today = dayKey(Date.now()), E = dayEnergy(today), sg = +settings.goalSteps || 10000;
     const pr = Math.min(1, st.steps / sg), C = 2 * Math.PI * 42;
     const W = store.get(K_WEIGHTS, []), w = +settings.weight || 0, dW = W.length >= 2 ? W[W.length - 1].kg - W[0].kg : 0;
-    let h = '<div class="block dash-today"><div class="dt-ring"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" class="r0"/><circle cx="50" cy="50" r="42" class="r1" style="stroke-dasharray:' + (pr * C).toFixed(1) + ' ' + C.toFixed(1) + '"/></svg><div><b class="num">' + nf0.format(st.steps) + '</b><small>/ ' + nf0.format(sg) + ' pas</small></div></div>' +
+    let h = '<div class="block dash-today"><div class="dt-ring"><svg viewBox="0 0 100 100"><defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#a78bfa"/></linearGradient></defs><circle cx="50" cy="50" r="42" class="r0"/><circle cx="50" cy="50" r="42" class="r1" style="stroke-dasharray:' + (pr * C).toFixed(1) + ' ' + C.toFixed(1) + '"/></svg><div><b class="num">' + nf0.format(st.steps) + '</b><small>/ ' + nf0.format(sg) + ' pas</small></div></div>' +
       '<div class="dt-side"><div class="dt-t">Aujourd\'hui</div><div class="dt-l"><span>🍽️ Mangées</span><b class="num">' + nf0.format(Math.round(E.eaten)) + ' kcal</b></div><div class="dt-l"><span>🔥 Dépensées</span><b class="num">' + nf0.format(Math.round(E.burned)) + ' kcal</b></div><div class="dt-l"><span>🎯 Pas</span><b class="num">' + Math.round(pr * 100) + ' %</b></div></div></div>';
     try { h += focusHtml(st); } catch (e) {}
     const tile = (ic, v, l, tab) => '<button type="button" class="dtile"' + (tab ? ' data-pgtab="' + tab + '"' : '') + '><span>' + ic + '</span><b class="num">' + v + '</b><small>' + l + '</small></button>';
