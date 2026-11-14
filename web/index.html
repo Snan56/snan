@@ -1037,6 +1037,10 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
 .rt-intro{margin:0 2px 12px;font-size:13.5px;color:var(--gris)}.rt-list{display:flex;flex-direction:column;gap:8px}.rt-it{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:16px;border:1px solid var(--ligne);background:var(--carte);color:inherit;font:inherit;text-align:left;cursor:pointer}
 .rt-ic .aico{width:24px;height:24px;color:var(--accent)}.rt-t{flex:1;min-width:0}.rt-t b{display:block;font-size:15px}.rt-t small{display:block;margin-top:2px;font-size:12.5px;color:var(--gris)}.rt-t em{display:block;margin-top:3px;font-style:normal;font-size:12.5px;font-weight:700;color:#d6a24e}.rt-it i{font-style:normal;font-size:22px;color:var(--gris)}.rt-it.loading{opacity:.6}
 .rt-cred{margin:14px 2px 0;font-size:11.5px;color:var(--gris)}
+.ss-list{display:flex;flex-direction:column;gap:8px}.ss-it{display:flex;align-items:center;gap:12px;width:100%;padding:10px;border-radius:14px;border:1px solid var(--ligne);background:var(--carte);color:inherit;font:inherit;text-align:left;cursor:pointer}.ss-it[aria-pressed="true"]{border-color:var(--accent)}.ss-it>span:nth-child(2){flex:1}.ss-it b{display:block;font-size:15px}.ss-it small{font-size:12.5px;color:var(--gris)}.ss-it i{font-style:normal;color:var(--accent);font-weight:800}
+.ss-prev{width:54px;height:54px;flex:none;border-radius:10px;background-size:cover;background-position:center;border:1px solid var(--ligne)}
+.ss-standard{background-image:url(https://tile.openstreetmap.org/14/8472/5719.png)}.ss-topo{background-image:url(https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/14/5719/8472)}.ss-satellite{background-image:url(https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/14/5719/8472)}.ss-velo{background-image:url(https://a.tile-cyclosm.openstreetmap.fr/cyclosm/14/8472/5719.png)}.ss-simple{background-image:url(https://tile.openstreetmap.org/14/8472/5719.png);filter:saturate(.6)}
+#btnStyle{display:inline-flex;align-items:center;gap:6px}
 </style>
 </head>
 <body>
@@ -1088,6 +1092,7 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     <div class="hud" id="hud"><div class="plate"><div class="back"></div><div class="face"><span class="val num"><span id="hudSpeed">0,0</span><small>km/h</small></span><span class="val num"><span id="hudDist">0,00</span><small>km</small></span></div></div></div>
     <div class="map-btns" id="mapBtns">
       <button id="btnRoutes" class="mbtn mbtn-main" type="button">Parcours autour de moi</button>
+      <button id="btnStyle" class="mbtn" type="button" aria-label="Changer de fond de carte"><svg class="aico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5zM2 13l10 5 10-5M2 17.5l10 5 10-5"/></svg> Fond de carte</button>
       <button id="btn3d" class="mbtn" type="button">Vue 2D</button>
       <button id="recenter" class="mbtn hidden" type="button">Recentrer</button>
     </div>
@@ -1253,6 +1258,7 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
   <div class="hp-head"><h2 id="hpTitle" class="h-title">Historique</h2><button id="hpClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
   <div id="hpBody" class="hp-body"></div>
 </div>
+<div id="styleSheet" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="ssT"><div class="sheet"><div class="d-head"><h2 id="ssT">Fond de carte</h2><button id="ssClose" class="xbtn" type="button" aria-label="Fermer">×</button></div><div id="ssList" class="ss-list"></div></div></div>
 <div id="routesPage" class="histpage hidden" role="dialog" aria-modal="true" aria-labelledby="rtTitle">
   <div class="hp-head"><h2 id="rtTitle" class="h-title">Parcours</h2><button id="rtClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
   <div id="rtBody" class="hp-body"></div>
@@ -1562,6 +1568,17 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
   const RASTER_STYLE = { version: 8,
     sources: { osm: { type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256, maxzoom: 19, attribution: '© OpenStreetMap' } },
     layers: [{ id: 'osm', type: 'raster', source: 'osm' }] };
+
+  // Fonds de carte au choix
+  const rasterStyle = (url, attr, max) => ({ version: 8, sources: { fond: { type: 'raster', tiles: [url], tileSize: 256, maxzoom: max || 18, attribution: attr } }, layers: [{ id: 'fond', type: 'raster', source: 'fond' }] });
+  const MAP_STYLES = {
+    standard: ['Standard', 'Rues et bâtiments', () => STYLE_URL],
+    topo: ['Topo', 'Relief, courbes de niveau et sentiers, idéal en rando', () => rasterStyle('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', 'Carte © Esri, HERE, Garmin, OpenStreetMap', 19)],
+    satellite: ['Satellite', 'Vue aérienne', () => rasterStyle('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 'Imagerie © Esri, Maxar, Earthstar Geographics', 19)],
+    velo: ['Vélo', 'Pistes cyclables et itinéraires', () => rasterStyle('https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 'CyclOSM, données © OpenStreetMap', 19)],
+    simple: ['Simple', 'Carte OpenStreetMap classique', () => RASTER_STYLE]
+  };
+  const curStyle = () => (MAP_STYLES[settings.mapStyle] || MAP_STYLES.standard)[2]();
 
   // ---------- Stockage local ----------
   const store = {
@@ -6053,7 +6070,7 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     }
     const here = lastFix ? [lastFix.lon, lastFix.lat] : lastTrackPoint();
     try {
-      map = new maplibregl.Map({ container: 'map', style: STYLE_URL, center: here || [2.4, 46.6], zoom: here ? 16.5 : 5,
+      map = new maplibregl.Map({ container: 'map', style: curStyle(), center: here || [2.4, 46.6], zoom: here ? 16.5 : 5,
         pitch: settings.map3d ? 60 : 0, maxPitch: 70, attributionControl: false });
     } catch (e) { mapLoading = false; mapMsg("La carte 3D n'est pas prise en charge par ce navigateur. Le suivi continue quand même."); return; }
     map.addControl(new maplibregl.AttributionControl({ compact: true }), 'top-right');
@@ -6131,6 +6148,17 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     map.easeTo(o);
   }
   $('recenter').addEventListener('click', () => { setFollow(true); mapOnFix(false); });
+  function styleList() { const cur = MAP_STYLES[settings.mapStyle] ? settings.mapStyle : 'standard'; $('ssList').innerHTML = Object.entries(MAP_STYLES).map(([k, [l, d]]) => '<button type="button" class="ss-it" data-mst="' + k + '" aria-pressed="' + (k === cur) + '"><span class="ss-prev ss-' + k + '"></span><span><b>' + l + '</b><small>' + d + '</small></span>' + (k === cur ? '<i>✓</i>' : '') + '</button>').join(''); }
+  $('btnStyle').addEventListener('click', () => { styleList(); $('styleSheet').classList.remove('hidden'); });
+  $('ssClose').addEventListener('click', () => $('styleSheet').classList.add('hidden'));
+  $('styleSheet').addEventListener('click', e => { if (e.target.id === 'styleSheet') $('styleSheet').classList.add('hidden'); });
+  $('ssList').addEventListener('click', e => {
+    const b = e.target.closest('[data-mst]'); if (!b) return;
+    settings.mapStyle = b.dataset.mst; saveSettings(); styleList();
+    if (map) { styleLoaded = false; styleFellBack = true; map.setStyle(curStyle()); }
+    setTimeout(() => $('styleSheet').classList.add('hidden'), 250);
+    toast('Fond de carte : ' + MAP_STYLES[settings.mapStyle][0]);
+  });
   $('btn3d').addEventListener('click', () => {
     settings.map3d = !settings.map3d; saveSettings();
     $('btn3d').textContent = settings.map3d ? 'Vue 2D' : 'Vue 3D';
