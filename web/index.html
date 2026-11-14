@@ -1111,6 +1111,17 @@ body.mb-browse .mb-ico{display:flex}
 .mb-dsp{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.mb-dsp .chip{font-size:.82rem;padding:7px 12px}.mb-dsp .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#f6f0e2}
 .db-sp{margin:4px 0 2px;padding:5px 11px;border:1px solid var(--ligne);border-radius:999px;background:none;color:var(--blanc);font:inherit;font-size:.8rem;font-weight:700}
 body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-attrib-inner{display:none}
+
+.guess{margin:2px 0 10px;padding:12px;border-radius:16px;border:1px solid var(--ligne);background:rgba(255,255,255,.03)}.guess .g-q{margin:0 0 10px;font-size:15px;font-weight:800}.guess:not(.sure) .g-q{color:#d6a24e}
+.g-opts{display:flex;flex-direction:column;gap:6px}.gchip{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border-radius:12px;border:1px solid var(--ligne);background:var(--carte);color:var(--blanc);font:inherit;text-align:left;cursor:pointer}
+.gchip[aria-pressed="true"]{border-color:var(--accent);background:rgba(74,138,98,.18)}.gchip b{display:block;font-size:14.5px}.gchip small{font-size:12.5px;color:var(--gris)}.gimg{width:38px;height:38px;flex:none;border-radius:9px;object-fit:cover;background:rgba(255,255,255,.06)}
+.guess .linkbtn{margin-top:8px}
+.mplate .mrow{display:grid!important;grid-template-columns:auto auto minmax(0,1fr) auto auto!important;align-items:start;gap:10px}.mplate .mrow .mname b{text-align:left;color:var(--blanc);font-size:15px;font-weight:700}.mplate .mrow .mname small{font-size:12.5px}.mplate .mrow>.mchk,.mplate .mrow>.mkcal,.mplate .mrow>.mrm{align-self:center}.fimg-ph{display:inline-block;width:40px;height:40px;border-radius:9px;background:rgba(255,255,255,.05)}
+.msz{grid-column:3/-1;display:flex;flex-wrap:wrap;gap:4px;margin-top:-2px}.msz button{padding:5px 9px;border-radius:999px;border:1px solid var(--ligne);background:none;color:var(--gris);font:inherit;font-size:12.5px;font-weight:700}.msz button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#f6f0e2}.msz select{font-size:12.5px;padding:4px 6px}
+.mrm{width:34px;height:34px;border:0;border-radius:10px;background:rgba(255,255,255,.05);color:var(--gris);font-size:20px;cursor:pointer}
+.mqual{margin:8px 0;padding:12px;border-radius:14px;border:1px solid #d6a24e;background:rgba(214,162,78,.08)}.mqual p{margin:0 0 10px;font-size:14.5px}.mqual>div{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mqual .sbtn{text-align:center;font-size:14px}
+.rstats{grid-template-columns:repeat(4,1fr)!important}.rstats b{font-size:18px!important}
+.radd-h{margin:16px 2px 0;font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--gris)}
 </style>
 </head>
 <body>
@@ -1406,6 +1417,7 @@ body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-at
     <select id="mType" hidden><option value="0">Petit-déjeuner</option><option value="1">Déjeuner</option><option value="2">Goûter</option><option value="3">Dîner</option><option value="4">En-cas</option></select>
     <img id="mPhoto" class="mphoto hidden" alt="Photo du repas">
     <div id="mStatus" class="mstatus hidden" role="status"><span id="mStatusTxt"></span><div id="mBarBox" class="mbarbox hidden"><i id="mBar"></i></div></div>
+    <div id="mQual" class="mqual hidden" role="alert"><p id="mQualTxt"></p><div><label class="sbtn save"><input id="mRetake" type="file" accept="image/*" capture="environment" hidden>Reprendre la photo</label><button id="mForce" type="button" class="sbtn cancel">Analyser quand même</button></div></div>
     <div class="mplate"><div class="mplate-h">Dans ton assiette</div><div id="mList"></div></div>
     <div class="seg mtabs" role="tablist"><button type="button" data-mt="comp" aria-pressed="true">Composer</button><button type="button" data-mt="search" aria-pressed="false">Rechercher</button><button type="button" data-mt="create" aria-pressed="false">Créer</button></div>
     <div id="mtComp"><div id="mComp" class="cp hidden"></div></div>
@@ -5590,6 +5602,13 @@ body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-at
     try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); } catch (e) { bmp = await createImageBitmap(file); }
     const fit = (max) => { const k = Math.min(1, max / Math.max(bmp.width, bmp.height)); const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k); c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height); return c; };
     const big = fit(512), small = fit(160);
+    const qual = (() => { // luminosité moyenne et netteté (variance du laplacien) sur une version 320 px
+      const c = fit(320), w = c.width, h = c.height, d = c.getContext('2d').getImageData(0, 0, w, h).data, L = new Float32Array(w * h); let sum = 0;
+      for (let i = 0; i < w * h; i++) { const v = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]; L[i] = v; sum += v; }
+      let a = 0, a2 = 0, n = 0; for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) { const i = y * w + x, v = 4 * L[i] - L[i - 1] - L[i + 1] - L[i - w] - L[i + w]; a += v; a2 += v * v; n++; }
+      const bright = sum / (w * h), sharp = n ? a2 / n - (a / n) ** 2 : 999;
+      return { bright: Math.round(bright), sharp: Math.round(sharp), bad: bright < 40 ? 'dark' : sharp < 25 ? 'blur' : '' };
+    })();
     const toBlob = c => new Promise(r => c.toBlob(r, 'image/jpeg', 0.9));
     const crop = (x, y, w, h, flip) => { const W = big.width, H = big.height, c = document.createElement('canvas'); c.width = Math.round(W * w); c.height = Math.round(H * h); const g = c.getContext('2d');
       if (flip) { g.translate(c.width, 0); g.scale(-1, 1); } g.drawImage(big, W * x, H * y, W * w, H * h, 0, 0, c.width, c.height); return c; };
@@ -5597,7 +5616,7 @@ body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-at
     // vue d'ensemble (photo, centre, miroir) + 4 zones qui se chevauchent pour trouver chaque aliment de l'assiette
     const views = await Promise.all([crop(0.15, 0.15, 0.7, 0.7), crop(0, 0, 1, 1, true)].map(toBlob));
     const zones = await Promise.all([[0, 0], [0.4, 0], [0, 0.4], [0.4, 0.4]].map(([x, y]) => toBlob(crop(x, y, 0.6, 0.6))));
-    return { blob, views, zones, preview: big.toDataURL('image/jpeg', 0.8), thumb: small.toDataURL('image/jpeg', 0.6) };
+    return { blob, views, zones, qual, preview: big.toDataURL('image/jpeg', 0.8), thumb: small.toDataURL('image/jpeg', 0.6) };
   }
   async function embedPhoto(blob) {
     const ai = await loadFoodAI();
@@ -5622,23 +5641,47 @@ body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-at
   fetch('food-img/credits.json').then(r => r.json()).then(c => { FOOD_IMG = c || {}; try { if (currentView === 5) renderRepas(); } catch (e) {} }).catch(() => {});
   const imgId = id => { if (!id) return null; id = String(id); if (FOOD_IMG[id]) return id; if (FOOD_IMG['i-' + id]) return 'i-' + id; return null; };
   const fimg = (id, cls) => { const k = imgId(id); return k ? '<img class="' + (cls || 'fimg') + '" src="food-img/' + encodeURIComponent(k) + '.jpg" alt="" loading="lazy">' : ''; };
-  function mealRows() {
-    $('mList').innerHTML = MS.items.length ? MS.items.map((it, i) =>
-      '<div class="mrow' + (it.on ? '' : ' off') + '" data-i="' + i + '">' +
-      '<label class="mchk"><input type="checkbox" data-mon="' + i + '"' + (it.on ? ' checked' : '') + ' aria-label="Garder ' + esc(it.f.fr) + '"><span></span></label>' +
-      fimg(it.f.id) + '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + esc(it.f.portion) + '</small>' + (it.mine ? '' : '<i class="mtag' + (it.mem ? ' ok' : '') + '">' + (it.mem ? 'Ton habitude' : it.z ? 'Vu sur la photo' : it.v ? 'Variante' : it.p != null ? 'IA · ' + (it.p >= 0.5 ? 'très probable' : it.p >= 0.12 ? 'probable' : 'possible') : '') + '</i>') + '</div>' +
-      '<select data-mq="' + i + '" aria-label="Nombre de portions de ' + esc(it.f.fr) + '">' + QTY.map(([q, l]) => '<option value="' + q + '"' + (q === it.q ? ' selected' : '') + '>× ' + l + '</option>').join('') + '</select>' +
-      '<b class="mkcal num">' + nf0.format(Math.round(it.f.kcal * it.q)) + '<small>kcal</small></b></div>').join('')
-      : '<p class="empty">Rien pour l\'instant : choisis tes aliments ci-dessous.</p>';
-    const tot = MS.items.filter(x => x.on).reduce((a, x) => a + x.f.kcal * x.q, 0);
-    $('mTotal').innerHTML = '<span>Total du repas</span><b class="num">' + nf0.format(Math.round(tot)) + ' kcal</b>';
-    $('rpSave').disabled = !MS.items.some(x => x.on);
+  const SIZES = [[0.7, 'Petite'], [1, 'Moyenne'], [1.4, 'Grande']];
+  let habC = { t: 0, m: {} };
+  function habits() { // tes aliments habituels (90 derniers jours), calculés sur le téléphone
+    if (Date.now() - habC.t < 30000) return habC.m;
+    const m = {}, lim = Date.now() - 90 * 864e5;
+    store.get(K_MEALS, []).forEach(x => { if (x.date > lim) (x.items || []).forEach(i => { m[i.id] = (m[i.id] || 0) + 1; }); });
+    habC = { t: Date.now(), m }; return m;
   }
+  function guessHtml() {
+    const g = MS.guess; if (!g || !g.opts.length) return '';
+    const chip = (o, i) => '<button type="button" class="gchip" data-gpick="' + i + '" aria-pressed="' + (g.pick === i) + '">' + (fimg(o.f.id, 'gimg') || '<span class="gimg"></span>') + '<span><b>' + esc(o.f.fr) + '</b><small>' + (o.p != null ? 'confiance ' + Math.max(1, Math.round(o.p * 100)) + ' %' : 'variante') + (o.h ? ' · habituel' : '') + '</small></span></button>';
+    const q = g.mem ? 'Comme la dernière fois ? Sinon, c\'est lequel :' : g.sure ? 'Je pense que c\'est ça. Touche pour corriger :' : 'Je ne suis pas sûr : c\'est lequel ?';
+    return '<div class="guess' + (g.sure ? ' sure' : '') + '"><p class="g-q">' + q + '</p><div class="g-opts">' + g.opts.map(chip).join('') + '</div><button type="button" class="linkbtn" data-gother="1">Aucun des trois : chercher l\'aliment</button></div>';
+  }
+  function mealRows() {
+    $('mList').innerHTML = guessHtml() + (MS.items.length ? MS.items.map((it, i) =>
+      '<div class="mrow' + (it.on ? '' : ' off') + '" data-i="' + i + '">' +
+      '<label class="mchk"><input type="checkbox" data-mon="' + i + '"' + (it.on ? ' checked' : '') + ' aria-label="Compter ' + esc(it.f.fr) + '"><span></span></label>' +
+      (fimg(it.f.id) || '<span class="fimg fimg-ph" aria-hidden="true"></span>') + '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>Référence : ' + esc(it.f.portion || '1 portion') + ' = ' + nf0.format(it.f.kcal) + ' kcal</small>' +
+      (it.mine || it.g ? '' : '<i class="mtag' + (it.mem ? ' ok' : '') + '">' + (it.mem ? 'Ton habitude' : it.z ? 'Vu sur la photo · ' + Math.round((it.p || 0) * 100) + ' %' : it.v ? 'Variante' : it.p != null ? 'IA · ' + Math.round(it.p * 100) + ' %' : '') + '</i>') + '</div>' +
+      '<b class="mkcal num">' + nf0.format(Math.round(it.f.kcal * it.q)) + '<small>kcal</small></b><button type="button" class="mrm" data-mrm="' + i + '" aria-label="Retirer ' + esc(it.f.fr) + '">×</button>' +
+      '<div class="msz" role="group" aria-label="Portion de ' + esc(it.f.fr) + '">' + SIZES.map(([q, l]) => '<button type="button" data-msz="' + i + ':' + q + '" aria-pressed="' + (it.q === q) + '">' + l + '</button>').join('') +
+      '<select data-mq="' + i + '" aria-label="Nombre de portions de ' + esc(it.f.fr) + '">' + (QTY.some(([q]) => q === it.q) ? '' : '<option value="' + it.q + '" selected>× ' + String(it.q).replace('.', ',') + '</option>') + QTY.map(([q, l]) => '<option value="' + q + '"' + (q === it.q ? ' selected' : '') + '>× ' + l + '</option>').join('') + '</select></div></div>').join('')
+      : (MS.guess ? '' : '<p class="empty">Rien pour l\'instant : choisis tes aliments ci-dessous.</p>'));
+    const on = MS.items.filter(x => x.on), tot = on.reduce((a, x) => a + x.f.kcal * x.q, 0), mac = on.reduce((a, x) => { const m = macroOf(x.f, x.q); return a.map((v, k) => v + m[k]); }, [0, 0, 0]);
+    $('mTotal').innerHTML = '<span>Total du repas · ' + Math.round(mac[0]) + ' g prot. · ' + Math.round(mac[1]) + ' g gluc. · ' + Math.round(mac[2]) + ' g lip.</span><b class="num">' + nf0.format(Math.round(tot)) + ' kcal</b>';
+    $('rpSave').disabled = !on.length;
+  }
+  $('mList').addEventListener('click', e => {
+    const p = e.target.closest('[data-gpick]');
+    if (p) { const g = MS.guess, i = +p.dataset.gpick; MS.items = MS.items.filter(x => !x.g); if (g.pick === i) g.pick = -1; else { g.pick = i; MS.items.unshift({ f: g.opts[i].f, p: g.opts[i].p, q: 1, on: true, g: true }); } mealRows(); return; }
+    if (e.target.closest('[data-gother]')) { mSetTab('search'); setTimeout(() => { $('offQ').focus(); $('offQ').scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 60); return; }
+    const sz = e.target.closest('[data-msz]'); if (sz) { const [i, q] = sz.dataset.msz.split(':'); MS.items[+i].q = +q; MS.items[+i].on = true; mealRows(); return; }
+    const rm = e.target.closest('[data-mrm]'); if (rm) { const it = MS.items.splice(+rm.dataset.mrm, 1)[0]; if (it && it.g && MS.guess) MS.guess.pick = -1; mealRows(); }
+  });
   function mealStatus(txt, pct) {
     $('mStatus').classList.toggle('hidden', !txt); $('mStatusTxt').textContent = txt || '';
     $('mBar').style.width = pct == null ? '0' : (pct * 100).toFixed(0) + '%'; $('mBarBox').classList.toggle('hidden', pct == null);
   }
-  async function openMeal(file) {
+  async function openMeal(file, force) {
+    MS.guess = null; $('mQual').classList.add('hidden');
     MS.items = []; MS.thumb = ''; MS.date = Date.now(); MS.vec = null; CP.sel = []; $('offRes').innerHTML = ''; $('localRes').innerHTML = ''; $('offQ').value = ''; $('mComp').classList.add('hidden'); $('mCompBtn').classList.remove('hidden');
     $('mType').value = String(mealTypeFor(MS.date));
     $('mPhoto').classList.add('hidden'); $('mSearch').value = '';
@@ -5649,6 +5692,11 @@ body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-at
     let ph;
     try { ph = await prepPhoto(file); } catch (e) { mealStatus("Cette photo n'a pas pu être ouverte. Essaie avec une autre photo."); return; }
     MS.thumb = ph.thumb; $('mPhoto').src = ph.preview; $('mPhoto').classList.remove('hidden');
+    if (ph.qual.bad && !force) { // photo trop sombre ou floue : on demande d'en reprendre une plutôt que d'inventer
+      mealStatus(''); MS.file = file;
+      $('mQualTxt').textContent = ph.qual.bad === 'dark' ? 'La photo est trop sombre pour bien reconnaître le plat. Reprends-la avec plus de lumière.' : 'La photo a l\'air floue. Reprends-la en tenant le téléphone immobile, à 30 cm environ de l\'assiette.';
+      $('mQual').classList.remove('hidden'); return;
+    }
     mealStatus(foodAI ? 'Analyse de la photo…' : "Préparation de l'IA…", foodAI ? null : 0);
     try {
       await loadFoodAI((p, total) => mealStatus("Téléchargement de l'IA (environ 45 Mo, une seule fois, de préférence en wifi)…", p));
@@ -5659,19 +5707,24 @@ body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-at
       const avg0 = vs[0].map((_, k) => vs.reduce((a, v) => a + v[k], 0) / vs.length), an = Math.hypot(...avg0) || 1, avg = avg0.map(x => x / an);
       MS.vec = avg;
       const res = await classifyPhoto(null, avg);
-      const top = res.slice(0, 6);
-      MS.items = top.map((r, i) => ({ f: r.f, p: r.p, q: 1, on: i === 0 || r.p >= 0.3 }));
+      // les 3 plus probables ; à score proche, tes aliments habituels passent devant
+      const hab = habits(), boost = r => r.p * (1 + 0.25 * Math.min(4, hab[r.f.id] || 0));
+      const top = res.slice(0, 12).sort((a, b) => boost(b) - boost(a)).slice(0, 3);
+      const sure = top[0].p >= 0.65 && top[0].p - (top[1] ? top[1].p : 0) >= 0.35;
+      MS.guess = { opts: top.map(r => ({ f: r.f, p: r.p, h: !!hab[r.f.id] })), sure, pick: sure ? 0 : -1 };
+      MS.items = sure ? [{ f: top[0].f, p: top[0].p, q: 1, on: true, g: true }] : [];
       // chaque zone de l'assiette : un autre aliment bien visible ? (ex. steak + frites + salade)
       mealStatus('Recherche des autres aliments de l\'assiette…');
-      const seen = new Set(MS.items.map(x => x.f.id));
+      const seen = new Set(top.map(x => x.f.id));
       for (const z of ph.zones) {
         const r = (await classifyPhoto(z))[0];
-        if (r && r.p >= 0.35 && !seen.has(r.f.id)) { seen.add(r.f.id); MS.items.splice(1, 0, { f: r.f, p: r.p, z: true, q: 1, on: r.p >= 0.55 }); }
+        if (r && r.p >= 0.35 && !seen.has(r.f.id)) { seen.add(r.f.id); MS.items.push({ f: r.f, p: r.p, z: true, q: 1, on: r.p >= 0.55 }); }
       }
       // mémoire : une photo qui ressemble à un repas déjà corrigé → on reprend tes aliments et portions
       const mem = store.get(K_MEALMEM, []); let best = null, bs = 0;
       mem.forEach(m => { const mv = m.v; let d = 0; for (let k = 0; k < avg.length; k++) d += avg[k] * mv[k] / 100; if (d > bs) { bs = d; best = m; } });
       if (best && bs > 0.9) {
+        MS.items = MS.items.filter(x => !x.g); MS.guess.pick = -1; MS.guess.mem = true;
         MS.items.forEach(x => { x.on = false; });
         best.items.slice().reverse().forEach(it => {
           const f = it.f || foodsList.foods.find(x => x.id === it.id); if (!f) return;
@@ -5683,7 +5736,7 @@ body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-at
       // variantes : plats de la liste complète très proches du premier choix (ex. pizza → pizza 4 fromages, margherita…)
       const cos = (a, b) => { let s = 0, na = 0, nb = 0; for (let k = 0; k < a.length; k++) { s += a[k] * b[k]; na += a[k] * a[k]; nb += b[k] * b[k]; } return s / Math.sqrt(na * nb); };
       const vars = foodsList.foods.filter(f => f.ai === 0).map(f => [f, cos(f.vec, top[0].f.vec)]).filter(x => x[1] > 0.8).sort((a, b) => b[1] - a[1]).slice(0, 3);
-      MS.items.splice(1, 0, ...vars.map(([f]) => ({ f, p: null, v: true, q: 1, on: false })));
+      MS.guess.opts.push(...vars.filter(([f]) => !seen.has(f.id)).slice(0, 2).map(([f]) => ({ f, p: null, h: !!hab[f.id] })));
       mealStatus(''); mealRows();
     } catch (e) {
       mealStatus(navigator.onLine === false ? "La première analyse a besoin d'internet pour télécharger l'IA (environ 45 Mo). Ensuite, elle marche sans connexion. Tu peux aussi ajouter les aliments avec la recherche."
@@ -5798,7 +5851,8 @@ body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-at
   function localSearch(q) {
     const nz = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''), qn = nz(q);
     const L = myFoods().map(f => ['my', f]).concat(INGR.map(x => ['ing', x]), (foodsList ? foodsList.foods : []).map(f => ['db', f]));
-    return L.filter(([, x]) => nz(x.fr).includes(qn)).sort((a, b) => nz(a[1].fr).indexOf(qn) - nz(b[1].fr).indexOf(qn)).slice(0, 8);
+    const hb = habits(), sc = x => nz(x.fr).indexOf(qn) - Math.min(4, hb[x.id] || 0) * 3;
+    return L.filter(([, x]) => nz(x.fr).includes(qn)).sort((a, b) => sc(a[1]) - sc(b[1])).slice(0, 8);
   }
   let localList = [];
   $('localRes').addEventListener('click', e => {
@@ -5845,6 +5899,10 @@ body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-at
   });
   ['mCamera', 'mGallery'].forEach(id => $(id).addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) openMeal(f); }));
   $('mNoPhoto').addEventListener('click', () => openMeal(null));
+  $('mRetake').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) openMeal(f); });
+  $('mForce').addEventListener('click', () => { if (MS.file) openMeal(MS.file, true); });
+  function camRefused() { toast('Pas de photo ? Si l\'appareil photo est bloqué (Réglages > Parcours > Appareil photo), choisis une photo dans la Galerie.'); }
+  ['mCamera', 'mRetake'].forEach(id => $(id).addEventListener('cancel', camRefused));
 
   // ---------- Composer son assiette : base d'ingrédients (kcal pour 100 g ou 100 ml) + guidage par l'utilisateur ----------
   // Valeurs moyennes (aliments cuits quand ils se mangent cuits), arrondies, d'après les tables de composition usuelles (type Ciqual).
@@ -6352,13 +6410,13 @@ body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-at
     const tgt = nd ? nd.target : 0, pct = tgt ? Math.min(1, en.eaten / tgt) : 0, R = 70, C = 2 * Math.PI * R;
     let h = '<div class="block rhero"><svg class="rring" viewBox="0 0 170 170" aria-hidden="true"><circle cx="85" cy="85" r="' + R + '" class="rr-t"/><circle cx="85" cy="85" r="' + R + '" class="rr-a' + (left < 0 ? ' over' : '') + '" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - pct)).toFixed(1) + '"/></svg>' +
       '<div class="rcenter"><b class="num">' + (left == null ? nf0.format(en.eaten) : nf0.format(Math.abs(left))) + '</b><span>' + (left == null ? 'kcal mangées' : left >= 0 ? 'kcal restantes' : 'kcal en trop') + '</span></div>' +
-      '<div class="rstats"><div><b class="num">' + nf0.format(en.eaten) + '</b><span>mangées</span></div><div><b class="num">' + (tgt ? nf0.format(Math.round(tgt)) : '–') + '</b><span>objectif</span></div><div><b class="num">' + nf0.format(Math.round(en.burned)) + '</b><span>sport</span></div></div>' +
+      '<div class="rstats"><div><b class="num">' + nf0.format(en.eaten) + '</b><span>mangées</span></div><div><b class="num">' + (tgt ? nf0.format(Math.round(tgt)) : '–') + '</b><span>objectif</span></div><div><b class="num">' + nf0.format(Math.round(en.burned)) + '</b><span>brûlées (sport)</span></div><div><b class="num">' + (en.eaten - en.burned > 0 ? '+' : '') + nf0.format(Math.round(en.eaten - en.burned)) + '</b><span>solde</span></div></div>' +
       macrosHtml(today) + '</div>';
     try { h += recovHtml(); } catch (e) {}
     // 2. Ajouter un repas
-    h += '<div class="radd"><label class="rtile main"><input id="mCameraP" type="file" accept="image/*" capture="environment" hidden><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><b>Photo</b></label>' +
+    h += '<div class="radd-h">Ajouter un repas</div><div class="radd"><label class="rtile main"><input id="mCameraP" type="file" accept="image/*" capture="environment" hidden><svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg><b>Photo</b></label>' +
       '<label class="rtile"><input id="mGalleryP" type="file" accept="image/*" hidden><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 16l5-5 4 4 3-3 6 6"/></svg><b>Galerie</b></label>' +
-      '<button type="button" class="rtile" id="mNoPhotoP"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><b>Sans photo</b></button></div>';
+      '<button type="button" class="rtile" id="mNoPhotoP"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><b>Recherche</b></button></div>';
     // 3. Les repas du jour, par moment de la journée
     h += '<div class="block"><div class="bh">Mes repas du jour</div>';
     [0, 1, 2, 3, 4].forEach(t => {
@@ -6394,7 +6452,8 @@ body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-at
     $('repas').innerHTML = h;
     $('mCameraP').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) openMeal(f); });
     $('mGalleryP').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (f) openMeal(f); });
-    $('mNoPhotoP').addEventListener('click', () => openMeal(null));
+    $('mNoPhotoP').addEventListener('click', () => openMeal(null).then(() => { mSetTab('search'); setTimeout(() => $('offQ').focus(), 80); }));
+    $('mCameraP').addEventListener('cancel', camRefused);
   }
   $('repas').addEventListener('click', e => {
     const b = e.target.closest('[data-mdel]'); if (!b) return;
