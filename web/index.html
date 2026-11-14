@@ -1012,6 +1012,21 @@ body:not(.anim-off) .coachline,body:not(.anim-off) .meteo,body:not(.anim-off) .p
 body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
 .run-act{display:inline-flex;align-items:center;gap:5px;color:var(--blanc);font-weight:700}.run-act .aico{width:15px;height:15px}
 .hp-chips .chip{display:inline-flex;align-items:center;gap:6px}
+
+/* ---------- Onglet Séances v2 ---------- */
+.shero{display:flex;flex-direction:column;gap:4px;border-left:3px solid var(--accent)!important}.shero small{font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}.shero>b{font-size:22px;font-weight:800;line-height:1.15}.shero span{font-size:14px;color:var(--gris)}.shero .sbtn{margin-top:10px}
+.stiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.stiles .wtile{min-height:112px;text-align:left;cursor:pointer}
+.srow{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--ligne)}.srow>div{flex:1;min-width:0}.srow b{display:block;font-size:15.5px}.srow small{display:block;margin-top:2px;font-size:12.5px;color:var(--gris)}.srow .sbtn{flex:none;width:auto;padding:9px 16px;font-size:14.5px}
+.sbtnrow{width:100%;background:none;border-left:0;border-right:0;border-bottom:0;color:inherit;font:inherit;text-align:left;cursor:pointer}.sbtnrow i{font-style:normal;font-size:22px;color:var(--gris)}
+.bh+.srow{border-top:0;padding-top:4px}
+.ssearch{margin:0 0 10px!important}.schips{margin-bottom:12px}.slist{margin-bottom:14px}.slist .wc{margin-bottom:8px}
+.stot{grid-template-columns:repeat(3,1fr)!important}
+.mrow{display:grid;grid-template-columns:76px 1fr 86px;gap:10px;align-items:center;padding:7px 0;font-size:14px}.mrow b{font-size:12.5px;font-weight:600;text-align:right;color:var(--gris)}.mrow.off span{color:var(--gris)}.mrow .goal-bar{margin:0}
+.mtip{margin:10px 0 0;font-size:13.5px;color:var(--gris)}.mtip b{color:var(--blanc)}
+.gex-last{display:block;margin:-2px 0 6px;font-size:12px;color:var(--gris)}.gex-last b{color:var(--accent)}.grest-t{float:right;color:var(--accent);font-size:15px}
+.rs-ring{position:relative;width:200px;height:200px;margin:4px auto 16px}.rs-ring svg{width:100%;height:100%;transform:rotate(-90deg)}.rs-ring circle{fill:none;stroke-width:8}.rs-ring .r0{stroke:var(--ligne)}.rs-ring .r1{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+.rs-ring>div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}.rs-ring b{font-size:54px;line-height:1}.rs-ring small{margin-top:4px;font-size:13px;color:var(--gris)}.rs-chips{justify-content:center;margin-bottom:14px}
+.restpill{position:fixed;z-index:45;left:16px;bottom:calc(var(--bottom) + 14px);padding:11px 16px;border:0;border-radius:999px;background:var(--accent);color:#f6f0e2;font:inherit;font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4)}
 </style>
 </head>
 <body>
@@ -1074,7 +1089,7 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
 
   <!-- Séances -->
   <section class="view" id="v-seances" aria-label="Séances" inert>
-    <h2 class="h-title">Séances d'exercices</h2>
+    <h2 class="h-title">Séances</h2>
     <div id="seances"></div>
   </section>
 
@@ -1234,6 +1249,11 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
     <button id="amAdd" class="sbtn save" type="button">📷 Ajouter une photo ici</button><small class="am-tip" id="amTip">Déplace la carte pour viser l'endroit (la croix au centre), puis ajoute ta photo.</small></div>
   <input type="file" id="amIn" accept="image/*" hidden>
 </div>
+<div id="restSheet" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rsT"><div class="sheet"><div class="d-head"><h2 id="rsT">Minuteur de repos</h2><button id="rsClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
+  <div class="rs-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="r0"/><circle id="rsArc" cx="60" cy="60" r="52" class="r1"/></svg><div><b id="rsTime" class="num">1:30</b><small id="rsSub">Choisis ta durée</small></div></div>
+  <div class="chips cp-wrap rs-chips" id="rsChips"></div>
+  <div class="btns"><button id="rsGo" class="sbtn save" type="button">Démarrer</button><button id="rsPlus" class="sbtn cancel" type="button">+ 15 secondes</button></div></div></div>
+<button id="restPill" class="restpill hidden" type="button" aria-label="Minuteur de repos en cours"></button>
 <div id="infoSheet" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="isT"><div class="sheet"><div class="d-head"><h2 id="isT"></h2><button id="isClose" class="xbtn" type="button" aria-label="Fermer">×</button></div><p id="isP" class="is-p"></p><div id="isR" class="is-r"></div><p id="isNow" class="is-now"></p></div></div>
 <div id="phView" class="phview hidden" role="dialog" aria-label="Photo"><img id="phImg" alt="Photo"><small id="phCap"></small><button type="button" id="phDel" class="sbtn del hidden">Supprimer cette photo</button></div>
 <div id="detail" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dTitle">
@@ -3248,32 +3268,166 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
     else if (ed) openGym(p, -1, 'plan');
     else if (confirm('Supprimer la séance prévue « ' + planName(p) + ' »' + (p.weekly ? ' (toutes les semaines)' : '') + ' ?')) { store.set(K_GPLAN, P.filter(x => x.id !== id)); gymPlanNotify(); renderSeances(); }
   });
-  function renderSeances() {
-    const ws = allWorkouts(), log = store.get(K_WLOG, []), mine = store.get(K_WORKOUTS, []);
-    // 1. Les 3 actions principales
-    let h = '<div class="wtiles">' +
-      '<button class="wtile main" id="gNew" type="button"><svg viewBox="0 0 24 24"><path d="M6.5 7v10M17.5 7v10M3 10v4M21 10v4M6.5 12h11"/></svg><b>Musculation</b><small>Noter ma séance</small></button>' +
-      '<button class="wtile" type="button" data-nav="1"><svg viewBox="0 0 24 24"><path d="M4 12h16M4 12l4-4M4 12l4 4M20 12l-4-4M20 12l-4 4"/></svg><b>Test navette</b><small>Mesurer ma VO2max</small></button>' +
-      '<button class="wtile" id="wNew" type="button"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><b>Créer</b><small>Ma propre séance</small></button></div>';
-    try { h += gymPlansHtml(); } catch (e) {}
-    try { h += progHtml(); } catch (e) {}
-    // 2. Ce que j'ai fait
-    const n = log.filter(l => l.date >= weekStart(Date.now())).length;
-    h += '<div class="block wplog"><div class="bh">Mes séances</div>';
-    if (!log.length) h += '<p class="empty">Aucune séance pour l\'instant. Note ta séance de musculation ou lance une séance guidée ci-dessous.</p>';
-    else {
-      h += '<p class="streak">Cette semaine : <b>' + plural(n, 'séance') + '</b></p>' + log.slice(0, wLogAll ? 12 : 3).map((l, i) => wLogRow(l, i)).join('');
-      if (log.length > 3) h += '<button type="button" class="linkbtn wmore" data-wlog="1">' + (wLogAll ? 'Voir moins' : 'Voir tout') + '</button>';
-    }
-    h += '</div>';
-    // 3. Séances guidées, rangées par catégorie (touche pour déplier)
-    h += '<h3 class="wgh">Séances guidées<small>Chronomètre, voix et bips : suis l\'écran</small></h3>';
-    const groups = (mine.length ? [['mes', 'Mes séances créées', '', mine]] : []).concat(GOALS_W.map(([k, l, d]) => [k, l, d, ws.filter(w => w.goal === k)])).filter(g => g[3].length);
-    groups.forEach(([k, l, d, list]) => {
-      h += '<details class="wgrp" data-wg="' + k + '"' + (wOpen.has(k) ? ' open' : '') + '><summary><span><b>' + esc(l) + '</b>' + (d ? '<small>' + esc(d) + '</small>' : '') + '</span><i class="num">' + list.length + '</i></summary>' + list.map(wCard).join('') + '</details>';
+  // ---------- Onglet Séances : 3 onglets simples (Aujourd'hui, Catalogue, Suivi) ----------
+  let sTab = 'now', sFilter = 'tout', sQuery = '';
+  const K_ROUT = 'parcours.gymRoutines';
+  const routines = () => store.get(K_ROUT, []);
+  const musNames = ks => MUSCLES.filter(m => (ks || []).includes(m[0])).map(m => m[1]).join(' + ') || 'Musculation';
+  // Par exercice de muscu : record de charge, première charge, dernière séance
+  function gymStats(exDate) {
+    const R = {};
+    store.get(K_WLOG, []).filter(l => l.kind === 'muscu' && l.date !== exDate).slice().sort((x, y) => x.date - y.date).forEach(l => (l.exercises || []).forEach(e => {
+      const r = R[e.name] || (R[e.name] = { max: 0, maxDate: 0, first: 0, last: null, n: 0 }), kg = +e.kg || 0;
+      r.n++; if (kg > 0 && !r.first) r.first = kg;
+      r.last = { sets: e.sets, reps: e.reps, kg, date: l.date };
+      if (kg > r.max) { r.max = kg; r.maxDate = l.date; }
+    }));
+    return R;
+  }
+  // Muscles travaillés sur les 7 derniers jours
+  function muscleWeek() {
+    const since = Date.now() - 7 * 864e5, L = store.get(K_WLOG, []).filter(l => l.kind === 'muscu');
+    return MUSCLES.map(m => {
+      let sets = 0, ses = 0, last = 0;
+      L.forEach(l => { if (!(l.muscles || []).includes(m[0])) return; last = Math.max(last, l.date); if (l.date >= since) { ses++; (l.exercises || []).forEach(e => { if (m[2].includes(e.name)) sets += +e.sets || 0; }); } });
+      return { k: m[0], l: m[1], sets, ses, last };
     });
+  }
+  function seanceHero(log) {
+    const now = Date.now(), today = dayKey(now), end = new Date(); end.setHours(23, 59, 59, 999);
+    const card = (k, t, d, btn) => '<div class="block shero"><small>' + k + '</small><b>' + t + '</b><span>' + d + '</span>' + btn + '</div>';
+    const P = gymPlans().filter(p => p.at <= end.getTime());
+    if (P.length) { const p = P[0]; return card(p.at < now ? 'Séance prévue · c\'est l\'heure' : 'Séance prévue · aujourd\'hui à ' + new Date(p.at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }), esc(planName(p)), plural((p.exercises || []).length, 'exercice') + ' · ' + p.dur + ' min', '<button type="button" class="sbtn save" data-gplan-go="' + p.id + '">Commencer</button>'); }
+    if (log.some(l => dayKey(l.date) === today)) return card('Aujourd\'hui', 'Séance faite', 'Bien joué. Récupère, ou refais-en une si tu as encore de l\'énergie.', '');
+    if (progCur()) return ''; // la carte du programme sert déjà de « à faire »
+    const sp = settings.sports || [];
+    if (settings.mainGoal === 'muscle' || (sp.length && sp.every(x => x === 'muscu'))) {
+      const m = muscleWeek().filter(x => x.k !== 'abdos').sort((x, y) => x.last - y.last)[0];
+      const d = m.last ? Math.floor((now - m.last) / 864e5) : null;
+      return card('Suggestion du jour', 'Musculation : ' + m.l, d == null ? 'Pas encore travaillé ici.' : d >= 1 ? 'Pas travaillé depuis ' + plural(d, 'jour') + '.' : 'Travaillé aujourd\'hui.', '<button type="button" class="sbtn save" data-sug-gym="' + m.k + '">Commencer</button>');
+    }
+    const want = { lose: ['hiit', 'cardio'], endur: ['course', 'cardio'], fit: ['renfo', 'abdos', 'mobilite'] }[settings.mainGoal] || ['renfo', 'cardio', 'mobilite'];
+    const beg = settings.sportLv != null && settings.sportLv <= 1, ws = allWorkouts();
+    let L = ws.filter(w => want.includes(w.goal) && (!beg || (w.level || 1) <= 1)); if (!L.length) L = ws.filter(w => want.includes(w.goal)); if (!L.length) L = ws;
+    if (!L.length) return '';
+    const w = L[Math.floor(now / 864e5) % L.length];
+    return card('Suggestion du jour', esc(w.name), fmtMin(totalSec(w)) + ' · ' + nf0.format(estKcal(w)) + ' kcal · ' + plural(w.exercises.length, 'exercice'), '<button type="button" class="sbtn save" data-w="' + esc(w.id) + '">Voir la séance</button>');
+  }
+  function sListHtml() {
+    const q = sQuery.trim().toLowerCase(), mine = store.get(K_WORKOUTS, []);
+    let L = allWorkouts().filter(w => sFilter === 'tout' || (sFilter === 'mes' ? mine.some(m => m.id === w.id) : w.goal === sFilter));
+    if (q) L = L.filter(w => (w.name + ' ' + (w.exercises || []).map(e => e.name).join(' ')).toLowerCase().includes(q));
+    L = L.slice().sort((x, y) => (x.level || 0) - (y.level || 0) || totalSec(x) - totalSec(y));
+    return L.length ? L.map(wCard).join('') : '<p class="empty">Aucune séance ne correspond. Essaie un autre mot ou un autre filtre.</p>';
+  }
+  function renderSeances() {
+    const log = store.get(K_WLOG, []), mine = store.get(K_WORKOUTS, []), ws = allWorkouts();
+    const ic = d => '<svg viewBox="0 0 24 24" aria-hidden="true">' + d + '</svg>';
+    let h = '<div class="pgtabs" role="tablist">' + [['now', 'Aujourd\'hui'], ['cat', 'Catalogue'], ['suivi', 'Suivi']].map(([k, l]) => '<button type="button" role="tab" data-stab="' + k + '" aria-selected="' + (k === sTab) + '">' + l + '</button>').join('') + '</div>';
+    if (sTab === 'now') {
+      try { h += seanceHero(log); } catch (e) {}
+      try { if (progCur()) h += progHtml(); } catch (e) {}
+      h += '<div class="stiles">' +
+        '<button class="wtile main" id="gNew" type="button">' + ic('<path d="M6.5 7v10M17.5 7v10M3 10v4M21 10v4M6.5 12h11"/>') + '<b>Musculation</b><small>Noter ma séance en salle</small></button>' +
+        '<button class="wtile" type="button" data-stab="cat">' + ic('<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/>') + '<b>Séance guidée</b><small>' + ws.length + ' séances avec chrono</small></button>' +
+        '<button class="wtile" type="button" data-rest-open="1">' + ic('<path d="M6 3h12M6 21h12M7 3v4l5 5 5-5V3M7 21v-4l5-5 5 5v4"/>') + '<b>Minuteur de repos</b><small>Entre deux séries</small></button>' +
+        '<button class="wtile" type="button" data-gplan-new="1">' + ic('<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>') + '<b>Programmer</b><small>Planifier avec un rappel</small></button></div>';
+      const R = routines();
+      if (R.length) h += '<div class="block"><div class="bh">Mes routines</div>' + R.map(r => '<div class="srow"><div><b>' + esc(r.name) + '</b><small>' + esc(musNames(r.muscles)) + ' · ' + plural((r.exercises || []).length, 'exercice') + ' · ' + r.dur + ' min</small></div><button type="button" class="sbtn save" data-rout="' + r.id + '">Lancer</button><button type="button" class="ibtn" data-rout-del="' + r.id + '" aria-label="Supprimer la routine ' + esc(r.name) + '">×</button></div>').join('') + '</div>';
+      try { if (gymPlans().length) h += gymPlansHtml(); } catch (e) {}
+    } else if (sTab === 'cat') {
+      h += '<input id="sSearch" class="msearch ssearch" type="search" placeholder="Chercher une séance ou un exercice" value="' + esc(sQuery) + '" aria-label="Chercher une séance">';
+      h += '<div class="chips schips">' + [['tout', 'Tout']].concat(mine.length ? [['mes', 'Mes séances']] : []).concat(GOALS_W.map(([k, l]) => [k, l])).map(([k, l]) => '<button type="button" class="chip" data-sf="' + k + '" aria-pressed="' + (sFilter === k) + '">' + esc(l) + '</button>').join('') + '</div>';
+      h += '<div class="slist" id="sList">' + sListHtml() + '</div>';
+      h += '<div class="block"><div class="bh">Autres</div>' +
+        '<button type="button" class="srow sbtnrow" id="wNew"><div><b>Créer ma séance</b><small>Tes exercices, tes durées, tes tours</small></div><i>›</i></button>' +
+        '<button type="button" class="srow sbtnrow" data-nav="1"><div><b>Test navette</b><small>Mesurer ton endurance (VO2max)</small></div><i>›</i></button></div>';
+      try { if (!progCur()) h += progHtml(); } catch (e) {}
+    } else {
+      const ws0 = weekStart(Date.now()), wk = log.filter(l => l.date >= ws0);
+      h += '<div class="hp-tot stot"><div><b class="num">' + wk.length + '</b><span>séance' + (wk.length > 1 ? 's' : '') + ' cette semaine</span></div><div><b class="num">' + nf0.format(Math.round(wk.reduce((x, l) => x + (l.durationMs || 0), 0) / 60000)) + '</b><span>minutes</span></div><div><b class="num">' + nf0.format(wk.reduce((x, l) => x + (l.kcal || 0), 0)) + '</b><span>kcal</span></div></div>';
+      try {
+        const M = muscleWeek(), any = M.some(m => m.last), mx = Math.max(1, ...M.map(m => m.sets || m.ses * 4));
+        h += '<div class="block"><div class="bh">Muscles travaillés <small class="bcount">7 derniers jours</small></div>';
+        if (!any) h += '<p class="empty">Note une séance de musculation pour voir quels muscles tu travailles, et lesquels tu oublies.</p>';
+        else {
+          h += M.map(m => { const v = m.sets || m.ses * 4, d = m.last ? Math.floor((Date.now() - m.last) / 864e5) : null;
+            return '<div class="mrow' + (m.ses ? '' : ' off') + '"><span>' + m.l + '</span><div class="goal-bar"><i style="width:' + (v / mx * 100).toFixed(0) + '%"></i></div><b>' + (m.ses ? (m.sets ? plural(m.sets, 'série') : plural(m.ses, 'séance')) : d == null ? 'jamais' : 'il y a ' + d + ' j') + '</b></div>'; }).join('');
+          const miss = M.filter(m => !m.ses && m.k !== 'abdos').map(m => m.l.toLowerCase());
+          h += '<p class="mtip">' + (miss.length ? 'À ne pas oublier cette semaine : <b>' + miss.join(', ') + '</b>.' : 'Tous les groupes musculaires ont été travaillés cette semaine.') + '</p>';
+        }
+        h += '</div>';
+        const S = gymStats(), recs = Object.keys(S).filter(k => S[k].max > 0).sort((x, y) => S[y].maxDate - S[x].maxDate);
+        h += '<div class="block"><div class="bh">Mes records de charge</div>';
+        if (!recs.length) h += '<p class="empty">Indique la charge de tes exercices quand tu notes une séance : tes records apparaîtront ici.</p>';
+        else h += recs.slice(0, 10).map(k => { const r = S[k], gain = r.max - r.first;
+          return '<div class="rec"><div>' + esc(k) + '<small>' + new Date(r.maxDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) + (gain > 0 ? ' · +' + nf1.format(gain).replace(',0', '') + ' kg depuis le début' : '') + '</small></div><div class="v">' + nf1.format(r.max).replace(',0', '') + ' kg</div></div>'; }).join('');
+        h += '</div>';
+      } catch (e) {}
+      h += '<div class="block wplog"><div class="bh">Historique</div>';
+      if (!log.length) h += '<p class="empty">Aucune séance pour l\'instant. Tes séances de muscu, tes séances guidées et tes tests navette s\'afficheront ici.</p>';
+      else {
+        h += log.slice(0, wLogAll ? 30 : 5).map((l, i) => wLogRow(l, i)).join('');
+        if (log.length > 5) h += '<button type="button" class="linkbtn wmore" data-wlog="1">' + (wLogAll ? 'Voir moins' : 'Voir tout') + '</button>';
+      }
+      h += '</div>';
+    }
     $('seances').innerHTML = h;
   }
+  $('seances').addEventListener('input', e => { if (e.target.id === 'sSearch') { sQuery = e.target.value; const L = $('sList'); if (L) L.innerHTML = sListHtml(); } });
+  $('seances').addEventListener('click', e => {
+    const t = e.target.closest('[data-stab]'); if (t) { sTab = t.dataset.stab; renderSeances(); try { fx($('seances')); } catch (x) {} $('v-seances').scrollTop = 0; return; }
+    const f = e.target.closest('[data-sf]'); if (f) { sFilter = f.dataset.sf; renderSeances(); return; }
+    if (e.target.closest('[data-rest-open]')) { openRest(); return; }
+    const sg = e.target.closest('[data-sug-gym]'); if (sg) { openGym(); G.mus = [sg.dataset.sugGym]; renderGym(); return; }
+    const rd = e.target.closest('[data-rout-del]');
+    if (rd) { const R = routines(), r = R.find(x => String(x.id) === rd.dataset.routDel); if (r && confirm('Supprimer la routine « ' + r.name + ' » ?')) { store.set(K_ROUT, R.filter(x => x !== r)); renderSeances(); } return; }
+    const ro = e.target.closest('[data-rout]');
+    if (ro) {
+      const r = routines().find(x => String(x.id) === ro.dataset.rout); if (!r) return;
+      const st = gymStats();
+      openGym({ id: r.id, muscles: r.muscles, exercises: (r.exercises || []).map(x => Object.assign({}, x, { kg: (st[x.name] && st[x.name].last && st[x.name].last.kg) || x.kg || 0 })), dur: r.dur, int: r.int }, -1, 'fromplan');
+      toast('Routine « ' + r.name + ' » prête, avec tes charges de la dernière fois');
+    }
+  });
+  // ---------- Minuteur de repos (entre deux séries) ----------
+  const RT = { end: 0, total: 0, sec: +settings.restSec || 90, t: null };
+  const REST_OPTS = [30, 45, 60, 90, 120, 180];
+  const fmtMS = x => Math.floor(x / 60) + ':' + pad(Math.floor(x % 60));
+  function restChips() { $('rsChips').innerHTML = REST_OPTS.map(x => '<button type="button" class="chip" data-rs="' + x + '" aria-pressed="' + (RT.sec === x) + '">' + fmtSec(x) + '</button>').join(''); }
+  function restUi() {
+    const run = RT.end > 0, left = run ? Math.max(0, (RT.end - Date.now()) / 1000) : RT.sec, C = 2 * Math.PI * 52, txt = fmtMS(Math.ceil(left));
+    $('rsTime').textContent = txt; $('rsSub').textContent = run ? 'Repos en cours' : 'Choisis ta durée';
+    $('rsArc').style.strokeDasharray = C.toFixed(1); $('rsArc').style.strokeDashoffset = (run ? C * (1 - left / Math.max(1, RT.total)) : 0).toFixed(1);
+    $('rsGo').textContent = run ? 'Arrêter' : 'Démarrer';
+    const pill = $('restPill'); pill.classList.toggle('hidden', !run || !$('restSheet').classList.contains('hidden') || !$('gsheet').classList.contains('hidden')); pill.textContent = 'Repos ' + txt;
+    const g = $('gRest'); if (g) g.textContent = run ? txt : '';
+  }
+  function restNotif(on) {
+    const LN = plugin('LocalNotifications'); if (!LN) return;
+    try { LN.cancel({ notifications: [{ id: 97 }] }); if (on && RT.end > Date.now() + 1500) LN.schedule({ notifications: [{ id: 97, title: 'Parcours · Repos terminé', body: 'C\'est reparti pour la série suivante.', schedule: { at: new Date(RT.end), allowWhileIdle: true } }] }); } catch (e) {}
+  }
+  function restStop() { clearInterval(RT.t); RT.t = null; RT.end = 0; restNotif(false); restUi(); }
+  function restStart(sec) {
+    RT.sec = sec; settings.restSec = sec; saveSettings(); RT.total = sec; RT.end = Date.now() + sec * 1000;
+    clearInterval(RT.t); RT.t = setInterval(() => { if (Date.now() >= RT.end) restDone(); else restUi(); }, 250);
+    try { audioUnlock(); } catch (e) {}
+    restChips(); restUi();
+  }
+  function restDone() {
+    restStop();
+    beep(880, 200, 0.5, true); setTimeout(() => beep(1175, 420, 0.5, true), 230);
+    try { navigator.vibrate && navigator.vibrate([150, 80, 150]); } catch (e) {}
+    speak('Repos terminé. C\'est reparti.'); toast('Repos terminé : c\'est reparti !');
+  }
+  function openRest() { restChips(); $('restSheet').classList.remove('hidden'); restUi(); }
+  $('rsClose').addEventListener('click', () => { $('restSheet').classList.add('hidden'); restUi(); });
+  $('restSheet').addEventListener('click', e => { if (e.target.id === 'restSheet') { $('restSheet').classList.add('hidden'); restUi(); } });
+  $('rsChips').addEventListener('click', e => { const b = e.target.closest('[data-rs]'); if (!b) return; if (RT.end > 0) restStart(+b.dataset.rs); else { RT.sec = +b.dataset.rs; restChips(); restUi(); } });
+  $('rsGo').addEventListener('click', () => { if (RT.end > 0) restStop(); else restStart(RT.sec); });
+  $('rsPlus').addEventListener('click', () => { if (RT.end > 0) { RT.end += 15000; RT.total += 15; } else RT.sec = Math.min(600, RT.sec + 15); restUi(); });
+  $('restPill').addEventListener('click', openRest);
+  document.addEventListener('visibilitychange', () => { if (RT.end > 0) { restNotif(document.hidden); if (!document.hidden && Date.now() >= RT.end) restDone(); } });
   $('seances').addEventListener('toggle', e => { const d = e.target.closest && e.target.closest('.wgrp'); if (d) { if (d.open) wOpen.add(d.dataset.wg); else wOpen.delete(d.dataset.wg); } }, true);
   $('seances').addEventListener('click', e => {
     if (e.target.closest('[data-wlog]')) { wLogAll = !wLogAll; renderSeances(); return; }
@@ -3313,6 +3467,22 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
     store.get(K_WLOG, []).forEach(l => { if (l.kind !== 'muscu') return; const k = (l.muscles || []).slice().sort().join('+'); if (seen.has(k)) return; seen.add(k); out.push(l); });
     return out.slice(0, 4);
   }
+  function gexHint(e) {
+    if (!G.stats) { const old = G.editIdx >= 0 ? store.get(K_WLOG, [])[G.editIdx] : null; G.stats = gymStats(old ? old.date : undefined); }
+    const r = G.stats[e.name], kgf = v => nf1.format(v).replace(',0', '') + ' kg';
+    if (!r || !r.last) return '<small class="gex-last">Première fois : note ta charge pour suivre tes progrès.</small>';
+    return '<small class="gex-last">Dernière fois : ' + r.last.sets + ' × ' + r.last.reps + (r.last.kg ? ' à ' + kgf(r.last.kg) : '') + (r.max ? ' · record ' + kgf(r.max) : '') + ((+e.kg || 0) > r.max && r.max > 0 ? ' · <b>nouveau record !</b>' : '') + '</small>';
+  }
+  $('gBody').addEventListener('click', e => {
+    const rs = e.target.closest('[data-rest]'); if (rs) { restStart(+rs.dataset.rest); toast('Repos de ' + fmtSec(+rs.dataset.rest) + ' lancé'); return; }
+    if (!e.target.closest('[data-grout-save]')) return;
+    if (!G.mus.length) return;
+    let name = ''; try { name = (prompt('Nom de la routine (ex. : Push, Jambes, Haut du corps)', musNames(G.mus)) || '').trim().slice(0, 30); } catch (x) {}
+    if (!name) return;
+    const R = routines().filter(x => x.name.toLowerCase() !== name.toLowerCase());
+    R.unshift({ id: 'r' + Date.now(), name, muscles: G.mus.slice(), exercises: G.ex.map(x => ({ name: x.name, m: x.m, sets: x.sets, reps: x.reps, kg: x.kg || 0 })), dur: G.dur, int: G.int });
+    store.set(K_ROUT, R.slice(0, 20)); toast('Routine « ' + name + ' » enregistrée : retrouve-la dans Séances'); renderSeances();
+  });
   function renderGym() {
     let h = '';
     if (G.plan) {
@@ -3337,11 +3507,16 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
             '<input type="number" inputmode="numeric" min="1" max="20" value="' + e.sets + '" data-gs="' + i + '" aria-label="Séries de ' + esc(e.name) + '">' +
             '<input type="number" inputmode="numeric" min="1" max="100" value="' + e.reps + '" data-gr="' + i + '" aria-label="Répétitions de ' + esc(e.name) + '">' +
             '<span class="gkg"><input type="number" inputmode="decimal" min="0" max="500" step="0.5" value="' + (e.kg || '') + '" placeholder="–" data-gk="' + i + '" aria-label="Charge en kg pour ' + esc(e.name) + '">kg</span></div>';
+          h += gexHint(e);
         });
       }
     }
     h += '<div class="cp-t">3. Durée de la séance</div><div class="chips cp-wrap">' + [...new Set([30, 45, 60, 75, 90, 120, G.dur])].sort((a, b) => a - b).map(d => '<button type="button" class="chip" data-gd="' + d + '" aria-pressed="' + (G.dur === d) + '">' + (d < 60 ? d + ' min' : Math.floor(d / 60) + ' h' + (d % 60 ? ' ' + (d % 60) : '')) + '</button>').join('') + '</div>';
     h += '<div class="cp-t">4. Intensité</div><div class="chips cp-wrap">' + GINT.map((g, i) => '<button type="button" class="chip cp-por" data-gi="' + i + '" aria-pressed="' + (G.int === i) + '"><span>' + g[0] + '</span><b>' + g[1] + '</b></button>').join('') + '</div>';
+    if (G.mus.length && !G.plan) {
+      h += '<div class="cp-t">Repos entre les séries <b id="gRest" class="num grest-t"></b></div><div class="chips cp-wrap">' + [60, 90, 120, 180].map(x => '<button type="button" class="chip" data-rest="' + x + '">' + fmtSec(x) + '</button>').join('') + '</div>';
+      h += '<button type="button" class="linkbtn" data-grout-save="1">Enregistrer comme routine (à relancer en un appui)</button>';
+    }
     const vol = G.ex.reduce((a, e) => a + e.sets * e.reps * (e.kg || 0), 0), sets = G.ex.reduce((a, e) => a + e.sets, 0);
     h += '<div class="gsum"><div><span>Calories dépensées</span><b class="num">' + nf0.format(gymKcal()) + '</b><small>kcal</small></div>' +
       '<div><span>' + (vol ? 'Volume soulevé' : 'Séries') + '</span><b class="num">' + (vol ? nf0.format(vol) : sets || '–') + '</b><small>' + (vol ? 'kg' : '') + '</small></div></div>' +
@@ -3350,6 +3525,7 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
     $('gSave').disabled = !G.mus.length;
   }
   function openGym(edit, idx, mode) {
+    G.stats = null;
     G.editIdx = edit && mode !== 'plan' && mode !== 'fromplan' ? idx : -1; G.plan = mode === 'plan'; G.fromPlan = mode === 'fromplan' ? edit.id : null;
     if (G.plan) { const d = new Date(Date.now() + 864e5); d.setHours(18, 0, 0, 0); G.planAt = edit && edit.at ? edit.at : d.getTime(); G.planRep = !!(edit && edit.weekly); G.planId = edit && edit.id || null; }
     if (mode === 'plan' || mode === 'fromplan') {
@@ -3418,11 +3594,12 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
     if (G.fromPlan) { const P = gymPlans(), pl = P.find(x => x.id === G.fromPlan); if (pl) { if (pl.weekly) { pl.at += 7 * 864e5; while (pl.at < Date.now() + 3600e3) pl.at += 7 * 864e5; } else P.splice(P.indexOf(pl), 1); store.set(K_GPLAN, P); gymPlanNotify(); } G.fromPlan = null; }
     const names = MUSCLES.filter(m => G.mus.includes(m[0])).map(m => m[1]);
     const log = store.get(K_WLOG, []), old = G.editIdx >= 0 ? log[G.editIdx] : null;
+    const st0 = old ? {} : gymStats(), prs = G.ex.filter(x => st0[x.name] && st0[x.name].max > 0 && (+x.kg || 0) > st0[x.name].max).map(x => x.name + ' ' + nf1.format(x.kg).replace(',0', '') + ' kg (+' + nf1.format(x.kg - st0[x.name].max).replace(',0', '') + ')');
     const entry = ({ kind: 'muscu', date: old ? old.date : Date.now() - G.dur * 60000, name: 'Musculation : ' + names.join(', '), muscles: G.mus.slice(), exercises: G.ex.map(e => ({ name: e.name, sets: e.sets, reps: e.reps, kg: e.kg })),
       durationMs: G.dur * 60000, kcal: gymKcal(), intensity: GINT[G.int][0], done: G.ex.length, total: G.ex.length });
     if (old) log[G.editIdx] = entry; else log.unshift(entry);
     store.set(K_WLOG, log.slice(0, 300)); store.set('parcours.gymDef', G.def);
-    $('gsheet').classList.add('hidden'); renderSeances(); toast(old ? 'Séance modifiée' : 'Séance de musculation enregistrée'); try { healthChanged(); } catch (e) {}
+    $('gsheet').classList.add('hidden'); renderSeances(); toast(old ? 'Séance modifiée' : prs.length ? 'Nouveau record : ' + prs.join(', ') : 'Séance de musculation enregistrée'); if (prs.length) { try { navigator.vibrate && navigator.vibrate([80, 60, 160]); } catch (x) {} } try { healthChanged(); } catch (e) {}
   });
 
   // Fiche d'une séance
