@@ -1105,6 +1105,12 @@ body.mb-browse #hud,body.mb-full .mb-fab,body.mb-full .map-btns{display:none}
 .mb-ico{display:none;width:48px;height:48px;padding:0!important;align-items:center;justify-content:center}.mb-ico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
 body.mb-browse .mb-ico{display:flex}
 @media (prefers-reduced-motion:reduce){.rt-sheet{transition:none}}
+
+.db-stat{display:block;font-style:normal;font-size:.85rem;font-weight:700;color:var(--blanc);margin:2px 0}
+.mb-dur{margin-top:8px;padding:12px;border-radius:14px;border:1px solid var(--ligne);background:rgba(255,255,255,.035)}.mb-dur small{display:block;font-size:.8rem;color:var(--gris)}.mb-dur b{display:block;font-size:1.3rem;margin:2px 0}.mb-dur span{display:block;font-size:.8rem;color:var(--gris)}
+.mb-dsp{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.mb-dsp .chip{font-size:.82rem;padding:7px 12px}.mb-dsp .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#f6f0e2}
+.db-sp{margin:4px 0 2px;padding:5px 11px;border:1px solid var(--ligne);border-radius:999px;background:none;color:var(--blanc);font:inherit;font-size:.8rem;font-weight:700}
+body.drawing .maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-attrib-inner{display:none}
 </style>
 </head>
 <body>
@@ -1177,7 +1183,7 @@ body.mb-browse .mb-ico{display:flex}
     </div>
     <div id="guideBar" class="guidebar hidden"><div><small id="gbKind"></small><b id="gbName"></b><span id="gbInfo"></span></div><div class="gb-b"><button id="gbGo" class="sbtn save" type="button">Lancer ce parcours</button><button id="gbOff" class="ibtn" type="button" aria-label="Retirer le parcours">×</button></div></div>
     <div id="drawBar" class="drawbar hidden">
-      <div class="db-top"><div><small>Nouveau parcours</small><b id="dbKm" class="num">0,00 km</b><span id="dbUp">Touche la carte pour placer le départ</span></div>
+      <div class="db-top"><div><small>Nouveau parcours</small><b id="dbKm" class="num">0,00 km</b><em id="dbStat" class="db-stat"></em><button id="dbSp" type="button" class="db-sp" aria-label="Changer de sport pour la durée et le tracé"></button><span id="dbUp">Touche la carte pour placer le départ</span></div>
         <div class="db-mode" role="group" aria-label="Type de tracé"><button type="button" data-dmode="path" aria-pressed="true">Chemins</button><button type="button" data-dmode="line" aria-pressed="false">Ligne droite</button></div></div>
       <div class="db-b"><button id="dbUndo" class="sbtn cancel" type="button">Annuler le point</button><button id="dbLoop" class="sbtn cancel" type="button">Boucler</button><button id="dbSave" class="sbtn save" type="button">Enregistrer</button><button id="dbQuit" class="ibtn" type="button" aria-label="Quitter le dessin">×</button></div>
     </div>
@@ -2433,16 +2439,27 @@ body.mb-browse .mb-ico{display:flex}
 
   // ---------- Créer ses propres parcours (dessin sur la carte) ----------
   const K_MYRT = 'parcours.myRoutes';
-  const DR = { on: false, pts: [], segs: [], mode: 'path', busy: false };
+  const DR = { on: false, pts: [], segs: [], el: [], mode: 'path', busy: false };
   const myRoutes = () => store.get(K_MYRT, []);
   const segLen = c => { let d = 0; for (let i = 1; i < c.length; i++) d += haversine({ lat: c[i - 1][1], lon: c[i - 1][0] }, { lat: c[i][1], lon: c[i][0] }); return d; };
   async function routeSeg(a, b) {
     if (DR.mode === 'path') {
-      const act = settings.activity === 'velo' ? 'routed-bike/route/v1/bike' : 'routed-foot/route/v1/foot';
+      const act = drawSport() === 'velo' ? 'routed-bike/route/v1/bike' : 'routed-foot/route/v1/foot';
       try { const j = await getJson('https://routing.openstreetmap.de/' + act + '/' + a[0] + ',' + a[1] + ';' + b[0] + ',' + b[1] + '?overview=full&geometries=geojson');
         const c = j && j.routes && j.routes[0] && j.routes[0].geometry.coordinates; if (c && c.length > 1) return c.map(x => [Math.round(x[0] * 1e5) / 1e5, Math.round(x[1] * 1e5) / 1e5]); } catch (e) {}
     }
     return [a, b];
+  }
+  const drawSport = () => DR.sp || (settings.activity === 'velo' ? 'velo' : settings.activity === 'course' ? 'course' : 'marche');
+  async function segElev(seg) { // dénivelé d'un tronçon : ~25 points (en ligne droite, on ajoute des points intermédiaires)
+    let P = seg;
+    if (P.length < 12) { P = []; for (let i = 1; i < seg.length; i++) for (let k = 0; k < 12; k++) { const t = k / 12; P.push([seg[i - 1][0] + (seg[i][0] - seg[i - 1][0]) * t, seg[i - 1][1] + (seg[i][1] - seg[i - 1][1]) * t]); } P.push(seg[seg.length - 1]); }
+    if (P.length > 25) { const k = (P.length - 1) / 24; P = Array.from({ length: 25 }, (_, i) => P[Math.round(i * k)]); }
+    try {
+      const j = await getJson('https://api.open-meteo.com/v1/elevation?latitude=' + P.map(c => c[1].toFixed(5)).join(',') + '&longitude=' + P.map(c => c[0].toFixed(5)).join(','));
+      const E = (j && j.elevation) || []; let up = 0, down = 0; for (let i = 1; i < E.length; i++) { const d = E[i] - E[i - 1]; if (d > 0) up += d; else down -= d; }
+      return { up: Math.round(up), down: Math.round(down) };
+    } catch (e) { return { up: 0, down: 0, fail: 1 }; }
   }
   function drawGeo() {
     return { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: DR.segs.flat() } }].concat(DR.pts.map((p, i) => ({ type: 'Feature', properties: { k: i === 0 ? 'start' : 'pt' }, geometry: { type: 'Point', coordinates: p } }))) };
@@ -2450,6 +2467,10 @@ body.mb-browse .mb-ico{display:flex}
   function drawUi() {
     const m = DR.segs.reduce((a, c) => a + segLen(c), 0);
     $('dbKm').textContent = nf2.format(m / 1000) + ' km';
+    const sp = drawSport(), up = DR.el.reduce((a, x) => a + (x ? x.up : 0), 0), dn = DR.el.reduce((a, x) => a + (x ? x.down : 0), 0), wait = DR.el.length < DR.segs.length || DR.el.some(x => x === undefined);
+    const d = durOf(m / 1000, up, sp);
+    $('dbStat').textContent = DR.segs.length ? '+' + up + ' m · −' + dn + ' m' + (wait ? ' (calcul…)' : '') + ' · ' + fmtRange(d.range) : '';
+    $('dbSp').textContent = SP_LBL[sp] + ' ▾';
     $('dbUp').textContent = DR.busy ? 'Calcul du chemin…' : !DR.pts.length ? 'Touche la carte pour placer le départ' : DR.pts.length === 1 ? 'Touche la carte pour tracer la suite' : plural(DR.pts.length, 'point') + ' · touche pour continuer';
     document.querySelectorAll('[data-dmode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.dmode === DR.mode));
     $('dbUndo').disabled = !DR.pts.length; $('dbSave').disabled = DR.pts.length < 2 || DR.busy; $('dbLoop').disabled = DR.pts.length < 3 || DR.busy;
@@ -2461,18 +2482,20 @@ body.mb-browse .mb-ico{display:flex}
     DR.busy = true; drawUi();
     const seg = await routeSeg(DR.pts[DR.pts.length - 1], p);
     DR.pts.push(p); DR.segs.push(seg); DR.busy = false; drawUi();
+    const i = DR.segs.length - 1; segElev(seg).then(x => { if (DR.segs[i] === seg) { DR.el[i] = x; drawUi(); } });
   }
   async function drawStart() {
     $('routesPage').classList.add('hidden'); if (guide) { guide = null; store.del(K_GUIDE); guideBarUi(); }
     if (currentView !== 1) go(1);
     await ensureMap(); try { await whenMapReady(); } catch (e) { toast('La carte n\'est pas disponible.'); return; }
-    DR.on = true; DR.pts = []; DR.segs = []; document.body.classList.add('drawing');
+    DR.on = true; DR.pts = []; DR.segs = []; DR.el = []; DR.sp = null; document.body.classList.add('drawing');
     $('drawBar').classList.remove('hidden'); drawUi();
     if (rtPos || lastFix) map.easeTo({ center: lastFix ? [lastFix.lon, lastFix.lat] : [rtPos.lon, rtPos.lat], zoom: 15, pitch: 0, duration: anim() ? 800 : 0 });
     toast('Touche la carte pour placer les points de ton parcours');
   }
-  function drawStop() { DR.on = false; DR.pts = []; DR.segs = []; document.body.classList.remove('drawing'); $('drawBar').classList.add('hidden'); drawUi(); }
-  $('dbUndo').addEventListener('click', () => { if (DR.busy) return; DR.pts.pop(); DR.segs.pop(); drawUi(); });
+  function drawStop() { DR.on = false; DR.pts = []; DR.segs = []; DR.el = []; document.body.classList.remove('drawing'); $('drawBar').classList.add('hidden'); drawUi(); }
+  $('dbUndo').addEventListener('click', () => { if (DR.busy) return; DR.pts.pop(); DR.segs.pop(); DR.el.length = DR.segs.length; drawUi(); });
+  $('dbSp').addEventListener('click', () => { const o = ['course', 'marche', 'rando', 'velo']; DR.sp = o[(o.indexOf(drawSport()) + 1) % 4]; drawUi(); });
   $('dbLoop').addEventListener('click', () => { if (DR.pts.length > 2) drawAdd(DR.pts[0]); });
   $('dbQuit').addEventListener('click', () => { if (DR.pts.length < 2 || confirm('Quitter sans enregistrer ce parcours ?')) drawStop(); });
   document.querySelectorAll('[data-dmode]').forEach(b => b.addEventListener('click', () => { DR.mode = b.dataset.dmode; drawUi(); }));
@@ -2482,12 +2505,14 @@ body.mb-browse .mb-ico{display:flex}
     if (!name) return;
     const km = Math.round(segLen(coords) / 10) / 100;
     let up = 0, down = 0;
-    try { // dénivelé : altitude de ~80 points le long du tracé (Open-Meteo, gratuit)
+    const known = DR.el.length === DR.segs.length && DR.el.every(x => x && !x.fail);
+    if (known) { up = DR.el.reduce((a, x) => a + x.up, 0); down = DR.el.reduce((a, x) => a + x.down, 0); }
+    else try { // dénivelé : altitude de ~80 points le long du tracé (Open-Meteo, gratuit)
       const step = Math.max(1, Math.floor(coords.length / 80)), S = coords.filter((c, i) => i % step === 0 || i === coords.length - 1).slice(0, 100);
       const j = await getJson('https://api.open-meteo.com/v1/elevation?latitude=' + S.map(c => c[1].toFixed(5)).join(',') + '&longitude=' + S.map(c => c[0].toFixed(5)).join(','));
       const E = (j && j.elevation) || []; for (let i = 1; i < E.length; i++) { const d = E[i] - E[i - 1]; if (d > 0) up += d; else down -= d; }
     } catch (e) {}
-    const kind = settings.activity === 'velo' ? 'bicycle' : settings.activity === 'course' ? 'running' : 'foot';
+    const kind = { velo: 'bicycle', course: 'running', rando: 'hiking', marche: 'foot' }[drawSport()];
     const R = myRoutes(); R.unshift({ id: 'my' + Date.now(), name, kind, km, up: Math.round(up), down: Math.round(down), coords: [coords], t: Date.now() }); store.set(K_MYRT, R.slice(0, 50));
     drawStop(); toast('Parcours « ' + name + ' » enregistré : ' + nf2.format(km) + ' km' + (up ? ', +' + Math.round(up) + ' m' : ''));
     useMyRoute(R[0]);
@@ -2495,14 +2520,45 @@ body.mb-browse .mb-ico{display:flex}
   );
   function useMyRoute(r) { guide = { id: r.id, name: r.name, kind: r.kind, km: r.km, coords: r.coords }; store.set(K_GUIDE, guide); $('routesPage').classList.add('hidden'); showGuide(true); }
 
+
+  // @duree-debut — fonctions pures (aucun accès au téléphone), testées par tests/duree.test.mjs
+  const DUR_KMH = { marche: 4.5, rando: 4.5, course: 10, velo: 18 };       // vitesse de base sur le plat
+  const DUR_CLIMB = { marche: 600, rando: 600, course: 600, velo: 800 };   // mètres de D+ qui ajoutent 1 h (course : 1 min / 10 m)
+  const durSport = sp => DUR_KMH[sp] ? sp : 'marche';
+  function estDuration(km, up, sport, kmh) { // durée en heures
+    if (!(km > 0)) return null;
+    const sp = durSport(sport), v = kmh > 0 ? kmh : DUR_KMH[sp];
+    return km / v + Math.max(0, up || 0) / DUR_CLIMB[sp];
+  }
+  function durRange(h, personal) { // fourchette en minutes, arrondie à 5 min (plus serrée si on connaît ta vitesse)
+    if (h == null || !(h > 0)) return null;
+    const e = personal ? 0.08 : 0.12, r = m => Math.max(5, Math.round(m / 5) * 5), a = r(h * 60 * (1 - e)), b = r(h * 60 * (1 + e));
+    return [a, b > a ? b : a + 5];
+  }
+  function fmtDurMin(m) { return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + String(m % 60).padStart(2, '0') : ''); }
+  function fmtRange(r) { return r ? fmtDurMin(r[0]) + ' – ' + fmtDurMin(r[1]) : '–'; }
+  function userKmh(hist, sport) { // ta vitesse moyenne réelle sur le plat (dénivelé retiré), d'après tes 15 dernières sorties de ce sport
+    const sp = durSport(sport), act = sp === 'rando' ? 'marche' : sp;
+    const L = (hist || []).filter(h => h && h.activity === act && h.distanceM > 1000 && h.durationMs > 5 * 60000).slice(0, 15);
+    if (L.length < 2) return null;
+    let km = 0, hrs = 0; L.forEach(h => { km += h.distanceM / 1000; hrs += Math.max(h.durationMs / 3600000 - Math.max(0, h.dplus || 0) / DUR_CLIMB[sp], h.durationMs / 3600000 * 0.5); });
+    const v = km / hrs, lim = { marche: [2, 8], course: [5, 25], velo: [8, 45] }[act];
+    return v >= lim[0] && v <= lim[1] ? Math.round(v * 10) / 10 : null;
+  }
+  // @duree-fin
+  let kmhCache = { t: 0 };
+  function myKmh(sport) { if (Date.now() - kmhCache.t > 60000) kmhCache = { t: Date.now() }; const sp = durSport(sport); if (!(sp in kmhCache)) kmhCache[sp] = userKmh(store.get(K_HIST, []), sp); return kmhCache[sp]; }
+  function durOf(km, up, sport) { const v = myKmh(sport), h = estDuration(km, up, sport, v); return { h, range: durRange(h, !!v), kmh: v }; }
   // ---------- Carte : les parcours de la zone visible (OpenStreetMap via Overpass + les miens) ----------
   const K_CELLS = 'parcours.osmCells', K_RTDET = 'parcours.rtDetails', CELL = 0.2, MINZ = 11;
   const SPORT = { running: 'course', fitness_trail: 'course', track: 'course', foot: 'marche', walking: 'marche', hiking: 'rando', bicycle: 'velo', mtb: 'velo' };
   const SP_LBL = { course: 'Course', marche: 'Marche', rando: 'Rando', velo: 'Vélo' }, SP_KMH = { course: 9.5, marche: 4.5, rando: 3.8, velo: 17 };
-  const MB = { cells: store.get(K_CELLS, {}), det: store.get(K_RTDET, {}), full: {}, sport: 'tout', dur: 'tout', dist: 'tout', st: 'min', sel: null, busy: false, again: false, err: '', slow: false, loc: '', timer: 0, all: [], vis: [], detBusy: '' };
+  const MB = { cells: store.get(K_CELLS, {}), det: store.get(K_RTDET, {}), full: {}, dsp: {}, sport: 'tout', dur: 'tout', dist: 'tout', st: 'min', sel: null, busy: false, again: false, err: '', slow: false, loc: '', timer: 0, all: [], vis: [], detBusy: '' };
   const r5 = v => Math.round(v * 1e5) / 1e5, linesLen = L => L.reduce((a, l) => a + segLen(l), 0);
   const mbSport = r => SPORT[r.kind] || 'marche';
-  const mbHours = r => r.km ? r.km / SP_KMH[mbSport(r)] + (r.up || 0) / (mbSport(r) === 'velo' ? 900 : 600) : null;
+  const mbDurSp = r => MB.dsp[r.id] || mbSport(r);
+  const mbDur = r => durOf(r.km, r.up, mbDurSp(r));
+  const mbHours = r => mbDur(r).h;
   const fmtH = h => { if (h == null) return '–'; const m = Math.max(5, Math.round(h * 12) * 5); return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + pad(m % 60) : ''); };
   const mbFiltered = () => MB.sport !== 'tout' || MB.dur !== 'tout' || MB.dist !== 'tout';
   function mbRoutes() {
@@ -2524,7 +2580,7 @@ body.mb-browse .mb-ico{display:flex}
     const L = MB.all.filter(mbPass);
     if (data && map && map.getSource('rts')) {
       map.getSource('rts').setData({ type: 'FeatureCollection', features: L.filter(r => r.lines && r.lines.length).map(r => ({ type: 'Feature', properties: { id: r.id, my: r.my ? 1 : 0 }, geometry: { type: 'MultiLineString', coordinates: r.lines } })) });
-      map.getSource('rtp').setData({ type: 'FeatureCollection', features: L.filter(r => r.c).map(r => ({ type: 'Feature', properties: { id: r.id }, geometry: { type: 'Point', coordinates: r.c } })) });
+      map.getSource('rtp').setData({ type: 'FeatureCollection', features: L.filter(r => r.c).map(r => ({ type: 'Feature', properties: { id: r.id, dur: (d => d ? fmtDurMin(d[0]) + '–' + fmtDurMin(d[1]) : '')(mbDur(r).range) }, geometry: { type: 'Point', coordinates: r.c } })) });
     }
     if (map) {
       const b = map.getBounds(), c = map.getCenter(), far = map.getZoom() < MINZ;
@@ -2634,7 +2690,7 @@ body.mb-browse .mb-ico{display:flex}
   }
   function mbFacts(r) {
     const approx = !r.exact && !r.kmTag && !r.my;
-    return [SP_LBL[mbSport(r)] + (r.my ? ' · à toi' : ''), r.km ? (approx ? '≈ ' : '') + nf1.format(r.km) + ' km' : null, r.up != null ? '+' + r.up + ' m' : null, '~' + fmtH(mbHours(r))].filter(Boolean).join(' · ');
+    return [SP_LBL[mbSport(r)] + (r.my ? ' · à toi' : ''), r.km ? (approx ? '≈ ' : '') + nf1.format(r.km) + ' km' : null, r.up != null ? '+' + r.up + ' m' : null, fmtRange(mbDur(r).range)].filter(Boolean).join(' · ');
   }
   function mbSheet() {
     if (!$('rtSheet')) return;
@@ -2651,7 +2707,7 @@ body.mb-browse .mb-ico{display:flex}
       const rec = recs[r.id], k = RT_KIND[r.kind] || ['marche', 'Parcours'], wait = MB.detBusy === r.id, fail = MB.detBusy === 'err';
       const v = x => wait && x === '–' ? '…' : x;
       h = '<div class="mb-det"><button type="button" class="linkbtn" data-mb="back">‹ Tous les parcours</button><small>' + (r.my ? 'Mon parcours' : k[1] + ({ iwn: ' international', nwn: ' national', rwn: ' régional', lwn: ' local', icn: ' international', ncn: ' national', rcn: ' régional', lcn: ' local' }[r.net] || '')) + '</small><h3>' + esc(r.name) + '</h3>' +
-        '<div class="mb-stats"><div><b class="num">' + v(r.km ? (r.exact || r.kmTag ? '' : '≈ ') + nf1.format(r.km) + ' km' : '–') + '</b><small>Distance</small></div><div><b class="num">' + v(r.up != null ? '+' + r.up + ' m' : '–') + '</b><small>Dénivelé positif</small></div><div><b class="num">' + v(r.down != null ? '−' + r.down + ' m' : '–') + '</b><small>Dénivelé négatif</small></div><div><b class="num">' + v(fmtH(mbHours(r))) + '</b><small>Durée estimée (' + SP_LBL[mbSport(r)].toLowerCase() + ')</small></div></div>' +
+        '<div class="mb-stats"><div><b class="num">' + v(r.km ? (r.exact || r.kmTag ? '' : '≈ ') + nf1.format(r.km) + ' km' : '–') + '</b><small>Distance</small></div><div><b class="num">' + v(r.up != null ? '+' + r.up + ' m' : '–') + '</b><small>Dénivelé positif</small></div><div><b class="num">' + v(r.down != null ? '−' + r.down + ' m' : '–') + '</b><small>Dénivelé négatif</small></div><div><b class="num">' + (r.my ? 'À toi' : 'OSM') + '</b><small>Source</small></div></div>' + (() => { const sp = mbDurSp(r), d = mbDur(r); return '<div class="mb-dur"><small>Durée estimée</small><b class="num">' + v(fmtRange(d.range)) + '</b><span>' + (d.kmh ? 'D\'après ta vitesse moyenne en ' + SP_LBL[sp].toLowerCase() + ' (' + nf1.format(d.kmh) + ' km/h sur le plat)' : 'Allure standard (' + DUR_KMH[sp] + ' km/h' + (r.up ? ', montée comprise' : '') + ')') + '</span><div class="mb-dsp" role="group" aria-label="Sport pour la durée">' + ['course', 'marche', 'rando', 'velo'].map(k => '<button type="button" class="chip" data-mb-sp="' + k + '" aria-pressed="' + (k === sp) + '">' + SP_LBL[k] + '</button>').join('') + '</div></div>'; })() +
         (wait ? '<p class="mb-note">Calcul de la distance exacte et du dénivelé…</p>' : fail ? '<p class="mb-note">Détails indisponibles pour l\'instant (réseau ?). <button type="button" class="linkbtn" data-mb="detail">Réessayer</button></p>' : '') +
         (rec ? '<p class="mb-note">Ton record : <b>' + fmtClock(rec.best) + '</b> · ' + plural(rec.n, 'passage') + '</p>' : '') +
         '<button type="button" class="sbtn save" data-mb="go">Démarrer ce parcours</button><button type="button" class="sbtn cancel" data-mb="follow">Afficher le tracé à suivre</button>' +
@@ -2672,6 +2728,7 @@ body.mb-browse .mb-ico{display:flex}
   }
   $('shBody').addEventListener('click', e => {
     const it = e.target.closest('[data-mbr]'); if (it) { mbSelect(it.dataset.mbr, true); return; }
+    const sp = e.target.closest('[data-mb-sp]'); if (sp && MB.sel) { MB.dsp[MB.sel] = sp.dataset.mbSp; mbRefresh(true); return; }
     const b = e.target.closest('[data-mb]'); if (!b) return; const a = b.dataset.mb, r = MB.sel && MB.all.find(x => x.id === MB.sel);
     if (a === 'back') mbDeselect();
     else if (a === 'retry') { MB.err = ''; mbLoad(); }
@@ -6585,6 +6642,7 @@ body.mb-browse .mb-ico{display:flex}
     map.addLayer({ id: 'rtsel-coeur', type: 'line', source: 'rtsel', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#d6a24e', 'line-width': lw(3, 6.5) } });
     map.addLayer({ id: 'rt-clu', type: 'circle', source: 'rtp', filter: ['has', 'point_count'], paint: { 'circle-color': '#4a8a62', 'circle-stroke-color': '#efe7d4', 'circle-stroke-width': 2, 'circle-radius': ['step', ['get', 'point_count'], 14, 10, 18, 40, 23] } });
     if (st.glyphs) try { map.addLayer({ id: 'rt-clu-n', type: 'symbol', source: 'rtp', filter: ['has', 'point_count'], layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-size': 13, 'text-font': ['Noto Sans Bold'], 'text-allow-overlap': true }, paint: { 'text-color': '#f6f0e2' } }); } catch (e) {}
+    if (st.glyphs) try { map.addLayer({ id: 'rt-pt-dur', type: 'symbol', source: 'rtp', minzoom: 12, filter: ['!', ['has', 'point_count']], layout: { 'text-field': ['get', 'dur'], 'text-size': 12, 'text-font': ['Noto Sans Bold'], 'text-offset': [0, 1.35], 'text-anchor': 'top', 'text-optional': true }, paint: { 'text-color': '#efe7d4', 'text-halo-color': '#0f1511', 'text-halo-width': 1.6 } }); } catch (e) {}
     map.addLayer({ id: 'rt-pt', type: 'circle', source: 'rtp', filter: ['!', ['has', 'point_count']], paint: { 'circle-color': '#4a8a62', 'circle-stroke-color': '#efe7d4', 'circle-stroke-width': 2, 'circle-radius': 7 } });
     if (!map.__mb) { map.__mb = 1; map.on('moveend', () => { clearTimeout(MB.timer); mbRefresh(false); MB.timer = setTimeout(mbLoad, 500); }); map.on('click', mbClick); if (!lastFix) setTimeout(() => mbLocate(false), 400); }
     mbRefresh(true); clearTimeout(MB.timer); MB.timer = setTimeout(mbLoad, 500);
