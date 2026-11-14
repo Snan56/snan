@@ -1064,6 +1064,47 @@ body.drawing .map-btns,body.drawing #guideBar,body.drawing #hud{display:none!imp
 .sc-t small{display:block;font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gris)}.sc-t b{display:block;font-size:17px}.sc-t span{display:block;margin-top:2px;font-size:13px;color:var(--gris)}
 .sc-parts{display:flex;flex-direction:column;gap:7px;margin:14px 0 4px}.sc-parts>div{display:grid;grid-template-columns:74px 1fr 104px;gap:10px;align-items:center;font-size:13px}.sc-parts .goal-bar{margin:0}.sc-parts em{font-style:normal;font-size:12px;color:var(--gris);text-align:right}
 .sc-week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;height:64px;margin-top:12px;align-items:end}.sc-week div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px}.sc-week i{width:100%;max-width:22px;border-radius:5px;background:rgba(255,255,255,.12)}.sc-week .t i{background:var(--accent)}.sc-week span{font-size:11px;color:var(--gris)}
+
+/* ===== Carte : exploration des parcours ===== */
+@supports (font:-apple-system-body){html{font:-apple-system-body}}
+.mb-top{position:absolute;z-index:6;left:12px;right:12px;top:calc(var(--top) + 4px);display:none;flex-direction:column;gap:8px}
+body.mb-browse .mb-top{display:flex}
+.mb-search{display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;min-height:48px;border-radius:14px;background:var(--carte);border:1px solid var(--ligne);box-shadow:0 8px 22px rgba(0,0,0,.4)}
+.mb-search svg{flex:none;width:19px;height:19px;fill:none;stroke:var(--gris);stroke-width:2;stroke-linecap:round}
+.mb-search input{flex:1;min-width:0;border:0;background:none;color:var(--blanc);font:inherit;font-size:max(16px,1rem);padding:11px 0;outline:none;-webkit-appearance:none}
+.mb-search input::placeholder{color:var(--gris)}.mb-search input::-webkit-search-cancel-button{display:none}
+.mb-search button{width:40px;height:40px;border:0;border-radius:10px;background:none;color:var(--gris);font-size:22px}
+.mb-res{max-height:42vh;overflow-y:auto;border-radius:14px;background:var(--carte);border:1px solid var(--ligne);box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.mb-res button{display:block;width:100%;padding:12px 14px;border:0;border-bottom:1px solid var(--ligne);background:none;color:var(--blanc);font:inherit;text-align:left}.mb-res button:last-child{border-bottom:0}
+.mb-res b{font-size:.95rem}.mb-res small,.mb-r0{display:block;margin:2px 0 0;font-size:.8rem;color:var(--gris)}.mb-r0{padding:12px 14px;margin:0}
+.mb-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:0 12px 2px}.mb-chips::-webkit-scrollbar{display:none}
+.mb-chips .chip{font-size:.85rem;padding:8px 13px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.mb-chips .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#f6f0e2}
+.chip-sel{flex:none;-webkit-appearance:none;appearance:none;border:1px solid var(--ligne);border-radius:999px;padding:8px 30px 8px 13px;background:var(--carte) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23b9b29f' stroke-width='2.4'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center/14px;color:var(--blanc);font:inherit;font-size:.85rem;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.chip-sel.on{border-color:var(--accent);background-color:var(--accent);color:#f6f0e2}
+.rt-sheet{position:absolute;z-index:6;left:0;right:0;bottom:var(--bottom);display:none;flex-direction:column;overflow:hidden;background:var(--carte);border:1px solid var(--ligne);border-bottom:0;border-radius:20px 20px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.45);transition:height .28s cubic-bezier(.2,.8,.2,1)}
+body.mb-browse .rt-sheet{display:flex}
+.rt-sheet.s-min{height:auto}.rt-sheet.s-mid{height:44%}.rt-sheet.s-full{height:calc(100% - var(--bottom) - var(--top) - 62px)}
+.sh-grab{flex:none;padding:8px 18px 14px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.sh-grab i{display:block;width:40px;height:5px;margin:0 auto 10px;border-radius:3px;background:rgba(239,231,212,.35)}
+.sh-grab b{display:block;font-size:1.05rem;line-height:1.25}.sh-grab small{display:block;margin-top:3px;font-size:.85rem;line-height:1.35;color:var(--gris)}
+.sh-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 14px 16px}.s-min .sh-body{display:none}
+.sh-body .rt-it b{font-size:1rem}.sh-body .rt-it small{font-size:.82rem}.sh-body .rt-it.on{border-color:#d6a24e}
+.mb-empty{margin:4px 2px 12px;font-size:.95rem;color:var(--gris);line-height:1.45}.mb-retry{width:100%;margin-bottom:12px}.sh-body>.sbtn{width:100%}
+.mb-det>small{display:block;margin-top:10px;font-size:.78rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.mb-det h3{margin:4px 0 14px;font-size:1.45rem;line-height:1.15}
+.mb-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.mb-stats div{padding:12px;border-radius:14px;border:1px solid var(--ligne);background:rgba(255,255,255,.035)}
+.mb-stats b{display:block;font-size:1.3rem}.mb-stats small{display:block;margin-top:2px;font-size:.8rem;color:var(--gris)}
+.mb-note{margin:12px 2px 0;font-size:.9rem;color:var(--gris)}.mb-note b{color:var(--blanc)}
+.mb-det .sbtn{display:block;width:100%;margin-top:10px;font-size:1rem}.mb-det .sbtn.save{margin-top:16px}.mb-del{display:block;margin:14px auto 0;color:#e08a7a}
+.mb-fab{position:absolute;z-index:6;left:12px;bottom:calc(var(--bottom) + var(--shH,96px) + 12px);display:none;padding:13px 18px;border:0;border-radius:999px;background:var(--accent);color:#f6f0e2;font:inherit;font-size:.95rem;font-weight:800;box-shadow:0 10px 24px rgba(0,0,0,.45);cursor:pointer}
+body.mb-browse .mb-fab{display:block}
+body.mb-browse .map-btns{top:calc(var(--top) + 108px);bottom:auto}body.mb-browse #recenter{display:none}
+body.mb-browse .maplibregl-ctrl-top-right{top:auto!important;right:auto;left:0;bottom:calc(var(--bottom) + var(--shH,96px) + 64px)}
+body.mb-browse #hud,body.mb-full .mb-fab,body.mb-full .map-btns{display:none}
+.mb-ico{display:none;width:48px;height:48px;padding:0!important;align-items:center;justify-content:center}.mb-ico svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+body.mb-browse .mb-ico{display:flex}
+@media (prefers-reduced-motion:reduce){.rt-sheet{transition:none}}
 </style>
 </head>
 <body>
@@ -1114,10 +1155,25 @@ body.drawing .map-btns,body.drawing #guideBar,body.drawing #hud{display:none!imp
     <div id="mapMsg" class="map-msg hidden"></div>
     <div class="hud" id="hud"><div class="plate"><div class="back"></div><div class="face"><span class="val num"><span id="hudSpeed">0,0</span><small>km/h</small></span><span class="val num"><span id="hudDist">0,00</span><small>km</small></span></div></div></div>
     <div class="map-btns" id="mapBtns">
-      <button id="btnRoutes" class="mbtn mbtn-main" type="button">Parcours autour de moi</button>
+      <button id="mbLoc" class="mbtn mb-ico" type="button" aria-label="Me localiser"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="7.5"/></svg></button>
+      <button id="btnRoutes" class="mbtn mbtn-main hidden" type="button">Parcours autour de moi</button>
       <button id="btnStyle" class="mbtn" type="button" aria-label="Changer de fond de carte"><svg class="aico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5zM2 13l10 5 10-5M2 17.5l10 5 10-5"/></svg> Fond de carte</button>
       <button id="btn3d" class="mbtn" type="button">Vue 2D</button>
       <button id="recenter" class="mbtn hidden" type="button">Recentrer</button>
+    </div>
+    <div id="mbTop" class="mb-top">
+      <div class="mb-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="mbQ" type="search" placeholder="Ville, lieu…" aria-label="Rechercher une ville ou un lieu" autocomplete="off" autocorrect="off" enterkeyhint="search"><button id="mbQx" class="hidden" type="button" aria-label="Effacer la recherche">×</button></div>
+      <div id="mbRes" class="mb-res hidden"></div>
+      <div class="mb-chips" role="group" aria-label="Filtrer les parcours">
+        <button type="button" class="chip" data-mbs="tout" aria-pressed="true">Tous</button><button type="button" class="chip" data-mbs="course" aria-pressed="false">Course</button><button type="button" class="chip" data-mbs="marche" aria-pressed="false">Marche</button><button type="button" class="chip" data-mbs="velo" aria-pressed="false">Vélo</button><button type="button" class="chip" data-mbs="rando" aria-pressed="false">Rando</button>
+        <select id="mbDur" class="chip-sel" aria-label="Durée"><option value="tout">Durée</option><option value="a">Moins de 30 min</option><option value="b">30 à 60 min</option><option value="c">1 à 2 h</option><option value="d">Plus de 2 h</option></select>
+        <select id="mbDist" class="chip-sel" aria-label="Distance"><option value="tout">Distance</option><option value="a">Moins de 5 km</option><option value="b">5 à 10 km</option><option value="c">10 à 20 km</option><option value="d">Plus de 20 km</option></select>
+      </div>
+    </div>
+    <button id="mbNew" class="mb-fab" type="button">+ Créer un parcours</button>
+    <div id="rtSheet" class="rt-sheet s-min">
+      <div id="shGrab" class="sh-grab" role="button" tabindex="0" aria-expanded="false" aria-label="Afficher ou réduire la liste des parcours"><i></i><b id="shTitle">Parcours</b><small id="shSub" class="hidden"></small></div>
+      <div id="shBody" class="sh-body"></div>
     </div>
     <div id="guideBar" class="guidebar hidden"><div><small id="gbKind"></small><b id="gbName"></b><span id="gbInfo"></span></div><div class="gb-b"><button id="gbGo" class="sbtn save" type="button">Lancer ce parcours</button><button id="gbOff" class="ibtn" type="button" aria-label="Retirer le parcours">×</button></div></div>
     <div id="drawBar" class="drawbar hidden">
@@ -2438,6 +2494,236 @@ body.drawing .map-btns,body.drawing #guideBar,body.drawing #hud{display:none!imp
   }
   );
   function useMyRoute(r) { guide = { id: r.id, name: r.name, kind: r.kind, km: r.km, coords: r.coords }; store.set(K_GUIDE, guide); $('routesPage').classList.add('hidden'); showGuide(true); }
+
+  // ---------- Carte : les parcours de la zone visible (OpenStreetMap via Overpass + les miens) ----------
+  const K_CELLS = 'parcours.osmCells', K_RTDET = 'parcours.rtDetails', CELL = 0.2, MINZ = 11;
+  const SPORT = { running: 'course', fitness_trail: 'course', track: 'course', foot: 'marche', walking: 'marche', hiking: 'rando', bicycle: 'velo', mtb: 'velo' };
+  const SP_LBL = { course: 'Course', marche: 'Marche', rando: 'Rando', velo: 'Vélo' }, SP_KMH = { course: 9.5, marche: 4.5, rando: 3.8, velo: 17 };
+  const MB = { cells: store.get(K_CELLS, {}), det: store.get(K_RTDET, {}), full: {}, sport: 'tout', dur: 'tout', dist: 'tout', st: 'min', sel: null, busy: false, again: false, err: '', slow: false, loc: '', timer: 0, all: [], vis: [], detBusy: '' };
+  const r5 = v => Math.round(v * 1e5) / 1e5, linesLen = L => L.reduce((a, l) => a + segLen(l), 0);
+  const mbSport = r => SPORT[r.kind] || 'marche';
+  const mbHours = r => r.km ? r.km / SP_KMH[mbSport(r)] + (r.up || 0) / (mbSport(r) === 'velo' ? 900 : 600) : null;
+  const fmtH = h => { if (h == null) return '–'; const m = Math.max(5, Math.round(h * 12) * 5); return m < 60 ? m + ' min' : Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + pad(m % 60) : ''); };
+  const mbFiltered = () => MB.sport !== 'tout' || MB.dur !== 'tout' || MB.dist !== 'tout';
+  function mbRoutes() {
+    const by = {};
+    Object.values(MB.cells).forEach(c => (c.list || []).forEach(r => { const o = by[r.id]; if (!o) by[r.id] = Object.assign({}, r); else o.lines = o.lines.concat(r.lines); }));
+    const out = Object.values(by).map(r => { const d = MB.det[r.id]; return d ? Object.assign(r, { km: d.km, up: d.up, down: d.down, exact: 1 }) : r; });
+    myRoutes().forEach(m => { const f = m.coords.flat(); out.push({ id: m.id, my: 1, kind: m.kind, name: m.name, km: m.km, up: m.up, down: m.down, exact: 1, lines: m.coords, c: f[Math.floor(f.length / 2)] }); });
+    return out;
+  }
+  function mbPass(r) {
+    if (MB.sport !== 'tout' && mbSport(r) !== MB.sport) return false;
+    const R = { a: [0, .5], b: [.5, 1], c: [1, 2], d: [2, 1e9] }, D = { a: [0, 5], b: [5, 10], c: [10, 20], d: [20, 1e9] };
+    if (MB.dur !== 'tout') { const h = mbHours(r); if (h == null || h < R[MB.dur][0] || h >= R[MB.dur][1]) return false; }
+    if (MB.dist !== 'tout') { if (!r.km || r.km < D[MB.dist][0] || r.km >= D[MB.dist][1]) return false; }
+    return true;
+  }
+  function mbRefresh(data) {
+    MB.all = mbRoutes();
+    const L = MB.all.filter(mbPass);
+    if (data && map && map.getSource('rts')) {
+      map.getSource('rts').setData({ type: 'FeatureCollection', features: L.filter(r => r.lines && r.lines.length).map(r => ({ type: 'Feature', properties: { id: r.id, my: r.my ? 1 : 0 }, geometry: { type: 'MultiLineString', coordinates: r.lines } })) });
+      map.getSource('rtp').setData({ type: 'FeatureCollection', features: L.filter(r => r.c).map(r => ({ type: 'Feature', properties: { id: r.id }, geometry: { type: 'Point', coordinates: r.c } })) });
+    }
+    if (map) {
+      const b = map.getBounds(), c = map.getCenter(), far = map.getZoom() < MINZ;
+      MB.vis = L.filter(r => (!far || r.my) && ((r.c && b.contains(r.c)) || (r.lines || []).some(l => l.some((p, i) => i % 6 === 0 && b.contains(p)))))
+        .map(r => [r, r.c ? haversine({ lat: c.lat, lon: c.lng }, { lat: r.c[1], lon: r.c[0] }) : 1e9]).sort((x, y) => x[1] - y[1]).map(x => x[0]);
+    }
+    mbSheet();
+  }
+  function mbCells() { const b = map.getBounds(), o = []; for (let a = Math.floor(b.getSouth() / CELL); a <= Math.floor(b.getNorth() / CELL); a++) for (let c = Math.floor(b.getWest() / CELL); c <= Math.floor(b.getEast() / CELL); c++) o.push(a + '_' + c); return o; }
+  function mbSave() {
+    const old = () => Object.keys(MB.cells).sort((a, b) => MB.cells[a].t - MB.cells[b].t);
+    let ks = old(); while (ks.length > 60) delete MB.cells[ks.shift()];
+    for (let i = 0; i < 6; i++) { try { localStorage.setItem(K_CELLS, JSON.stringify(MB.cells)); return; } catch (e) { old().slice(0, 8).forEach(k => delete MB.cells[k]); } }
+  }
+  async function mbLoad() {
+    if (!map || DR.on) return;
+    if (map.getZoom() < MINZ) { mbSheet(); return; }
+    const fresh = k => MB.cells[k] && Date.now() - MB.cells[k].t < 21 * 864e5, ctr = map.getCenter();
+    let miss = mbCells().filter(k => !fresh(k));
+    if (!miss.length) { MB.err = ''; mbSheet(); return; }
+    if (navigator.onLine === false) { MB.err = 'offline'; mbSheet(); return; }
+    if (MB.busy) { MB.again = true; return; }
+    // une seule requête à la fois (règles d'usage d'Overpass), au plus 6 cases de 0,2° autour du centre
+    miss = miss.map(k => { const [a, c] = k.split('_').map(Number); return [k, Math.hypot((a + .5) * CELL - ctr.lat, (c + .5) * CELL - ctr.lng)]; }).sort((x, y) => x[1] - y[1]).slice(0, 6).map(x => x[0]);
+    const A = miss.map(k => k.split('_').map(Number)), bb = [Math.min(...A.map(x => x[0])) * CELL, Math.min(...A.map(x => x[1])) * CELL, (Math.max(...A.map(x => x[0])) + 1) * CELL, (Math.max(...A.map(x => x[1])) + 1) * CELL].map(v => v.toFixed(3)).join(',');
+    MB.busy = true; MB.err = ''; MB.slow = false; mbSheet();
+    const slowT = setTimeout(() => { MB.slow = true; mbSheet(); }, 7000);
+    try {
+      const d = await overpass('[out:json][timeout:25];relation["route"~"^(hiking|foot|walking|running|fitness_trail|bicycle|mtb)$"]["name"](' + bb + ');out geom(' + bb + ') 150;');
+      const got = {}; miss.forEach(k => got[k] = []);
+      (d.elements || []).forEach(el => {
+        const t = el.tags || {}; if (!SPORT[t.route]) return;
+        let lines = (el.members || []).filter(m => m.type === 'way' && m.geometry).map(m => m.geometry.filter(p => p).map(p => [r5(p.lon), r5(p.lat)])).filter(l => l.length > 1);
+        if (!lines.length) return;
+        const tot = lines.reduce((a, l) => a + l.length, 0), stp = Math.ceil(tot / 300);
+        if (stp > 1) lines = lines.map(l => l.filter((p, i) => i % stp === 0 || i === l.length - 1)).filter(l => l.length > 1);
+        const big = lines.reduce((a, l) => l.length > a.length ? l : a, []), c = big[Math.floor(big.length / 2)];
+        const km = parseFloat(String(t.distance || '').replace(',', '.')), up = parseFloat(t.ascent), down = parseFloat(t.descent);
+        const r = { id: 'r' + el.id, oid: el.id, kind: t.route, name: t.name, net: t.network, kmTag: km > 0 && km < 2000 ? 1 : 0, up: up > 0 ? Math.round(up) : null, down: down > 0 ? Math.round(down) : null, lines, c };
+        r.km = r.kmTag ? km : Math.round(linesLen(lines) / 100) / 10;
+        (got[Math.floor(c[1] / CELL) + '_' + Math.floor(c[0] / CELL)] || got[miss[0]]).push(r);
+      });
+      Object.entries(got).forEach(([k, L]) => MB.cells[k] = { t: Date.now(), list: L });
+      mbSave();
+    } catch (x) { MB.err = navigator.onLine === false ? 'offline' : 'api'; }
+    clearTimeout(slowT); MB.busy = false; MB.slow = false; mbRefresh(true);
+    if (MB.again) { MB.again = false; setTimeout(mbLoad, 1500); }
+  }
+  async function mbElev(lines) { // dénivelé : altitude de ~100 points (Open-Meteo, gratuit), sans relier deux tronçons séparés
+    let P = []; const tot = lines.reduce((a, l) => a + l.length, 0), stp = Math.max(1, Math.ceil(tot / 95));
+    lines.forEach((l, li) => l.forEach((p, i) => { if (i % stp === 0 || i === l.length - 1) P.push([p, li]); }));
+    if (P.length > 100) { const k = Math.ceil(P.length / 100); P = P.filter((x, i) => i % k === 0); }
+    const j = await getJson('https://api.open-meteo.com/v1/elevation?latitude=' + P.map(x => x[0][1].toFixed(5)).join(',') + '&longitude=' + P.map(x => x[0][0].toFixed(5)).join(','));
+    const E = (j && j.elevation) || []; let up = 0, down = 0;
+    for (let i = 1; i < E.length; i++) { if (P[i][1] !== P[i - 1][1]) continue; const d = E[i] - E[i - 1]; if (d > 0) up += d; else down -= d; }
+    if (!E.length) throw new Error('alt');
+    return { up: Math.round(up), down: Math.round(down) };
+  }
+  async function mbDetail(r) { // tracé complet, distance exacte et dénivelé (+ et −), gardés sur le téléphone
+    if (r.my || MB.full[r.id] && MB.det[r.id]) return;
+    MB.detBusy = r.id; mbSheet();
+    try {
+      let lines = MB.full[r.id];
+      if (!lines) {
+        const d = await overpass('[out:json][timeout:30];relation(' + r.oid + ');out geom;'), el = (d.elements || [])[0];
+        lines = el ? (el.members || []).filter(m => m.type === 'way' && m.geometry).map(m => m.geometry.filter(p => p).map(p => [r5(p.lon), r5(p.lat)])).filter(l => l.length > 1) : [];
+        if (!lines.length) throw new Error('vide'); MB.full[r.id] = lines;
+      }
+      if (!MB.det[r.id]) {
+        const km = r.kmTag ? r.km : Math.round(linesLen(lines) / 100) / 10;
+        let ev = { up: r.up, down: r.down }; if (ev.up == null || ev.down == null) { try { const e = await mbElev(lines); ev = { up: ev.up != null ? ev.up : e.up, down: ev.down != null ? ev.down : e.down }; } catch (e) {} }
+        MB.det[r.id] = { km, up: ev.up, down: ev.down }; const ks = Object.keys(MB.det); if (ks.length > 300) delete MB.det[ks[0]]; store.set(K_RTDET, MB.det);
+      }
+    } catch (e) { MB.detBusy = 'err'; mbRefresh(true); return; }
+    MB.detBusy = ''; mbRefresh(true);
+    if (MB.sel === r.id && map.getSource('rtsel')) map.getSource('rtsel').setData({ type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: MB.full[r.id] } });
+  }
+  function mbSelect(id, fly) {
+    const r = MB.all.find(x => x.id === id); if (!r) return;
+    MB.sel = id; MB.detBusy = ''; mbSetSheet(MB.st === 'full' ? 'full' : 'mid');
+    const L = MB.full[id] || r.lines || [];
+    if (map.getSource('rtsel')) map.getSource('rtsel').setData({ type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: L } });
+    if (fly && L.length) { const f = L.flat(), bb = f.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(f[0], f[0])); setFollow(false); map.fitBounds(bb, { padding: { top: 150, bottom: Math.round(innerHeight * 0.5), left: 40, right: 40 }, maxZoom: 15, duration: anim() ? 900 : 0 }); }
+    mbDetail(r);
+  }
+  function mbDeselect() { MB.sel = null; if (map && map.getSource('rtsel')) map.getSource('rtsel').setData({ type: 'FeatureCollection', features: [] }); mbSheet(); }
+  function mbClick(e) {
+    if (DR.on || !document.body.classList.contains('mb-browse')) return;
+    const lay = ['rt-clu', 'rt-pt', 'rt-hit'].filter(l => map.getLayer(l)), p = e.point;
+    const f = lay.length ? map.queryRenderedFeatures([[p.x - 8, p.y - 8], [p.x + 8, p.y + 8]], { layers: lay }) : [];
+    if (!f.length) { if (MB.sel) mbDeselect(); return; }
+    const c = f.find(x => x.layer.id === 'rt-clu');
+    if (c) { setFollow(false); Promise.resolve(map.getSource('rtp').getClusterExpansionZoom(c.properties.cluster_id)).then(z => map.easeTo({ center: c.geometry.coordinates, zoom: z + 0.3, duration: anim() ? 600 : 0 })).catch(() => {}); return; }
+    mbSelect(f[0].properties.id, false);
+  }
+  function mbLocate(user) {
+    if (!map) return;
+    if (lastFix) { MB.loc = ''; setFollow(true); map.easeTo({ center: [lastFix.lon, lastFix.lat], zoom: Math.max(map.getZoom(), 14), duration: anim() ? 800 : 0 }); mbSheet(); return; }
+    if (!navigator.geolocation) { MB.loc = 'denied'; mbSheet(); return; }
+    MB.loc = 'wait'; mbSheet();
+    navigator.geolocation.getCurrentPosition(q => { MB.loc = ''; map.easeTo({ center: [q.coords.longitude, q.coords.latitude], zoom: Math.max(map.getZoom(), 14), duration: anim() ? 800 : 0 }); mbSheet(); },
+      er => { MB.loc = er && er.code === 1 ? 'denied' : 'fail'; mbSheet(); if (user) $('mbQ').focus(); }, { enableHighAccuracy: false, maximumAge: 10 * 60000, timeout: 12000 });
+  }
+  function mbSetSheet(st) {
+    MB.st = st; $('rtSheet').className = 'rt-sheet s-' + st; document.body.classList.toggle('mb-full', st === 'full');
+    $('shGrab').setAttribute('aria-expanded', st !== 'min'); mbSheet();
+  }
+  function mbFacts(r) {
+    const approx = !r.exact && !r.kmTag && !r.my;
+    return [SP_LBL[mbSport(r)] + (r.my ? ' · à toi' : ''), r.km ? (approx ? '≈ ' : '') + nf1.format(r.km) + ' km' : null, r.up != null ? '+' + r.up + ' m' : null, '~' + fmtH(mbHours(r))].filter(Boolean).join(' · ');
+  }
+  function mbSheet() {
+    if (!$('rtSheet')) return;
+    const far = !map || map.getZoom() < MINZ, n = MB.vis.length, recs = store.get(K_RTREC, {});
+    const t = n ? n + ' parcours dans cette zone' : far ? 'Zoomez pour voir les parcours' : MB.busy ? 'Recherche des parcours…' : 'Aucun parcours dans cette zone';
+    let sub = MB.busy ? (MB.slow ? 'OpenStreetMap répond lentement, patiente un peu…' : 'Chargement depuis OpenStreetMap…') : MB.err === 'offline' ? 'Pas de réseau : seuls les parcours déjà chargés s\'affichent.' : MB.err === 'api' ? 'Le serveur OpenStreetMap ne répond pas pour l\'instant.' : '';
+    if (MB.loc === 'denied') sub = 'Localisation refusée : cherche une ville ou un lieu en haut.' + (sub ? ' ' + sub : '');
+    else if (MB.loc === 'fail') sub = 'Position introuvable : cherche une ville ou un lieu en haut.' + (sub ? ' ' + sub : '');
+    else if (MB.loc === 'wait' && !sub) sub = 'Recherche de ta position…';
+    $('shTitle').textContent = t; $('shSub').textContent = sub; $('shSub').classList.toggle('hidden', !sub);
+    const r = MB.sel && MB.all.find(x => x.id === MB.sel);
+    let h = '';
+    if (MB.st !== 'min' && r) {
+      const rec = recs[r.id], k = RT_KIND[r.kind] || ['marche', 'Parcours'], wait = MB.detBusy === r.id, fail = MB.detBusy === 'err';
+      const v = x => wait && x === '–' ? '…' : x;
+      h = '<div class="mb-det"><button type="button" class="linkbtn" data-mb="back">‹ Tous les parcours</button><small>' + (r.my ? 'Mon parcours' : k[1] + ({ iwn: ' international', nwn: ' national', rwn: ' régional', lwn: ' local', icn: ' international', ncn: ' national', rcn: ' régional', lcn: ' local' }[r.net] || '')) + '</small><h3>' + esc(r.name) + '</h3>' +
+        '<div class="mb-stats"><div><b class="num">' + v(r.km ? (r.exact || r.kmTag ? '' : '≈ ') + nf1.format(r.km) + ' km' : '–') + '</b><small>Distance</small></div><div><b class="num">' + v(r.up != null ? '+' + r.up + ' m' : '–') + '</b><small>Dénivelé positif</small></div><div><b class="num">' + v(r.down != null ? '−' + r.down + ' m' : '–') + '</b><small>Dénivelé négatif</small></div><div><b class="num">' + v(fmtH(mbHours(r))) + '</b><small>Durée estimée (' + SP_LBL[mbSport(r)].toLowerCase() + ')</small></div></div>' +
+        (wait ? '<p class="mb-note">Calcul de la distance exacte et du dénivelé…</p>' : fail ? '<p class="mb-note">Détails indisponibles pour l\'instant (réseau ?). <button type="button" class="linkbtn" data-mb="detail">Réessayer</button></p>' : '') +
+        (rec ? '<p class="mb-note">Ton record : <b>' + fmtClock(rec.best) + '</b> · ' + plural(rec.n, 'passage') + '</p>' : '') +
+        '<button type="button" class="sbtn save" data-mb="go">Démarrer ce parcours</button><button type="button" class="sbtn cancel" data-mb="follow">Afficher le tracé à suivre</button>' +
+        (r.my ? '<button type="button" class="linkbtn mb-del" data-mb="del">Supprimer ce parcours</button>' : '') + '</div>';
+    } else {
+      if (MB.err === 'api' && !MB.busy) h += '<button type="button" class="sbtn cancel mb-retry" data-mb="retry">Réessayer</button>';
+      if (n) h += '<div class="rt-list">' + MB.vis.slice(0, 80).map(x => { const rec = recs[x.id], sp = mbSport(x);
+        return '<button type="button" class="rt-it' + (x.id === MB.sel ? ' on' : '') + '" data-mbr="' + x.id + '"><span class="rt-ic">' + (ACT_ICON[sp] || ACT_ICON.marche || '') + '</span><span class="rt-t"><b>' + esc(x.name) + '</b><small>' + mbFacts(x) + '</small>' + (rec ? '<em>Ton record : ' + fmtClock(rec.best) + '</em>' : '') + '</span><i>›</i></button>'; }).join('') + '</div>';
+      else if (!MB.busy) h += '<p class="mb-empty">' + (far ? 'Zoome sur une ville ou un lieu pour voir ses parcours de course, de marche, de vélo et de rando.' : mbFiltered() ? 'Aucun parcours ne correspond à tes filtres ici. Élargis-les ou déplace la carte.' : MB.err ? 'Rien en mémoire pour cette zone.' : 'Aucun parcours balisé ici sur OpenStreetMap. Tu peux créer le tien.') + '</p>' + (mbFiltered() ? '<button type="button" class="sbtn cancel" data-mb="nofilter">Retirer les filtres</button>' : '<button type="button" class="sbtn save" data-mb="new">+ Créer un parcours</button>');
+    }
+    h += '<p class="rt-cred">Données © contributeurs OpenStreetMap (ODbL), via Overpass</p>';
+    $('shBody').innerHTML = h;
+  }
+  function mbFollow(r, start) {
+    guide = { id: r.id, name: r.name, kind: r.kind, km: r.km, coords: MB.full[r.id] || r.lines }; store.set(K_GUIDE, guide);
+    MB.sel = null; if (map.getSource('rtsel')) map.getSource('rtsel').setData({ type: 'FeatureCollection', features: [] }); mbSetSheet('min');
+    showGuide(!start); if (start) $('gbGo').click();
+  }
+  $('shBody').addEventListener('click', e => {
+    const it = e.target.closest('[data-mbr]'); if (it) { mbSelect(it.dataset.mbr, true); return; }
+    const b = e.target.closest('[data-mb]'); if (!b) return; const a = b.dataset.mb, r = MB.sel && MB.all.find(x => x.id === MB.sel);
+    if (a === 'back') mbDeselect();
+    else if (a === 'retry') { MB.err = ''; mbLoad(); }
+    else if (a === 'new') drawStart();
+    else if (a === 'nofilter') { MB.sport = MB.dur = MB.dist = 'tout'; $('mbDur').value = $('mbDist').value = 'tout'; mbChips(); mbRefresh(true); }
+    else if (a === 'detail' && r) { MB.detBusy = ''; mbDetail(r); }
+    else if ((a === 'go' || a === 'follow') && r) mbFollow(r, a === 'go');
+    else if (a === 'del' && r && confirm('Supprimer le parcours « ' + r.name + ' » ?')) { store.set(K_MYRT, myRoutes().filter(x => x.id !== r.id)); mbDeselect(); mbRefresh(true); }
+  });
+  function mbChips() { document.querySelectorAll('[data-mbs]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mbs === MB.sport)); ['mbDur', 'mbDist'].forEach(id => $(id).classList.toggle('on', $(id).value !== 'tout')); }
+  document.querySelectorAll('[data-mbs]').forEach(b => b.addEventListener('click', () => { MB.sport = b.dataset.mbs; mbChips(); mbRefresh(true); }));
+  $('mbDur').addEventListener('change', () => { MB.dur = $('mbDur').value; mbChips(); mbRefresh(true); });
+  $('mbDist').addEventListener('change', () => { MB.dist = $('mbDist').value; mbChips(); mbRefresh(true); });
+  $('mbNew').addEventListener('click', () => drawStart());
+  $('mbLoc').addEventListener('click', () => mbLocate(true));
+  // panneau du bas : 3 positions (réduit, liste, fiche), on le tire ou on touche la poignée
+  (() => {
+    const sh = $('rtSheet'), g = $('shGrab'), order = ['min', 'mid', 'full']; let y0 = null, h0 = 0, moved = false;
+    g.addEventListener('pointerdown', e => { y0 = e.clientY; h0 = sh.getBoundingClientRect().height; moved = false; sh.style.transition = 'none'; try { g.setPointerCapture(e.pointerId); } catch (x) {} });
+    g.addEventListener('pointermove', e => { if (y0 == null) return; const dy = e.clientY - y0; if (Math.abs(dy) > 6) moved = true; if (moved) sh.style.height = Math.max(70, h0 - dy) + 'px'; });
+    const end = e => { if (y0 == null) return; const dy = e.clientY - y0; y0 = null; sh.style.transition = ''; sh.style.height = '';
+      const i = order.indexOf(MB.st);
+      if (!moved) mbSetSheet(MB.st === 'min' ? 'mid' : MB.st === 'mid' ? 'min' : 'mid');
+      else { const step = Math.abs(dy) < 40 ? 0 : Math.max(1, Math.round(Math.abs(dy) / 200)) * (dy < 0 ? 1 : -1); mbSetSheet(order[Math.max(0, Math.min(2, i + step))]); } };
+    g.addEventListener('pointerup', end); g.addEventListener('pointercancel', end);
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); mbSetSheet(MB.st === 'min' ? 'mid' : 'min'); } });
+    try { new ResizeObserver(() => $('v-carte').style.setProperty('--shH', sh.getBoundingClientRect().height + 'px')).observe(sh); } catch (e) {}
+  })();
+  // recherche d'une ville ou d'un lieu (Photon, d'après OpenStreetMap)
+  let mbQT = 0, mbGeoR = [];
+  async function mbSearch(q) {
+    const c = map ? map.getCenter() : null; $('mbRes').classList.remove('hidden'); $('mbRes').innerHTML = '<p class="mb-r0">Recherche…</p>';
+    try {
+      const j = await getJson('https://photon.komoot.io/api/?limit=6&lang=fr&q=' + encodeURIComponent(q) + (c ? '&lat=' + c.lat.toFixed(2) + '&lon=' + c.lng.toFixed(2) : ''));
+      if ($('mbQ').value.trim() !== q) return;
+      mbGeoR = (j.features || []).filter(f => f.properties && f.properties.name);
+      $('mbRes').innerHTML = mbGeoR.length ? mbGeoR.map((f, i) => { const p = f.properties; return '<button type="button" data-geo="' + i + '"><b>' + esc(p.name) + '</b><small>' + esc([p.city !== p.name ? p.city : '', p.county || p.state, p.country].filter(Boolean).join(', ')) + '</small></button>'; }).join('') : '<p class="mb-r0">Aucun lieu trouvé.</p>';
+    } catch (e) { $('mbRes').innerHTML = '<p class="mb-r0">Recherche impossible : pas de réseau ?</p>'; }
+  }
+  function mbGo(i) {
+    const f = mbGeoR[i]; if (!f || !map) return; const x = f.properties.extent, ll = f.geometry.coordinates;
+    setFollow(false); $('mbRes').classList.add('hidden'); $('mbQ').value = f.properties.name; $('mbQ').blur(); MB.loc = '';
+    if (x) map.fitBounds([[x[0], x[3]], [x[2], x[1]]], { padding: 40, maxZoom: 14, minZoom: MINZ, duration: anim() ? 900 : 0 }); else map.easeTo({ center: ll, zoom: 14, duration: anim() ? 900 : 0 });
+  }
+  $('mbQ').addEventListener('input', () => { clearTimeout(mbQT); const q = $('mbQ').value.trim(); $('mbQx').classList.toggle('hidden', !q); if (q.length < 2) { $('mbRes').classList.add('hidden'); return; } mbQT = setTimeout(() => mbSearch(q), 400); });
+  $('mbQ').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (mbGeoR.length && !$('mbRes').classList.contains('hidden')) mbGo(0); else { const q = $('mbQ').value.trim(); if (q.length > 1) mbSearch(q); } } });
+  $('mbQx').addEventListener('click', () => { $('mbQ').value = ''; $('mbQx').classList.add('hidden'); $('mbRes').classList.add('hidden'); $('mbQ').focus(); });
+  $('mbRes').addEventListener('click', e => { const b = e.target.closest('[data-geo]'); if (b) mbGo(+b.dataset.geo); });
+  // l'écran Carte en mode « exploration » quand on n'enregistre pas, ne suit pas de parcours et ne dessine pas
+  let mbWas = null;
+  function mbMode() { const on = !DR.on && !guide && S.status === 'idle'; document.body.classList.toggle('mb-browse', on); if (on !== mbWas) { mbWas = on; if (on && map) mbRefresh(true); if (!on) $('mbRes').classList.add('hidden'); } }
+  setInterval(mbMode, 600); setTimeout(mbMode, 50); mbChips();
   function guideGeo() { return { type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: guide ? guide.coords : [] } }; }
   async function showGuide(fit) {
     guideBarUi();
@@ -6263,7 +6549,7 @@ body.drawing .map-btns,body.drawing #guideBar,body.drawing #hud{display:none!imp
       map = new maplibregl.Map({ container: 'map', style: curStyle(), center: here || [2.4, 46.6], zoom: here ? 16.5 : 5,
         pitch: settings.map3d ? 60 : 0, maxPitch: 70, attributionControl: false });
     } catch (e) { mapLoading = false; mapMsg("La carte 3D n'est pas prise en charge par ce navigateur. Le suivi continue quand même."); return; }
-    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'top-right');
+    map.addControl(new maplibregl.AttributionControl({ compact: true, customAttribution: '© OpenStreetMap' }), 'top-right');
     map.on('error', () => { if (!styleLoaded && !styleFellBack) { styleFellBack = true; map.setStyle(RASTER_STYLE); } });
     map.on('style.load', addMapLayers);
     map.on('dragstart', () => { if (!replayState) setFollow(false); });
@@ -6289,6 +6575,19 @@ body.drawing .map-btns,body.drawing #guideBar,body.drawing #hud{display:none!imp
     if (!map.getSource('replay')) map.addSource('replay', { type: 'geojson', data: empty });
     if (!map.getSource('guide')) map.addSource('guide', { type: 'geojson', data: guideGeo() });
     if (!map.getSource('draw')) map.addSource('draw', { type: 'geojson', data: drawGeo() });
+    const EFC = { type: 'FeatureCollection', features: [] };
+    if (!map.getSource('rts')) map.addSource('rts', { type: 'geojson', data: EFC });
+    if (!map.getSource('rtp')) map.addSource('rtp', { type: 'geojson', data: EFC, cluster: true, clusterRadius: 44, clusterMaxZoom: 13 });
+    if (!map.getSource('rtsel')) map.addSource('rtsel', { type: 'geojson', data: EFC });
+    map.addLayer({ id: 'rt-line', type: 'line', source: 'rts', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': ['case', ['==', ['get', 'my'], 1], '#b7791f', '#2f6b48'], 'line-opacity': 0.85, 'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1.4, 16, 3] } });
+    map.addLayer({ id: 'rt-hit', type: 'line', source: 'rts', paint: { 'line-color': '#000', 'line-opacity': 0, 'line-width': 16 } });
+    map.addLayer({ id: 'rtsel-bord', type: 'line', source: 'rtsel', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#0f1511', 'line-width': lw(6, 12), 'line-opacity': 0.6 } });
+    map.addLayer({ id: 'rtsel-coeur', type: 'line', source: 'rtsel', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#d6a24e', 'line-width': lw(3, 6.5) } });
+    map.addLayer({ id: 'rt-clu', type: 'circle', source: 'rtp', filter: ['has', 'point_count'], paint: { 'circle-color': '#4a8a62', 'circle-stroke-color': '#efe7d4', 'circle-stroke-width': 2, 'circle-radius': ['step', ['get', 'point_count'], 14, 10, 18, 40, 23] } });
+    if (st.glyphs) try { map.addLayer({ id: 'rt-clu-n', type: 'symbol', source: 'rtp', filter: ['has', 'point_count'], layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-size': 13, 'text-font': ['Noto Sans Bold'], 'text-allow-overlap': true }, paint: { 'text-color': '#f6f0e2' } }); } catch (e) {}
+    map.addLayer({ id: 'rt-pt', type: 'circle', source: 'rtp', filter: ['!', ['has', 'point_count']], paint: { 'circle-color': '#4a8a62', 'circle-stroke-color': '#efe7d4', 'circle-stroke-width': 2, 'circle-radius': 7 } });
+    if (!map.__mb) { map.__mb = 1; map.on('moveend', () => { clearTimeout(MB.timer); mbRefresh(false); MB.timer = setTimeout(mbLoad, 500); }); map.on('click', mbClick); if (!lastFix) setTimeout(() => mbLocate(false), 400); }
+    mbRefresh(true); clearTimeout(MB.timer); MB.timer = setTimeout(mbLoad, 500);
     map.addLayer({ id: 'guide-bord', type: 'line', source: 'guide', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#0f1511', 'line-width': lw(6, 15), 'line-opacity': 0.55 } });
     map.addLayer({ id: 'draw-line', type: 'line', source: 'draw', filter: ['==', '$type', 'LineString'], layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#d6a24e', 'line-width': lw(3.5, 8) } });
     map.addLayer({ id: 'draw-pt', type: 'circle', source: 'draw', filter: ['==', '$type', 'Point'], paint: { 'circle-radius': ['case', ['==', ['get', 'k'], 'start'], 9, 6], 'circle-color': ['case', ['==', ['get', 'k'], 'start'], '#4a8a62', '#efe7d4'], 'circle-stroke-color': '#0f1511', 'circle-stroke-width': 2 } });
