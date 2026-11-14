@@ -1041,6 +1041,29 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
 .ss-prev{width:54px;height:54px;flex:none;border-radius:10px;background-size:cover;background-position:center;border:1px solid var(--ligne)}
 .ss-standard{background-image:url(https://tile.openstreetmap.org/14/8472/5719.png)}.ss-topo{background-image:url(https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/14/5719/8472)}.ss-satellite{background-image:url(https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/14/5719/8472)}.ss-velo{background-image:url(https://a.tile-cyclosm.openstreetmap.fr/cyclosm/14/8472/5719.png)}.ss-simple{background-image:url(https://tile.openstreetmap.org/14/8472/5719.png);filter:saturate(.6)}
 #btnStyle{display:inline-flex;align-items:center;gap:6px}
+
+/* parcours dessinés */
+.drawbar{position:absolute;z-index:7;left:12px;right:12px;bottom:calc(var(--bottom) + 12px);padding:12px;border-radius:18px;background:var(--carte);border:1px solid var(--ligne);box-shadow:0 12px 30px rgba(0,0,0,.5)}
+.db-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}.db-top>div:first-child{flex:1}.db-top small{display:block;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#d6a24e}.db-top b{display:block;font-size:24px}.db-top span{font-size:12.5px;color:var(--gris)}
+.db-mode{display:flex;gap:4px;padding:3px;border-radius:12px;background:rgba(255,255,255,.05)}.db-mode button{border:0;border-radius:9px;padding:7px 9px;background:none;color:var(--gris);font:inherit;font-size:12.5px;font-weight:700}.db-mode button[aria-pressed="true"]{background:var(--accent);color:#f6f0e2}
+.db-b{display:flex;gap:6px;align-items:center}.db-b .sbtn{flex:1;padding:10px 6px;font-size:13px}.db-b .sbtn:disabled{opacity:.45}
+body.drawing .map-btns,body.drawing #guideBar,body.drawing #hud{display:none!important}body.drawing #map canvas{cursor:crosshair}
+/* mode salle */
+.livegym{position:fixed;inset:0;z-index:70;background:#0f1511;display:flex;flex-direction:column;padding:calc(var(--safe-t) + 10px) 18px calc(var(--safe-b) + 16px)}
+.lg-top{display:flex;align-items:center;gap:12px}.lg-top>span:first-child{font-size:22px;font-weight:800}.lg-top>span:nth-child(2){flex:1;font-size:13.5px;color:var(--gris)}
+.lg-prog{height:5px;margin:10px 0 18px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}.lg-prog i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.lg-body{flex:1;overflow-y:auto;display:flex;flex-direction:column}.lg-ex small{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}.lg-ex h2{margin:4px 0 6px;font-size:30px;line-height:1.1}.lg-last{margin:0;font-size:14px;color:var(--gris)}
+.lg-sets{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0}.lg-sets span{padding:7px 11px;border-radius:999px;border:1px solid var(--ligne);font-size:13px;color:var(--gris)}.lg-sets span.ok{background:var(--accent);border-color:var(--accent);color:#f6f0e2}.lg-sets span.cur{border-color:var(--accent);color:var(--blanc)}
+.lg-rest{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:14px;border-radius:16px;background:var(--carte);border-left:3px solid var(--accent)}.lg-rest b{font-size:32px;flex:1}.lg-rest small{font-size:12px;color:var(--gris);text-transform:uppercase;letter-spacing:.06em;font-weight:800}
+.lg-now{margin:4px 0 10px;font-size:15px;font-weight:700}.lg-adj{display:grid;grid-template-columns:1fr 1fr;gap:10px}.lg-adj small{display:block;font-size:12px;color:var(--gris);margin-bottom:6px}
+.lg-st{display:flex;align-items:center;justify-content:space-between;padding:6px;border-radius:16px;background:var(--carte);border:1px solid var(--ligne)}.lg-st b{font-size:28px}.lg-st button{width:46px;height:46px;border:0;border-radius:12px;background:rgba(255,255,255,.07);color:var(--blanc);font:inherit;font-size:24px;font-weight:700}
+.lg-go{width:100%;margin-top:16px;padding:18px!important;font-size:18px!important}.lg-pr{margin:8px 0 0;text-align:center;font-size:13.5px;font-weight:700;color:#d6a24e}
+.lg-nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto;padding-top:16px}.lg-nav .sbtn:disabled{opacity:.4}
+/* score du jour */
+.score{border-left:3px solid var(--accent)!important}.sc-top{display:flex;gap:14px;align-items:center}.sc-n{display:flex;align-items:baseline;gap:3px;flex:none}.sc-n b{font-size:46px;line-height:1;color:var(--accent)}.sc-n small{font-size:15px;color:var(--gris)}
+.sc-t small{display:block;font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--gris)}.sc-t b{display:block;font-size:17px}.sc-t span{display:block;margin-top:2px;font-size:13px;color:var(--gris)}
+.sc-parts{display:flex;flex-direction:column;gap:7px;margin:14px 0 4px}.sc-parts>div{display:grid;grid-template-columns:74px 1fr 104px;gap:10px;align-items:center;font-size:13px}.sc-parts .goal-bar{margin:0}.sc-parts em{font-style:normal;font-size:12px;color:var(--gris);text-align:right}
+.sc-week{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;height:64px;margin-top:12px;align-items:end}.sc-week div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px}.sc-week i{width:100%;max-width:22px;border-radius:5px;background:rgba(255,255,255,.12)}.sc-week .t i{background:var(--accent)}.sc-week span{font-size:11px;color:var(--gris)}
 </style>
 </head>
 <body>
@@ -1097,6 +1120,11 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
       <button id="recenter" class="mbtn hidden" type="button">Recentrer</button>
     </div>
     <div id="guideBar" class="guidebar hidden"><div><small id="gbKind"></small><b id="gbName"></b><span id="gbInfo"></span></div><div class="gb-b"><button id="gbGo" class="sbtn save" type="button">Lancer ce parcours</button><button id="gbOff" class="ibtn" type="button" aria-label="Retirer le parcours">×</button></div></div>
+    <div id="drawBar" class="drawbar hidden">
+      <div class="db-top"><div><small>Nouveau parcours</small><b id="dbKm" class="num">0,00 km</b><span id="dbUp">Touche la carte pour placer le départ</span></div>
+        <div class="db-mode" role="group" aria-label="Type de tracé"><button type="button" data-dmode="path" aria-pressed="true">Chemins</button><button type="button" data-dmode="line" aria-pressed="false">Ligne droite</button></div></div>
+      <div class="db-b"><button id="dbUndo" class="sbtn cancel" type="button">Annuler le point</button><button id="dbLoop" class="sbtn cancel" type="button">Boucler</button><button id="dbSave" class="sbtn save" type="button">Enregistrer</button><button id="dbQuit" class="ibtn" type="button" aria-label="Quitter le dessin">×</button></div>
+    </div>
     <div id="replayBar" class="replay hidden">
       <div class="rp-info"><b id="rpDist">0,00 km</b><span id="rpTime">0:00</span></div>
       <div class="rp-track"><i id="rpFill"></i></div>
@@ -1271,6 +1299,11 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     <button id="amAdd" class="sbtn save" type="button">📷 Ajouter une photo ici</button><small class="am-tip" id="amTip">Déplace la carte pour viser l'endroit (la croix au centre), puis ajoute ta photo.</small></div>
   <input type="file" id="amIn" accept="image/*" hidden>
 </div>
+<div id="liveGym" class="livegym hidden" role="dialog" aria-modal="true" aria-label="Séance en cours">
+  <div class="lg-top"><span id="lgTime" class="num">0:00</span><span id="lgStep"></span><button id="lgQuit" class="xbtn" type="button" aria-label="Quitter">×</button></div>
+  <div class="lg-prog"><i id="lgProg"></i></div>
+  <div id="lgBody" class="lg-body"></div>
+</div>
 <div id="restSheet" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="rsT"><div class="sheet"><div class="d-head"><h2 id="rsT">Minuteur de repos</h2><button id="rsClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
   <div class="rs-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="r0"/><circle id="rsArc" cx="60" cy="60" r="52" class="r1"/></svg><div><b id="rsTime" class="num">1:30</b><small id="rsSub">Choisis ta durée</small></div></div>
   <div class="chips cp-wrap rs-chips" id="rsChips"></div>
@@ -1364,6 +1397,7 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     <div class="d-head"><h2 id="gTitle">Séance de musculation</h2><button id="gClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
     <div id="gBody" class="cp gbody"></div>
     <div class="btns">
+      <button id="gLive" class="sbtn save hidden" type="button">Démarrer en mode salle</button>
       <button id="gSave" class="sbtn save" type="button">Enregistrer la séance</button>
       <button id="gCancel" class="sbtn cancel" type="button">Annuler</button>
       <button id="gDel" class="danger-btn hidden" type="button">Supprimer la séance</button>
@@ -2292,7 +2326,10 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
   }
   function renderRoutes(err) {
     const recs = store.get(K_RTREC, {});
-    let h = '<p class="rt-intro">Circuits balisés, pistes d\'athlétisme, sentiers et itinéraires vélo dans un rayon de 12 km, d\'après OpenStreetMap.</p>';
+    let h = '<button type="button" class="allmap-btn" data-rt-draw="1"><span>✏️</span><b>Créer mon parcours</b><small>Dessine-le sur la carte en touchant des points</small><i>›</i></button>';
+    const MY = myRoutes();
+    if (MY.length) h += '<div class="block"><div class="bh">Mes parcours</div>' + MY.map(r => { const rec = recs[r.id]; return '<div class="srow"><div><b>' + esc(r.name) + '</b><small>' + nf2.format(r.km) + ' km' + (r.up ? ' · +' + r.up + ' m' : '') + (rec ? ' · record ' + fmtClock(rec.best) : '') + '</small></div><button type="button" class="sbtn save" data-myrt="' + r.id + '">Afficher</button><button type="button" class="ibtn" data-myrt-del="' + r.id + '" aria-label="Supprimer ' + esc(r.name) + '">×</button></div>'; }).join('') + '</div>';
+    h += '<p class="rt-intro">Circuits balisés, pistes d\'athlétisme, sentiers et itinéraires vélo dans un rayon de 12 km, d\'après OpenStreetMap.</p>';
     h += '<div class="chips hp-chips">' + [['tout', 'Tout'], ['course', 'Course'], ['marche', 'Marche'], ['velo', 'Vélo']].map(([k, l]) => '<button type="button" class="chip" data-rtf="' + k + '" aria-pressed="' + (rtFilter === k) + '">' + (ACT_ICON[k] || '') + l + '</button>').join('') + '</div>';
     if (rtLoading && !rtList.length) { $('rtBody').innerHTML = h + '<p class="empty">Recherche des parcours autour de toi…</p>'; return; }
     if (err) { $('rtBody').innerHTML = h + '<div class="block"><p class="empty">' + esc(err) + '</p><button type="button" class="sbtn save" data-rt-reload="1">Réessayer</button></div>'; return; }
@@ -2311,6 +2348,9 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
   $('rtClose').addEventListener('click', () => $('routesPage').classList.add('hidden'));
   $('rtBody').addEventListener('click', async e => {
     const f = e.target.closest('[data-rtf]'); if (f) { rtFilter = f.dataset.rtf; renderRoutes(); return; }
+    if (e.target.closest('[data-rt-draw]')) { drawStart(); return; }
+    const mr = e.target.closest('[data-myrt]'); if (mr) { const r = myRoutes().find(x => x.id === mr.dataset.myrt); if (r) useMyRoute(r); return; }
+    const md = e.target.closest('[data-myrt-del]'); if (md) { const r = myRoutes().find(x => x.id === md.dataset.myrtDel); if (r && confirm('Supprimer le parcours « ' + r.name + ' » ?')) { store.set(K_MYRT, myRoutes().filter(x => x !== r)); renderRoutes(); } return; }
     if (e.target.closest('[data-rt-reload]')) { loadRoutes(true); return; }
     const b = e.target.closest('[data-rt]'); if (!b) return;
     const r = rtList.find(x => x.id === b.dataset.rt); if (!r) return;
@@ -2334,6 +2374,70 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
       $('routesPage').classList.add('hidden'); showGuide(true);
     } catch (x) { b.classList.remove('loading'); toast('Le tracé n\'a pas pu être chargé. Réessaie.'); renderRoutes(); }
   });
+
+  // ---------- Créer ses propres parcours (dessin sur la carte) ----------
+  const K_MYRT = 'parcours.myRoutes';
+  const DR = { on: false, pts: [], segs: [], mode: 'path', busy: false };
+  const myRoutes = () => store.get(K_MYRT, []);
+  const segLen = c => { let d = 0; for (let i = 1; i < c.length; i++) d += haversine({ lat: c[i - 1][1], lon: c[i - 1][0] }, { lat: c[i][1], lon: c[i][0] }); return d; };
+  async function routeSeg(a, b) {
+    if (DR.mode === 'path') {
+      const act = settings.activity === 'velo' ? 'routed-bike/route/v1/bike' : 'routed-foot/route/v1/foot';
+      try { const j = await getJson('https://routing.openstreetmap.de/' + act + '/' + a[0] + ',' + a[1] + ';' + b[0] + ',' + b[1] + '?overview=full&geometries=geojson');
+        const c = j && j.routes && j.routes[0] && j.routes[0].geometry.coordinates; if (c && c.length > 1) return c.map(x => [Math.round(x[0] * 1e5) / 1e5, Math.round(x[1] * 1e5) / 1e5]); } catch (e) {}
+    }
+    return [a, b];
+  }
+  function drawGeo() {
+    return { type: 'FeatureCollection', features: [{ type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: DR.segs.flat() } }].concat(DR.pts.map((p, i) => ({ type: 'Feature', properties: { k: i === 0 ? 'start' : 'pt' }, geometry: { type: 'Point', coordinates: p } }))) };
+  }
+  function drawUi() {
+    const m = DR.segs.reduce((a, c) => a + segLen(c), 0);
+    $('dbKm').textContent = nf2.format(m / 1000) + ' km';
+    $('dbUp').textContent = DR.busy ? 'Calcul du chemin…' : !DR.pts.length ? 'Touche la carte pour placer le départ' : DR.pts.length === 1 ? 'Touche la carte pour tracer la suite' : plural(DR.pts.length, 'point') + ' · touche pour continuer';
+    document.querySelectorAll('[data-dmode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.dmode === DR.mode));
+    $('dbUndo').disabled = !DR.pts.length; $('dbSave').disabled = DR.pts.length < 2 || DR.busy; $('dbLoop').disabled = DR.pts.length < 3 || DR.busy;
+    if (map && map.getSource('draw')) map.getSource('draw').setData(drawGeo());
+  }
+  async function drawAdd(p) {
+    if (DR.busy) return; p = [Math.round(p[0] * 1e5) / 1e5, Math.round(p[1] * 1e5) / 1e5];
+    if (!DR.pts.length) { DR.pts.push(p); drawUi(); return; }
+    DR.busy = true; drawUi();
+    const seg = await routeSeg(DR.pts[DR.pts.length - 1], p);
+    DR.pts.push(p); DR.segs.push(seg); DR.busy = false; drawUi();
+  }
+  async function drawStart() {
+    $('routesPage').classList.add('hidden'); if (guide) { guide = null; store.del(K_GUIDE); guideBarUi(); }
+    if (currentView !== 1) go(1);
+    await ensureMap(); try { await whenMapReady(); } catch (e) { toast('La carte n\'est pas disponible.'); return; }
+    DR.on = true; DR.pts = []; DR.segs = []; document.body.classList.add('drawing');
+    $('drawBar').classList.remove('hidden'); drawUi();
+    if (rtPos || lastFix) map.easeTo({ center: lastFix ? [lastFix.lon, lastFix.lat] : [rtPos.lon, rtPos.lat], zoom: 15, pitch: 0, duration: anim() ? 800 : 0 });
+    toast('Touche la carte pour placer les points de ton parcours');
+  }
+  function drawStop() { DR.on = false; DR.pts = []; DR.segs = []; document.body.classList.remove('drawing'); $('drawBar').classList.add('hidden'); drawUi(); }
+  $('dbUndo').addEventListener('click', () => { if (DR.busy) return; DR.pts.pop(); DR.segs.pop(); drawUi(); });
+  $('dbLoop').addEventListener('click', () => { if (DR.pts.length > 2) drawAdd(DR.pts[0]); });
+  $('dbQuit').addEventListener('click', () => { if (DR.pts.length < 2 || confirm('Quitter sans enregistrer ce parcours ?')) drawStop(); });
+  document.querySelectorAll('[data-dmode]').forEach(b => b.addEventListener('click', () => { DR.mode = b.dataset.dmode; drawUi(); }));
+  $('dbSave').addEventListener('click', async () => {
+    const coords = DR.segs.flat(); if (coords.length < 2) return;
+    let name = ''; try { name = (prompt('Nom du parcours', 'Mon parcours ' + (myRoutes().length + 1)) || '').trim().slice(0, 40); } catch (e) {}
+    if (!name) return;
+    const km = Math.round(segLen(coords) / 10) / 100;
+    let up = 0, down = 0;
+    try { // dénivelé : altitude de ~80 points le long du tracé (Open-Meteo, gratuit)
+      const step = Math.max(1, Math.floor(coords.length / 80)), S = coords.filter((c, i) => i % step === 0 || i === coords.length - 1).slice(0, 100);
+      const j = await getJson('https://api.open-meteo.com/v1/elevation?latitude=' + S.map(c => c[1].toFixed(5)).join(',') + '&longitude=' + S.map(c => c[0].toFixed(5)).join(','));
+      const E = (j && j.elevation) || []; for (let i = 1; i < E.length; i++) { const d = E[i] - E[i - 1]; if (d > 0) up += d; else down -= d; }
+    } catch (e) {}
+    const kind = settings.activity === 'velo' ? 'bicycle' : settings.activity === 'course' ? 'running' : 'foot';
+    const R = myRoutes(); R.unshift({ id: 'my' + Date.now(), name, kind, km, up: Math.round(up), down: Math.round(down), coords: [coords], t: Date.now() }); store.set(K_MYRT, R.slice(0, 50));
+    drawStop(); toast('Parcours « ' + name + ' » enregistré : ' + nf2.format(km) + ' km' + (up ? ', +' + Math.round(up) + ' m' : ''));
+    useMyRoute(R[0]);
+  }
+  );
+  function useMyRoute(r) { guide = { id: r.id, name: r.name, kind: r.kind, km: r.km, coords: r.coords }; store.set(K_GUIDE, guide); $('routesPage').classList.add('hidden'); showGuide(true); }
   function guideGeo() { return { type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: guide ? guide.coords : [] } }; }
   async function showGuide(fit) {
     guideBarUi();
@@ -2346,8 +2450,9 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
   function guideBarUi() {
     const on = !!guide; $('guideBar').classList.toggle('hidden', !on); if (!on) return;
     const rec = store.get(K_RTREC, {})[guide.id], k = RT_KIND[guide.kind] || ['marche', 'Parcours'];
-    $('gbKind').textContent = k[1]; $('gbName').textContent = guide.name;
-    $('gbInfo').textContent = nf1.format(guide.km) + ' km' + (rec ? ' · ton record ' + fmtClock(rec.best) + ' (' + plural(rec.n, 'passage') + ')' : '');
+    $('gbKind').textContent = String(guide.id).startsWith('my') ? 'Mon parcours' : k[1]; $('gbName').textContent = guide.name;
+    const myr = myRoutes().find(x => x.id === guide.id);
+    $('gbInfo').textContent = nf1.format(guide.km) + ' km' + (myr && myr.up ? ' · +' + myr.up + ' m' : '') + (rec ? ' · ton record ' + fmtClock(rec.best) + ' (' + plural(rec.n, 'passage') + ')' : '');
     $('gbGo').classList.toggle('hidden', S.status !== 'idle');
   }
   $('gbOff').addEventListener('click', () => { guide = null; store.del(K_GUIDE); showGuide(); });
@@ -2615,12 +2720,42 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     if (g === 'muscle' || g === 'fit') return 'fit';
     return sp.includes('marche') && !isBeginner() ? 'hike1000' : 'fit';
   }
+
+  // ---------- Score de la journée (sur 10) ----------
+  function dayScore(key) {
+    const today = key === dayKey(Date.now()), H = store.get(K_HIST, []).filter(h => dayKey(h.date) === key), W = store.get(K_WLOG, []).filter(l => dayKey(l.date) === key);
+    let steps = H.filter(h => h.activity !== 'velo').reduce((a, h) => a + (h.steps || 0), 0);
+    if (today) { try { steps = Math.max(steps, goalStats().steps); } catch (e) {} }
+    const sg = +settings.goalSteps || 8000, sMin = (H.reduce((a, h) => a + (h.durationMs || 0), 0) + W.reduce((a, l) => a + (l.durationMs || 0), 0)) / 60000;
+    const meals = store.get(K_MEALS, []).filter(m => dayKey(m.date) === key), E = dayEnergy(key), nd = kcalNeed(Math.round(E.burned));
+    const P = meals.reduce((a, m) => a + mealMacros(m)[0], 0), pg = protGoal();
+    const c = [];
+    c.push(['Pas', Math.min(1, steps / sg) * 3, 3, nf0.format(steps) + ' / ' + nf0.format(sg)]);
+    c.push(['Sport', Math.min(1, sMin / 30) * 2.5, 2.5, Math.round(sMin) + ' min / 30']);
+    let cal = 0, calTxt = 'repas non notés';
+    if (meals.length && nd && nd.target) { const dev = Math.abs(E.eaten - nd.target) / nd.target; cal = 2.5 * Math.max(0, Math.min(1, (0.45 - dev) / 0.35)); calTxt = nf0.format(Math.round(E.eaten)) + ' / ' + nf0.format(Math.round(nd.target)) + ' kcal'; }
+    c.push(['Calories', cal, 2.5, calTxt]);
+    c.push(['Protéines', pg ? Math.min(1, P / pg.g) * 2 : 0, 2, pg ? Math.round(P) + ' / ' + pg.g + ' g' : '–']);
+    const tot = c.reduce((a, x) => a + x[1], 0);
+    return { score: Math.round(tot * 10) / 10, parts: c };
+  }
+  function scoreHtml() {
+    const now = Date.now(), k = dayKey(now), sc = dayScore(k), v = sc.score;
+    const word = v >= 8.5 ? 'Excellente journée' : v >= 7 ? 'Très bonne journée' : v >= 5 ? 'Bonne journée' : v >= 3 ? 'Journée moyenne' : 'Journée calme';
+    const days = []; for (let i = 6; i >= 0; i--) { const d = new Date(now - i * 864e5); d.setHours(12); const s = dayScore(dayKey(d.getTime())).score; days.push([['D', 'L', 'M', 'M', 'J', 'V', 'S'][d.getDay()], s, i === 0]); }
+    const weakest = sc.parts.slice().sort((a, b) => a[1] / a[2] - b[1] / b[2])[0];
+    const tip = { Pas: 'une marche de 20 min ajoute environ 2 000 pas', Sport: 'une petite séance ou une sortie de 30 min', Calories: weakest[3] === 'repas non notés' ? 'note tes repas pour compter les calories' : 'rapproche-toi de ton objectif de calories', 'Protéines': 'ajoute des protéines (skyr, œufs, poulet…)' }[weakest[0]];
+    return '<div class="block score"><div class="sc-top"><div class="sc-n"><b class="num">' + nf1.format(v).replace(',0', '') + '</b><small>/ 10</small></div><div class="sc-t"><small>Score du jour</small><b>' + word + '</b><span>' + (v < 9.5 ? 'Pour gagner des points : ' + tip + '.' : 'Tout est au vert, bravo.') + '</span></div></div>' +
+      '<div class="sc-parts">' + sc.parts.map(([l, p, m, t]) => '<div><span>' + l + '</span><div class="goal-bar"><i style="width:' + (p / m * 100).toFixed(0) + '%"></i></div><em>' + t + '</em></div>').join('') + '</div>' +
+      '<div class="sc-week">' + days.map(([l, s, t]) => '<div class="' + (t ? 't' : '') + '"><i style="height:' + Math.max(6, s * 10) + '%"></i><span>' + l + '</span></div>').join('') + '</div></div>';
+  }
   function dashHtml() {
     const st = goalStats(), today = dayKey(Date.now()), E = dayEnergy(today), sg = +settings.goalSteps || 10000;
     const pr = Math.min(1, st.steps / sg), C = 2 * Math.PI * 42;
     const W = store.get(K_WEIGHTS, []), w = +settings.weight || 0, dW = W.length >= 2 ? W[W.length - 1].kg - W[0].kg : 0;
     let h = '<div class="block dash-today"><div class="dt-ring"><svg viewBox="0 0 100 100"><defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7fb3c9"/><stop offset="1" stop-color="#a78bfa"/></linearGradient></defs><circle cx="50" cy="50" r="42" class="r0"/><circle cx="50" cy="50" r="42" class="r1" style="stroke-dasharray:' + (pr * C).toFixed(1) + ' ' + C.toFixed(1) + '"/></svg><div><b class="num">' + nf0.format(st.steps) + '</b><small>/ ' + nf0.format(sg) + ' pas</small></div></div>' +
       '<div class="dt-side"><div class="dt-t">Aujourd\'hui</div><div class="dt-l"><span>Mangées</span><b class="num">' + nf0.format(Math.round(E.eaten)) + ' kcal</b></div><div class="dt-l"><span>Dépensées</span><b class="num">' + nf0.format(Math.round(E.burned)) + ' kcal</b></div><div class="dt-l"><span>Objectif pas</span><b class="num">' + Math.round(pr * 100) + ' %</b></div></div></div>';
+    try { h = scoreHtml() + h; } catch (e) {}
     try { h += focusHtml(st); } catch (e) {}
     const tile = (ic, v, l, tab) => '<button type="button" class="dtile"' + (tab ? ' data-pgtab="' + tab + '"' : '') + '><b class="num">' + v + '</b><small>' + l + '</small></button>';
     h += '<div class="dtiles">' + tile('🔥', st.streak, 'jour' + (st.streak > 1 ? 's' : '') + ' d\'affilée') + tile('📍', nf1.format(st.km), 'km cette semaine', 'hist') +
@@ -3569,7 +3704,7 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     $('rsTime').textContent = txt; $('rsSub').textContent = run ? 'Repos en cours' : 'Choisis ta durée';
     $('rsArc').style.strokeDasharray = C.toFixed(1); $('rsArc').style.strokeDashoffset = (run ? C * (1 - left / Math.max(1, RT.total)) : 0).toFixed(1);
     $('rsGo').textContent = run ? 'Arrêter' : 'Démarrer';
-    const pill = $('restPill'); pill.classList.toggle('hidden', !run || !$('restSheet').classList.contains('hidden') || !$('gsheet').classList.contains('hidden')); pill.textContent = 'Repos ' + txt;
+    const pill = $('restPill'); pill.classList.toggle('hidden', !run || !$('restSheet').classList.contains('hidden') || !$('gsheet').classList.contains('hidden') || LG.on); pill.textContent = 'Repos ' + txt;
     const g = $('gRest'); if (g) g.textContent = run ? txt : '';
   }
   function restNotif(on) {
@@ -3636,6 +3771,60 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     store.get(K_WLOG, []).forEach(l => { if (l.kind !== 'muscu') return; const k = (l.muscles || []).slice().sort().join('+'); if (seen.has(k)) return; seen.add(k); out.push(l); });
     return out.slice(0, 4);
   }
+
+  // ---------- Mode salle : la séance exercice par exercice, série par série ----------
+  const LG = { on: false, ex: [], i: 0, t0: 0, tick: null };
+  function lgOpen() {
+    if (!G.ex.length) { toast('Choisis au moins un exercice.'); return; }
+    if (!G.stats) G.stats = gymStats();
+    LG.ex = G.ex.map(e => ({ name: e.name, m: e.m, target: e.sets, reps: e.reps, kg: +e.kg || (G.stats[e.name] && G.stats[e.name].last ? G.stats[e.name].last.kg : 0) || 0, done: [] }));
+    LG.i = 0; LG.t0 = Date.now(); LG.on = true;
+    $('gsheet').classList.add('hidden'); $('liveGym').classList.remove('hidden');
+    clearInterval(LG.tick); LG.tick = setInterval(lgClock, 500); lgRender(); try { audioUnlock(); } catch (e) {}
+  }
+  function lgClock() { const s = Math.floor((Date.now() - LG.t0) / 1000); $('lgTime').textContent = Math.floor(s / 60) + ':' + pad(s % 60); const r = $('lgRest'); if (r) { if (RT.end > 0) { r.classList.remove('hidden'); r.querySelector('b').textContent = fmtMS(Math.ceil((RT.end - Date.now()) / 1000)); } else r.classList.add('hidden'); } }
+  function lgRender() {
+    const e = LG.ex[LG.i], n = LG.ex.length, tot = LG.ex.reduce((a, x) => a + x.target, 0), dn = LG.ex.reduce((a, x) => a + Math.min(x.done.length, x.target), 0);
+    $('lgStep').textContent = 'Exercice ' + (LG.i + 1) + ' / ' + n; $('lgProg').style.width = (dn / Math.max(1, tot) * 100).toFixed(0) + '%';
+    const st = G.stats[e.name], kgf = v => nf1.format(v).replace(',0', '');
+    const setNo = Math.min(e.done.length + 1, e.target), fin = e.done.length >= e.target;
+    let h = '<div class="lg-ex"><small>' + esc((MUSCLES.find(m => m[0] === e.m) || ['', ''])[1]) + '</small><h2>' + esc(e.name) + '</h2>' +
+      (st && st.last ? '<p class="lg-last">Dernière fois : ' + st.last.sets + ' × ' + st.last.reps + (st.last.kg ? ' à ' + kgf(st.last.kg) + ' kg' : '') + (st.max ? ' · record ' + kgf(st.max) + ' kg' : '') + '</p>' : '<p class="lg-last">Première fois sur cet exercice</p>') + '</div>';
+    h += '<div class="lg-sets">' + Array.from({ length: Math.max(e.target, e.done.length) }, (_, k) => { const d = e.done[k]; return '<span class="' + (d ? 'ok' : k === e.done.length ? 'cur' : '') + '">' + (d ? d.reps + ' × ' + kgf(d.kg) : 'Série ' + (k + 1)) + '</span>'; }).join('') + '</div>';
+    h += '<div id="lgRest" class="lg-rest hidden"><small>Repos</small><b class="num">0:00</b><button type="button" class="linkbtn" data-lg="skiprest">Passer</button></div>';
+    if (!fin) {
+      h += '<p class="lg-now">Série ' + setNo + ' sur ' + e.target + '</p><div class="lg-adj"><div><small>Répétitions</small><div class="lg-st"><button type="button" data-lg="r-">−</button><b class="num">' + e.reps + '</b><button type="button" data-lg="r+">+</button></div></div>' +
+        '<div><small>Charge (kg)</small><div class="lg-st"><button type="button" data-lg="k-">−</button><b class="num">' + kgf(e.kg) + '</b><button type="button" data-lg="k+">+</button></div></div></div>' +
+        '<button type="button" class="sbtn save lg-go" data-lg="done">Série faite ✓</button>' + (st && st.max && e.kg > st.max ? '<p class="lg-pr">Nouveau record si tu la réussis !</p>' : '');
+    } else h += '<p class="lg-now">Exercice terminé</p><button type="button" class="sbtn save lg-go" data-lg="more">+ Une série de plus</button>';
+    h += '<div class="lg-nav"><button type="button" class="sbtn cancel" data-lg="prev"' + (LG.i ? '' : ' disabled') + '>‹ Précédent</button>' + (LG.i < n - 1 ? '<button type="button" class="sbtn cancel" data-lg="next">Suivant ›</button>' : '<button type="button" class="sbtn save" data-lg="end">Terminer la séance</button>') + '</div>';
+    $('lgBody').innerHTML = h; lgClock();
+  }
+  function lgEnd(save) {
+    clearInterval(LG.tick); LG.on = false; $('liveGym').classList.add('hidden');
+    if (!save) { $('gsheet').classList.remove('hidden'); renderGym(); return; }
+    G.ex = LG.ex.filter(x => x.done.length).map(x => ({ name: x.name, m: x.m, sets: x.done.length, reps: Math.round(x.done.reduce((a, d) => a + d.reps, 0) / x.done.length), kg: Math.max(...x.done.map(d => d.kg)) }));
+    if (!G.ex.length) { toast('Aucune série validée : séance non enregistrée.'); return; }
+    G.dur = Math.max(5, Math.round((Date.now() - LG.t0) / 60000)); restStop(); $('gSave').click();
+  }
+  $('liveGym').addEventListener('click', e => {
+    const b = e.target.closest('[data-lg]'); if (!b) return; const a = b.dataset.lg, x = LG.ex[LG.i];
+    if (a === 'r-') x.reps = Math.max(1, x.reps - 1); else if (a === 'r+') x.reps = Math.min(100, x.reps + 1);
+    else if (a === 'k-') x.kg = Math.max(0, Math.round((x.kg - 2.5) * 10) / 10); else if (a === 'k+') x.kg = Math.round((x.kg + 2.5) * 10) / 10;
+    else if (a === 'done') {
+      x.done.push({ reps: x.reps, kg: x.kg }); try { navigator.vibrate && navigator.vibrate(40); } catch (er) {}
+      const last = x.done.length >= x.target;
+      if (last && LG.i < LG.ex.length - 1) { LG.i++; toast('Exercice suivant : ' + LG.ex[LG.i].name); restStart(RT.sec); }
+      else if (!last) restStart(RT.sec);
+    }
+    else if (a === 'more') x.target++;
+    else if (a === 'skiprest') restStop();
+    else if (a === 'prev') LG.i = Math.max(0, LG.i - 1); else if (a === 'next') LG.i = Math.min(LG.ex.length - 1, LG.i + 1);
+    else if (a === 'end') { lgEnd(true); return; }
+    lgRender();
+  });
+  $('lgQuit').addEventListener('click', () => { const any = LG.ex.some(x => x.done.length); if (!any) { lgEnd(false); return; } if (confirm('Terminer et enregistrer la séance ? (Annuler pour continuer)')) lgEnd(true); });
+  $('gLive').addEventListener('click', lgOpen);
   function gexHint(e) {
     if (!G.stats) { const old = G.editIdx >= 0 ? store.get(K_WLOG, [])[G.editIdx] : null; G.stats = gymStats(old ? old.date : undefined); }
     const r = G.stats[e.name], kgf = v => nf1.format(v).replace(',0', '') + ' kg';
@@ -3686,6 +3875,7 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
       h += '<div class="cp-t">Repos entre les séries <b id="gRest" class="num grest-t"></b></div><div class="chips cp-wrap">' + [60, 90, 120, 180].map(x => '<button type="button" class="chip" data-rest="' + x + '">' + fmtSec(x) + '</button>').join('') + '</div>';
       h += '<button type="button" class="linkbtn" data-grout-save="1">Enregistrer comme routine (à relancer en un appui)</button>';
     }
+    $('gLive').classList.toggle('hidden', G.plan || G.editIdx >= 0 || !G.ex.length);
     const vol = G.ex.reduce((a, e) => a + e.sets * e.reps * (e.kg || 0), 0), sets = G.ex.reduce((a, e) => a + e.sets, 0);
     h += '<div class="gsum"><div><span>Calories dépensées</span><b class="num">' + nf0.format(gymKcal()) + '</b><small>kcal</small></div>' +
       '<div><span>' + (vol ? 'Volume soulevé' : 'Séries') + '</span><b class="num">' + (vol ? nf0.format(vol) : sets || '–') + '</b><small>' + (vol ? 'kg' : '') + '</small></div></div>' +
@@ -6098,7 +6288,11 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     if (!map.getSource('route')) map.addSource('route', { type: 'geojson', data: routeData() });
     if (!map.getSource('replay')) map.addSource('replay', { type: 'geojson', data: empty });
     if (!map.getSource('guide')) map.addSource('guide', { type: 'geojson', data: guideGeo() });
+    if (!map.getSource('draw')) map.addSource('draw', { type: 'geojson', data: drawGeo() });
     map.addLayer({ id: 'guide-bord', type: 'line', source: 'guide', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#0f1511', 'line-width': lw(6, 15), 'line-opacity': 0.55 } });
+    map.addLayer({ id: 'draw-line', type: 'line', source: 'draw', filter: ['==', '$type', 'LineString'], layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#d6a24e', 'line-width': lw(3.5, 8) } });
+    map.addLayer({ id: 'draw-pt', type: 'circle', source: 'draw', filter: ['==', '$type', 'Point'], paint: { 'circle-radius': ['case', ['==', ['get', 'k'], 'start'], 9, 6], 'circle-color': ['case', ['==', ['get', 'k'], 'start'], '#4a8a62', '#efe7d4'], 'circle-stroke-color': '#0f1511', 'circle-stroke-width': 2 } });
+    if (!map.__drawClick) { map.__drawClick = 1; map.on('click', e => { if (DR.on) drawAdd([e.lngLat.lng, e.lngLat.lat]); }); }
     map.addLayer({ id: 'guide-coeur', type: 'line', source: 'guide', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#d6a24e', 'line-width': lw(3, 8), 'line-dasharray': [1.6, 1.1] } });
     map.addLayer({ id: 'route-bord', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#efe7d4', 'line-width': lw(5, 14) } });
     map.addLayer({ id: 'route-coeur', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#4a8a62', 'line-width': lw(2.2, 7) } });
