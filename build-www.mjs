@@ -1,5 +1,5 @@
 // Prépare le dossier www de l'appli Android à partir de la version web (librairies embarquées, sans CDN).
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync, rmSync, cpSync, existsSync } from 'node:fs';
 const SRC = process.env.PARCOURS_WEB || '../parcours';
 rmSync('www', { recursive: true, force: true });
 mkdirSync('www/lib', { recursive: true });
@@ -16,4 +16,5 @@ copyFileSync('node_modules/maplibre-gl/dist/maplibre-gl.js', 'www/lib/maplibre-g
 copyFileSync('node_modules/maplibre-gl/dist/maplibre-gl.css', 'www/lib/maplibre-gl.css');
 copyFileSync('node_modules/@capacitor/core/dist/capacitor.js', 'www/capacitor.js');
 for (const f of ['icon-192.png', 'icon-512.png', 'apple-touch-icon.png', 'foods-data.json']) copyFileSync(`${SRC}/${f}`, `www/${f}`);
+if (existsSync(`${SRC}/food-img`)) cpSync(`${SRC}/food-img`, 'www/food-img', { recursive: true, filter: f => !/credits-\d+\.json$|\.tmp$/.test(f) });
 console.log('www prêt');

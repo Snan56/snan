@@ -1027,6 +1027,10 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
 .rs-ring{position:relative;width:200px;height:200px;margin:4px auto 16px}.rs-ring svg{width:100%;height:100%;transform:rotate(-90deg)}.rs-ring circle{fill:none;stroke-width:8}.rs-ring .r0{stroke:var(--ligne)}.rs-ring .r1{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .25s linear}
 .rs-ring>div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}.rs-ring b{font-size:54px;line-height:1}.rs-ring small{margin-top:4px;font-size:13px;color:var(--gris)}.rs-chips{justify-content:center;margin-bottom:14px}
 .restpill{position:fixed;z-index:45;left:16px;bottom:calc(var(--bottom) + 14px);padding:11px 16px;border:0;border-radius:999px;background:var(--accent);color:#f6f0e2;font:inherit;font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.fimg{width:46px;height:46px;flex:none;border-radius:12px;object-fit:cover;background:#1b241d;border:1px solid var(--ligne)}.fimg-0{display:inline-block}
+.mrow{display:flex;align-items:center;gap:10px}.offr{display:flex;align-items:center;gap:12px}.offr>span{flex:1;min-width:0}.cp-h{display:flex;align-items:center;gap:10px}.cp-h .fimg{width:40px;height:40px}.frow{display:flex;align-items:center;gap:10px}
+img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
+.ichip{display:inline-flex;align-items:center;gap:7px;padding-left:5px!important}.cimg{width:28px;height:28px;border-radius:50%;object-fit:cover;flex:none}
 </style>
 </head>
 <body>
@@ -4604,7 +4608,7 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
     const F = store.get(K_FAV, []);
     if (!F.length) return '';
     return '<div class="block"><div class="bh">Mes repas favoris</div>' + F.map((f, i) =>
-      '<div class="frow"><button type="button" class="fadd" data-fav="' + i + '"><b>' + esc(f.name) + '</b><small>' + esc(f.items.map(x => x.fr).join(', ')) + '</small></button>' +
+      '<div class="frow">' + fimg(((f.items || [])[0] || {}).id) + '<button type="button" class="fadd" data-fav="' + i + '"><b>' + esc(f.name) + '</b><small>' + esc(f.items.map(x => x.fr).join(', ')) + '</small></button>' +
       '<span class="num fk">' + nf0.format(f.kcal) + ' kcal</span><button type="button" class="fbtn" data-fav="' + i + '" aria-label="Ajouter ' + esc(f.name) + ' au journal">+</button>' +
       '<button type="button" class="fdel" data-fdel="' + i + '" aria-label="Supprimer le favori ' + esc(f.name) + '">×</button></div>').join('') +
       '<p class="about" style="margin-top:6px">Touche + pour l\'ajouter à aujourd\'hui en un appui.</p></div>';
@@ -4914,11 +4918,17 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
 
   // Fenêtre d'analyse d'un repas
   const MS = { items: [], thumb: '', date: 0 };
+
+  // ---------- Photos des aliments (vignettes libres de droits, dans l'appli) ----------
+  let FOOD_IMG = {};
+  fetch('food-img/credits.json').then(r => r.json()).then(c => { FOOD_IMG = c || {}; try { if (currentView === 5) renderRepas(); } catch (e) {} }).catch(() => {});
+  const imgId = id => { if (!id) return null; id = String(id); if (FOOD_IMG[id]) return id; if (FOOD_IMG['i-' + id]) return 'i-' + id; return null; };
+  const fimg = (id, cls) => { const k = imgId(id); return k ? '<img class="' + (cls || 'fimg') + '" src="food-img/' + encodeURIComponent(k) + '.jpg" alt="" loading="lazy">' : ''; };
   function mealRows() {
     $('mList').innerHTML = MS.items.length ? MS.items.map((it, i) =>
       '<div class="mrow' + (it.on ? '' : ' off') + '" data-i="' + i + '">' +
       '<label class="mchk"><input type="checkbox" data-mon="' + i + '"' + (it.on ? ' checked' : '') + ' aria-label="Garder ' + esc(it.f.fr) + '"><span></span></label>' +
-      '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + esc(it.f.portion) + '</small>' + (it.mine ? '' : '<i class="mtag' + (it.mem ? ' ok' : '') + '">' + (it.mem ? 'Ton habitude' : it.z ? 'Vu sur la photo' : it.v ? 'Variante' : it.p != null ? 'IA · ' + (it.p >= 0.5 ? 'très probable' : it.p >= 0.12 ? 'probable' : 'possible') : '') + '</i>') + '</div>' +
+      fimg(it.f.id) + '<div class="mname"><b>' + esc(it.f.fr) + '</b><small>' + esc(it.f.portion) + '</small>' + (it.mine ? '' : '<i class="mtag' + (it.mem ? ' ok' : '') + '">' + (it.mem ? 'Ton habitude' : it.z ? 'Vu sur la photo' : it.v ? 'Variante' : it.p != null ? 'IA · ' + (it.p >= 0.5 ? 'très probable' : it.p >= 0.12 ? 'probable' : 'possible') : '') + '</i>') + '</div>' +
       '<select data-mq="' + i + '" aria-label="Nombre de portions de ' + esc(it.f.fr) + '">' + QTY.map(([q, l]) => '<option value="' + q + '"' + (q === it.q ? ' selected' : '') + '>× ' + l + '</option>').join('') + '</select>' +
       '<b class="mkcal num">' + nf0.format(Math.round(it.f.kcal * it.q)) + '<small>kcal</small></b></div>').join('')
       : '<p class="empty">Rien pour l\'instant : choisis tes aliments ci-dessous.</p>';
@@ -5029,7 +5039,7 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
     e.preventDefault(); $('offQ').blur(); const q = $('offQ').value.trim(); if (q.length < 2) return;
     if (/^\d{8,14}$/.test(q.replace(/\s/g, ''))) { $('localRes').innerHTML = ''; barcodeLookup(q.replace(/\s/g, '')); return; }
     localList = localSearch(q);
-    $('localRes').innerHTML = localList.length ? '<div class="cp-g">Dans l\'appli</div><div class="offl">' + localList.map(([k, x], i) => '<button type="button" class="offr" data-loc="' + i + '"><span><b>' + esc(x.fr) + '</b><small>' + (k === 'my' ? 'Mon aliment · ' : '') + (k === 'ing' ? x.k + ' kcal / 100 ' + (['boisson', 'chaud', 'verre'].includes(x.t) ? 'ml' : 'g') : (x.portion ? esc(x.portion) + ' · ' : '') + nf0.format(x.kcal) + ' kcal') + '</small></span><i>+</i></button>').join('') + '</div><div class="cp-g">Produits du commerce</div>' : '';
+    $('localRes').innerHTML = localList.length ? '<div class="cp-g">Dans l\'appli</div><div class="offl">' + localList.map(([k, x], i) => '<button type="button" class="offr" data-loc="' + i + '">' + fimg(x.id) + '<span><b>' + esc(x.fr) + '</b><small>' + (k === 'my' ? 'Mon aliment · ' : '') + (k === 'ing' ? x.k + ' kcal / 100 ' + (['boisson', 'chaud', 'verre'].includes(x.t) ? 'ml' : 'g') : (x.portion ? esc(x.portion) + ' · ' : '') + nf0.format(x.kcal) + ' kcal') + '</small></span><i>+</i></button>').join('') + '</div><div class="cp-g">Produits du commerce</div>' : '';
     offRun(q);
   });
   $('offRes').addEventListener('click', e => {
@@ -5261,7 +5271,7 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
     const box = $('mComp'); if (box.classList.contains('hidden')) return;
     let h = '<div class="cp-step"><i>1</i><b>Cuisine</b><small>pour voir les aliments typiques</small></div><div class="chips">' + Object.keys(CUISINES).map(c => '<button type="button" class="chip" data-cu="' + esc(c) + '" aria-pressed="' + (CP.cuisine === c) + '">' + esc(c) + '</button>').join('') + '</div>';
     h += '<div class="cp-step"><i>2</i><b>Aliments</b><small>touche tout ce qu\'il y a dans l\'assiette</small></div>';
-    const chip = id => '<button type="button" class="chip" data-ing="' + id + '" aria-pressed="' + CP.sel.some(e => e.x.id === id) + '">' + (CP.sel.some(e => e.x.id === id) ? '✓ ' : '') + esc(INGR_BY[id].fr) + '</button>';
+    const chip = id => '<button type="button" class="chip ichip" data-ing="' + id + '" aria-pressed="' + CP.sel.some(e => e.x.id === id) + '">' + (imgId('i-' + id) ? fimg('i-' + id, 'cimg') : '') + (CP.sel.some(e => e.x.id === id) ? '✓ ' : '') + esc(INGR_BY[id].fr) + '</button>';
     if (CP.cuisine) {
       const ids = CUISINES[CP.cuisine];
       GROUPS.forEach(([name]) => { const g = ids.filter(id => groupOf(INGR_BY[id]) === name); if (g.length) h += '<div class="cp-g">' + name + '</div><div class="chips">' + g.map(chip).join('') + '</div>'; });
@@ -5274,7 +5284,7 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
       h += '<div class="cp-step"><i>3</i><b>Quantités</b><small>' + CP.sel.length + ' aliment' + (CP.sel.length > 1 ? 's' : '') + ' choisi' + (CP.sel.length > 1 ? 's' : '') + '</small></div>';
       CP.sel.forEach((e, si) => {
         const x = e.x, P = portionsOf(x);
-        h += '<div class="cp-card"><div class="cp-h"><b>' + esc(x.fr) + '</b><span class="num">' + nf0.format(compKcal(x, e.por, e.cook)) + ' kcal</span><button type="button" class="xbtn" data-rm="' + si + '" aria-label="Retirer ' + esc(x.fr) + '">×</button></div>' +
+        h += '<div class="cp-card"><div class="cp-h">' + fimg(x.id) + '<b>' + esc(x.fr) + '</b><span class="num">' + nf0.format(compKcal(x, e.por, e.cook)) + ' kcal</span><button type="button" class="xbtn" data-rm="' + si + '" aria-label="Retirer ' + esc(x.fr) + '">×</button></div>' +
           '<div class="chips">' + P.map((p, i) => '<button type="button" class="chip cp-por" data-por="' + si + ':' + i + '" aria-pressed="' + (e.por === i) + '"><span>' + esc(p[0]) + (x.t === 'plat' ? '' : ' · ' + p[1] + (['boisson', 'chaud', 'verre'].includes(x.t) ? ' ml' : ' g')) + '</span><b>' + nf0.format(compKcal(x, i, e.cook)) + ' kcal</b></button>').join('') + '</div>';
         if (x.cook) h += '<div class="chips">' + COOK.map((c, i) => '<button type="button" class="chip" data-cook="' + si + ':' + i + '" aria-pressed="' + (e.cook === i) + '">' + c[0] + '</button>').join('') + '</div>';
         h += '</div>';
@@ -5659,7 +5669,7 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
       const sub = list.reduce((a, [m]) => a + (m.kcal || 0), 0);
       h += '<div class="rgrp"><div class="rgh"><b>' + MEAL_TYPES[t] + '</b><span class="num">' + (sub ? nf0.format(sub) + ' kcal' : '') + '</span><button type="button" class="radd1" data-addtype="' + t + '" aria-label="Ajouter au ' + MEAL_TYPES[t].toLowerCase() + '">+</button></div>';
       list.forEach(([m, i]) => {
-        h += '<div class="meal">' + (m.thumb ? '<img src="' + m.thumb + '" alt="">' : '<span class="mthumb" aria-hidden="true"></span>') +
+        h += '<div class="meal">' + (m.thumb ? '<img src="' + m.thumb + '" alt="">' : imgId(((m.items || [])[0] || {}).id) ? fimg(m.items[0].id, 'mthumb') : '<span class="mthumb" aria-hidden="true"></span>') +
           '<div><b>' + esc(m.items.map(x => x.fr + (x.q !== 1 ? ' ×' + String(x.q).replace('.', ',') : '')).join(', ')) + '</b><small>' + tf.format(new Date(m.date)) + '</small></div>' +
           '<div class="mright"><b class="num">' + nf0.format(m.kcal) + '</b><small>kcal</small><button type="button" class="mdel" data-mdel="' + i + '" aria-label="Supprimer ce repas">' + (mealDelArmed === i ? 'Confirmer' : '×') + '</button></div></div>';
       });
