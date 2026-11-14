@@ -1031,6 +1031,12 @@ body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
 .mrow{display:flex;align-items:center;gap:10px}.offr{display:flex;align-items:center;gap:12px}.offr>span{flex:1;min-width:0}.cp-h{display:flex;align-items:center;gap:10px}.cp-h .fimg{width:40px;height:40px}.frow{display:flex;align-items:center;gap:10px}
 img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
 .ichip{display:inline-flex;align-items:center;gap:7px;padding-left:5px!important}.cimg{width:28px;height:28px;border-radius:50%;object-fit:cover;flex:none}
+.mbtn-main{background:var(--accent,#4a8a62)!important;color:#f6f0e2!important;border-color:transparent!important}
+.guidebar{position:absolute;z-index:6;left:14px;right:14px;top:calc(var(--top) + 10px);display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:16px;background:var(--carte,#172019);border:1px solid var(--ligne);border-left:3px solid #d6a24e;box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.guidebar>div:first-child{flex:1;min-width:0}.guidebar small{display:block;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#d6a24e}.guidebar b{display:block;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.guidebar span{font-size:12.5px;color:var(--gris)}.gb-b{display:flex;gap:8px;align-items:center}.gb-b .sbtn{width:auto;padding:9px 12px;font-size:13.5px}
+.rt-intro{margin:0 2px 12px;font-size:13.5px;color:var(--gris)}.rt-list{display:flex;flex-direction:column;gap:8px}.rt-it{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;border-radius:16px;border:1px solid var(--ligne);background:var(--carte);color:inherit;font:inherit;text-align:left;cursor:pointer}
+.rt-ic .aico{width:24px;height:24px;color:var(--accent)}.rt-t{flex:1;min-width:0}.rt-t b{display:block;font-size:15px}.rt-t small{display:block;margin-top:2px;font-size:12.5px;color:var(--gris)}.rt-t em{display:block;margin-top:3px;font-style:normal;font-size:12.5px;font-weight:700;color:#d6a24e}.rt-it i{font-style:normal;font-size:22px;color:var(--gris)}.rt-it.loading{opacity:.6}
+.rt-cred{margin:14px 2px 0;font-size:11.5px;color:var(--gris)}
 </style>
 </head>
 <body>
@@ -1081,9 +1087,11 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     <div id="mapMsg" class="map-msg hidden"></div>
     <div class="hud" id="hud"><div class="plate"><div class="back"></div><div class="face"><span class="val num"><span id="hudSpeed">0,0</span><small>km/h</small></span><span class="val num"><span id="hudDist">0,00</span><small>km</small></span></div></div></div>
     <div class="map-btns" id="mapBtns">
+      <button id="btnRoutes" class="mbtn mbtn-main" type="button">Parcours autour de moi</button>
       <button id="btn3d" class="mbtn" type="button">Vue 2D</button>
       <button id="recenter" class="mbtn hidden" type="button">Recentrer</button>
     </div>
+    <div id="guideBar" class="guidebar hidden"><div><small id="gbKind"></small><b id="gbName"></b><span id="gbInfo"></span></div><div class="gb-b"><button id="gbGo" class="sbtn save" type="button">Lancer ce parcours</button><button id="gbOff" class="ibtn" type="button" aria-label="Retirer le parcours">×</button></div></div>
     <div id="replayBar" class="replay hidden">
       <div class="rp-info"><b id="rpDist">0,00 km</b><span id="rpTime">0:00</span></div>
       <div class="rp-track"><i id="rpFill"></i></div>
@@ -1244,6 +1252,10 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
 <div id="histPage" class="histpage hidden" role="dialog" aria-modal="true" aria-labelledby="hpTitle">
   <div class="hp-head"><h2 id="hpTitle" class="h-title">Historique</h2><button id="hpClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
   <div id="hpBody" class="hp-body"></div>
+</div>
+<div id="routesPage" class="histpage hidden" role="dialog" aria-modal="true" aria-labelledby="rtTitle">
+  <div class="hp-head"><h2 id="rtTitle" class="h-title">Parcours</h2><button id="rtClose" class="xbtn" type="button" aria-label="Fermer">×</button></div>
+  <div id="rtBody" class="hp-body"></div>
 </div>
 <div id="allmap" class="allmap hidden" role="dialog" aria-label="Carte de tous mes parcours">
   <div id="amMap"></div>
@@ -2204,6 +2216,140 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     }
     return false;
   }
+
+  // ---------- Parcours autour de moi : base OpenStreetMap (circuits balisés, pistes d'athlé, sentiers) ----------
+  const K_RTCACHE = 'parcours.routesCache', K_RTREC = 'parcours.routeRecords', K_GUIDE = 'parcours.guide';
+  const RT_KIND = { running: ['course', 'Circuit de course'], track: ['course', 'Piste d\'athlétisme'], fitness_trail: ['course', 'Parcours santé'], hiking: ['marche', 'Randonnée'], foot: ['marche', 'Sentier pédestre'], walking: ['marche', 'Balade'], bicycle: ['velo', 'Itinéraire vélo'], mtb: ['velo', 'VTT'] };
+  let rtList = [], rtFilter = 'tout', rtPos = null, rtLoading = false, guide = store.get(K_GUIDE, null);
+  const OVP = ['https://overpass-api.de/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+  async function overpass(q) { // plusieurs serveurs gratuits : on essaie le suivant si l'un est saturé
+    const H = isNative && plugin('CapacitorHttp'); let last;
+    for (const base of OVP) {
+      const url = base + '?data=' + encodeURIComponent(q);
+      try {
+        if (H) { const r = await H.get({ url, headers: { 'User-Agent': 'Parcours/1.0 (appli perso)' }, readTimeout: 35000, connectTimeout: 10000 }); if (r.status !== 200) throw new Error('http ' + r.status); return typeof r.data === 'string' ? JSON.parse(r.data) : r.data; }
+        const ac = new AbortController(), t = setTimeout(() => ac.abort(), 35000);
+        const r = await fetch(url, { signal: ac.signal }); clearTimeout(t); if (!r.ok) throw new Error('http ' + r.status); return await r.json();
+      } catch (e) { last = e; }
+    }
+    throw last || new Error('overpass');
+  }
+  const rtKey = p => p.lat.toFixed(2) + ',' + p.lon.toFixed(2);
+  const M3857 = 20037508.34, toM = (lon, lat) => [lon * M3857 / 180, Math.log(Math.tan((90 + lat) * Math.PI / 360)) * M3857 / Math.PI], fromM = (x, y) => [x / M3857 * 180, Math.atan(Math.exp(y / M3857 * Math.PI)) * 360 / Math.PI - 90];
+  async function getJson(url) {
+    const H = isNative && plugin('CapacitorHttp');
+    if (H) { const r = await H.get({ url, headers: { 'User-Agent': 'Parcours/1.0 (appli perso)' }, readTimeout: 25000, connectTimeout: 10000 }); if (r.status !== 200) throw new Error('http ' + r.status); return typeof r.data === 'string' ? JSON.parse(r.data) : r.data; }
+    const ac = new AbortController(), t = setTimeout(() => ac.abort(), 25000); const r = await fetch(url, { signal: ac.signal }); clearTimeout(t); if (!r.ok) throw new Error('http ' + r.status); return r.json();
+  }
+  // Randonnée et vélo : Waymarked Trails (OpenStreetMap, rapide) ; course, parcours santé et pistes : Overpass (si disponible)
+  const WMT = { hiking: 'hiking', cycling: 'bicycle', mtb: 'mtb' };
+  async function wmtList(pos, km) {
+    const d = km / 111, a = toM(pos.lon - d / Math.cos(pos.lat * Math.PI / 180), pos.lat - d), b = toM(pos.lon + d / Math.cos(pos.lat * Math.PI / 180), pos.lat + d), bb = [a[0], a[1], b[0], b[1]].map(Math.round).join(',');
+    const out = await Promise.all(Object.keys(WMT).map(sv => getJson('https://' + sv + '.waymarkedtrails.org/api/v1/list/by_area?bbox=' + bb + '&limit=40').then(j => (j.results || []).filter(r => r.name).map(r => ({ id: 'w' + sv[0] + r.id, src: sv, type: 'relation', oid: r.id, kind: WMT[sv], name: r.name, net: r.group }))).catch(() => [])));
+    return out.flat();
+  }
+  async function ovpList(pos) {
+    const a = pos.lat.toFixed(4) + ',' + pos.lon.toFixed(4);
+    const d = await overpass('[out:json][timeout:25];(relation["route"~"^(running|fitness_trail|foot|walking)$"]["name"](around:12000,' + a + ');way["leisure"="track"]["sport"~"running|athletics"](around:12000,' + a + '););out tags center 80;');
+    return (d.elements || []).map(e => { const t = e.tags || {}, typ = e.type === 'way' ? 'track' : t.route, c = e.center || {}, km = parseFloat(String(t.distance || '').replace(',', '.'));
+      return { id: e.type[0] + e.id, src: 'osm', type: e.type, oid: e.id, kind: typ, name: t.name || (typ === 'track' ? 'Piste d\'athlétisme' : 'Parcours'), km: km > 0 && km < 500 ? km : null, lat: c.lat, lon: c.lon }; });
+  }
+  function rtMerge(list) {
+    const seen = new Set(rtList.map(r => r.name.toLowerCase() + '|' + RT_KIND[r.kind][0]));
+    list.forEach(r => { if (!RT_KIND[r.kind]) return; const k = r.name.toLowerCase() + '|' + RT_KIND[r.kind][0]; if (seen.has(k)) return; seen.add(k); rtList.push(r); });
+    rtList.forEach(r => { r.dist = r.lat != null && rtPos ? haversine(rtPos, { lat: r.lat, lon: r.lon }) : null; });
+    rtList.sort((x, y) => (x.dist == null) - (y.dist == null) || (x.dist || 0) - (y.dist || 0) || (x.kind === 'track' ? -1 : 0));
+  }
+  async function loadRoutes(force) {
+    rtLoading = true; renderRoutes();
+    rtPos = await Promise.race([herePos(), new Promise(r => setTimeout(() => r(settings.meteoPos || null), 15000))]);
+    if (!rtPos) { rtLoading = false; rtList = []; renderRoutes('Active la localisation pour trouver les parcours autour de toi.'); return; }
+    const C = store.get(K_RTCACHE, {}), k = rtKey(rtPos);
+    if (!force && C[k] && Date.now() - C[k].t < 7 * 864e5 && C[k].list.length) { rtList = []; rtMerge(C[k].list); rtLoading = false; renderRoutes(); return; }
+    rtList = [];
+    const save = () => { C[k] = { t: Date.now(), list: rtList.map(r => Object.assign({}, r, { dist: undefined })) }; const ks = Object.keys(C); if (ks.length > 8) delete C[ks[0]]; store.set(K_RTCACHE, C); };
+    const w = wmtList(rtPos, 12).then(L => { rtMerge(L); rtLoading = false; renderRoutes(); save(); });
+    const o = ovpList(rtPos).then(L => { rtMerge(L); rtLoading = false; renderRoutes(); save(); }).catch(() => {});
+    await Promise.allSettled([w, o]);
+    if (!rtList.length) { rtLoading = false; renderRoutes(navigator.onLine === false ? 'Il faut internet pour chercher les parcours.' : 'Aucun parcours trouvé, ou le serveur ne répond pas. Réessaie dans un instant.'); }
+  }
+  function renderRoutes(err) {
+    const recs = store.get(K_RTREC, {});
+    let h = '<p class="rt-intro">Circuits balisés, pistes d\'athlétisme, sentiers et itinéraires vélo dans un rayon de 12 km, d\'après OpenStreetMap.</p>';
+    h += '<div class="chips hp-chips">' + [['tout', 'Tout'], ['course', 'Course'], ['marche', 'Marche'], ['velo', 'Vélo']].map(([k, l]) => '<button type="button" class="chip" data-rtf="' + k + '" aria-pressed="' + (rtFilter === k) + '">' + (ACT_ICON[k] || '') + l + '</button>').join('') + '</div>';
+    if (rtLoading && !rtList.length) { $('rtBody').innerHTML = h + '<p class="empty">Recherche des parcours autour de toi…</p>'; return; }
+    if (err) { $('rtBody').innerHTML = h + '<div class="block"><p class="empty">' + esc(err) + '</p><button type="button" class="sbtn save" data-rt-reload="1">Réessayer</button></div>'; return; }
+    const L = rtList.filter(r => rtFilter === 'tout' || RT_KIND[r.kind][0] === rtFilter);
+    const done = Object.keys(recs).length;
+    if (done) h += '<div class="block"><div class="bh">Mes parcours faits</div>' + Object.entries(recs).sort((a, b) => b[1].last - a[1].last).slice(0, 6).map(([id, r]) => '<div class="rec"><div>' + esc(r.name) + '<small>' + plural(r.n, 'passage') + ' · ' + nf2.format(r.km) + ' km</small></div><div class="v">' + fmtClock(r.best) + '</div></div>').join('') + '</div>';
+    if (!L.length) { $('rtBody').innerHTML = h + '<div class="block"><p class="empty">Aucun parcours de ce type trouvé autour de toi.</p></div>'; return; }
+    h += '<div class="rt-list">' + L.slice(0, 60).map(r => { const rec = recs[r.id], k = RT_KIND[r.kind];
+      return '<button type="button" class="rt-it" data-rt="' + r.id + '"><span class="rt-ic">' + (ACT_ICON[k[0]] || '') + '</span><span class="rt-t"><b>' + esc(r.name) + '</b><small>' + k[1] + ({ INT: ' international', NAT: ' national', REG: ' régional', LOC: ' local' }[r.net] || '') + (r.km ? ' · ' + nf1.format(r.km) + ' km' : '') + (Number.isFinite(r.dist) ? ' · à ' + (r.dist < 1000 ? Math.round(r.dist / 10) * 10 + ' m' : nf1.format(r.dist / 1000) + ' km') : '') + '</small>' + (rec ? '<em>Ton record : ' + fmtClock(rec.best) + '</em>' : '') + '</span><i>›</i></button>'; }).join('') + '</div>';
+    h += '<p class="rt-cred">Données © contributeurs OpenStreetMap (ODbL), via Waymarked Trails et Overpass</p>';
+    $('rtBody').innerHTML = h;
+  }
+  function openRoutes() { $('routesPage').classList.remove('hidden'); try { fx($('rtBody')); } catch (e) {} if (!rtList.length) loadRoutes(); else renderRoutes(); }
+  $('btnRoutes').addEventListener('click', openRoutes);
+  setTimeout(guideBarUi, 500);
+  $('rtClose').addEventListener('click', () => $('routesPage').classList.add('hidden'));
+  $('rtBody').addEventListener('click', async e => {
+    const f = e.target.closest('[data-rtf]'); if (f) { rtFilter = f.dataset.rtf; renderRoutes(); return; }
+    if (e.target.closest('[data-rt-reload]')) { loadRoutes(true); return; }
+    const b = e.target.closest('[data-rt]'); if (!b) return;
+    const r = rtList.find(x => x.id === b.dataset.rt); if (!r) return;
+    b.classList.add('loading'); b.querySelector('small').textContent = 'Chargement du tracé…';
+    try {
+      let coords = [], wlen = 0;
+      if (r.src && r.src !== 'osm') {
+        const d = await getJson('https://' + r.src + '.waymarkedtrails.org/api/v1/details/relation/' + r.oid);
+        const walk = n => { if (!n) return; if (Array.isArray(n)) return n.forEach(walk); if (n.geometry && n.geometry.coordinates) coords.push(n.geometry.coordinates.map(c => fromM(c[0], c[1]).map(v => Math.round(v * 1e5) / 1e5))); ['main', 'appendices', 'ways'].forEach(k => walk(n[k])); };
+        walk(d.route); wlen = (d.route && d.route.length) || 0;
+      } else {
+        const d = await overpass('[out:json][timeout:30];' + r.type + '(' + r.oid + ');out geom;');
+        const el = (d.elements || [])[0]; if (!el) throw new Error('vide');
+        const lines = el.type === 'way' ? [el.geometry] : (el.members || []).filter(m => m.type === 'way' && m.geometry).map(m => m.geometry);
+        coords = lines.map(l => l.map(p => [Math.round(p.lon * 1e5) / 1e5, Math.round(p.lat * 1e5) / 1e5]));
+      }
+      coords = coords.filter(l => l.length > 1);
+      if (!coords.length) throw new Error('vide');
+      let len = 0; coords.forEach(l => { for (let i = 1; i < l.length; i++) len += haversine({ lat: l[i - 1][1], lon: l[i - 1][0] }, { lat: l[i][1], lon: l[i][0] }); });
+      guide = { id: r.id, name: r.name, kind: r.kind, km: r.km || Math.round((wlen || len) / 100) / 10, coords }; store.set(K_GUIDE, guide);
+      $('routesPage').classList.add('hidden'); showGuide(true);
+    } catch (x) { b.classList.remove('loading'); toast('Le tracé n\'a pas pu être chargé. Réessaie.'); renderRoutes(); }
+  });
+  function guideGeo() { return { type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: guide ? guide.coords : [] } }; }
+  async function showGuide(fit) {
+    guideBarUi();
+    if (!guide) { if (map && map.getSource('guide')) map.getSource('guide').setData(guideGeo()); return; }
+    if (currentView !== 1) go(1);
+    await ensureMap(); try { await whenMapReady(); } catch (e) { return; }
+    if (map.getSource('guide')) map.getSource('guide').setData(guideGeo());
+    if (fit) { const all = guide.coords.flat(); const bb = all.reduce((b, c) => b.extend(c), new maplibregl.LngLatBounds(all[0], all[0])); map.fitBounds(bb, { padding: { top: 120, bottom: 230, left: 40, right: 40 }, pitch: settings.map3d ? 45 : 0, duration: anim() ? 1200 : 0, maxZoom: 16 }); }
+  }
+  function guideBarUi() {
+    const on = !!guide; $('guideBar').classList.toggle('hidden', !on); if (!on) return;
+    const rec = store.get(K_RTREC, {})[guide.id], k = RT_KIND[guide.kind] || ['marche', 'Parcours'];
+    $('gbKind').textContent = k[1]; $('gbName').textContent = guide.name;
+    $('gbInfo').textContent = nf1.format(guide.km) + ' km' + (rec ? ' · ton record ' + fmtClock(rec.best) + ' (' + plural(rec.n, 'passage') + ')' : '');
+    $('gbGo').classList.toggle('hidden', S.status !== 'idle');
+  }
+  $('gbOff').addEventListener('click', () => { guide = null; store.del(K_GUIDE); showGuide(); });
+  $('gbGo').addEventListener('click', () => {
+    if (!guide) return; const a = (RT_KIND[guide.kind] || ['marche'])[0], b = document.querySelector('[data-act="' + a + '"]'); if (b) b.click();
+    startOrResume(); guideBarUi(); toast('C\'est parti sur « ' + guide.name + ' ». Suis le tracé sur la carte.');
+  });
+  // à la fin d'une sortie : as-tu fait le parcours suivi ? (au moins 75 % du tracé longé à moins de 60 m)
+  function guideCheck(entry) {
+    if (!guide || !entry.track || entry.distanceM < guide.km * 1000 * 0.7) return null;
+    const pts = entry.track.filter(p => p && p.length >= 2), G = guide.coords.flat(), step = Math.max(1, Math.floor(G.length / 60));
+    let hit = 0, tot = 0;
+    for (let i = 0; i < G.length; i += step) { tot++; const g = { lat: G[i][1], lon: G[i][0] }; if (pts.some(p => Math.abs(p[0] - g.lat) < 0.001 && Math.abs(p[1] - g.lon) < 0.0014 && haversine(g, { lat: p[0], lon: p[1] }) < 60)) hit++; }
+    if (!tot || hit / tot < 0.75) return null;
+    const R = store.get(K_RTREC, {}), r = R[guide.id] || { name: guide.name, km: guide.km, n: 0, best: 0, last: 0 }, ms = entry.durationMs || 0, pb = !r.best || ms < r.best;
+    r.n++; r.last = entry.date; if (pb) r.best = ms; R[guide.id] = r; store.set(K_RTREC, R);
+    entry.routeId = guide.id; entry.routeName = guide.name;
+    return { pb, first: r.n === 1, ms, name: guide.name };
+  }
   function saveSortie() {
     const hist = store.get(K_HIST, []);
     const before = computeRecords(hist);
@@ -2216,6 +2362,8 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     };
     fixMoving(entry); entry.kcalNet = 1;
     entry.kcal = Math.round(Math.max(entry.kcal, summaryKcal(entry)));
+    let gr = null; try { gr = guideCheck(entry); } catch (e) {}
+    if (gr) setTimeout(() => { toast(gr.first ? 'Parcours « ' + gr.name + ' » terminé en ' + fmtClock(gr.ms) + ' !' : gr.pb ? 'Nouveau record sur « ' + gr.name + ' » : ' + fmtClock(gr.ms) + ' !' : '« ' + gr.name + ' » en ' + fmtClock(gr.ms)); speak(gr.pb && !gr.first ? 'Nouveau record sur ce parcours !' : 'Parcours terminé.'); }, 1800);
     hist.unshift(entry);
     setTimeout(() => { try { pedoAfterSave(entry.date); } catch (e) {} }, 800);
     setTimeout(() => { try { if (lastEffort()) toast('⚡ Récupération : regarde l\'onglet Repas pour savoir quoi manger'); } catch (e) {} }, 2600);
@@ -5932,6 +6080,9 @@ img.mthumb{width:44px;height:44px;border-radius:12px;object-fit:cover}
     const empty = { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: [] } };
     if (!map.getSource('route')) map.addSource('route', { type: 'geojson', data: routeData() });
     if (!map.getSource('replay')) map.addSource('replay', { type: 'geojson', data: empty });
+    if (!map.getSource('guide')) map.addSource('guide', { type: 'geojson', data: guideGeo() });
+    map.addLayer({ id: 'guide-bord', type: 'line', source: 'guide', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#0f1511', 'line-width': lw(6, 15), 'line-opacity': 0.55 } });
+    map.addLayer({ id: 'guide-coeur', type: 'line', source: 'guide', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#d6a24e', 'line-width': lw(3, 8), 'line-dasharray': [1.6, 1.1] } });
     map.addLayer({ id: 'route-bord', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#efe7d4', 'line-width': lw(5, 14) } });
     map.addLayer({ id: 'route-coeur', type: 'line', source: 'route', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#4a8a62', 'line-width': lw(2.2, 7) } });
     map.addLayer({ id: 'replay-bord', type: 'line', source: 'replay', layout: { 'line-cap': 'round', 'line-join': 'round' }, paint: { 'line-color': '#efe7d4', 'line-width': lw(6, 16) } });
