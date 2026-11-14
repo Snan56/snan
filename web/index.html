@@ -1006,6 +1006,12 @@ body:not(.anim-off) .phview img{transition:scale .35s cubic-bezier(.2,.9,.25,1)}
 @starting-style{body:not(.anim-off) .allmap:not(.hidden),body:not(.anim-off) .phview:not(.hidden){opacity:0}body:not(.anim-off) .phview:not(.hidden) img{scale:.9}}
 body:not(.anim-off) .toast{transition:opacity .25s,transform .45s cubic-bezier(.2,1.5,.4,1)}
 body:not(.anim-off) .coachline,body:not(.anim-off) .meteo,body:not(.anim-off) .photobtn{animation:riseIn .45s cubic-bezier(.2,.8,.2,1)}
+.aico{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.act{display:inline-flex!important;align-items:center;gap:6px}
+.actbadge{display:flex;align-items:center;gap:8px;margin:2px 0 -4px;font-size:14px;color:var(--gris)}.actbadge .aico{width:22px;height:22px;color:var(--blanc)}.actbadge b{color:var(--blanc);font-size:15px;text-transform:uppercase;letter-spacing:.06em}.actbadge i{font-style:normal;font-size:12.5px;color:var(--gris)}
+body[data-act="course"] #pPace .face{border-color:var(--rouge)!important}
+.run-act{display:inline-flex;align-items:center;gap:5px;color:var(--blanc);font-weight:700}.run-act .aico{width:15px;height:15px}
+.hp-chips .chip{display:inline-flex;align-items:center;gap:6px}
 </style>
 </head>
 <body>
@@ -1024,10 +1030,11 @@ body:not(.anim-off) .coachline,body:not(.anim-off) .meteo,body:not(.anim-off) .p
   <!-- Sortie -->
   <section class="view is-active" id="v-sortie" aria-label="Sortie en cours">
     <div class="acts" role="group" aria-label="Activité">
-      <button class="act" type="button" data-act="marche">Marche</button>
-      <button class="act" type="button" data-act="course">Course</button>
-      <button class="act" type="button" data-act="velo">Vélo</button>
+      <button class="act" type="button" data-act="marche"><svg class="aico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="M10 21l2-6-2.5-2.5L11 8l3 3 3 1M9.5 12.5L7 14v3M12 15l3 6"/></svg>Marche</button>
+      <button class="act" type="button" data-act="course"><svg class="aico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="15" cy="4" r="2"/><path d="M5 20l4-4 2 1 3-5-3-2-3 2M11 10l3-2 3 3 3 1M14 12l2 3-1 5"/></svg>Course</button>
+      <button class="act" type="button" data-act="velo"><svg class="aico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M5.5 17l4-7h6l3 7M9.5 10l3 7h-7M13 6h3l-.5 4"/></svg>Vélo</button>
     </div>
+    <div class="actbadge" id="actBadge" aria-live="polite"></div>
     <div class="speed">
       <div class="speed-num num" data-info="speed"><span id="speed">0,0</span><span class="unit">km/h</span></div>
       <div class="speed-bar" aria-hidden="true"><i id="bar"></i></div>
@@ -1539,6 +1546,12 @@ body:not(.anim-off) .coachline,body:not(.anim-off) .meteo,body:not(.anim-off) .p
   const anim = () => !!settings.anim3d;
   const SENS = { faible: {hi: 1.9, lo: 0.4}, moyenne: {hi: 1.3, lo: 0.25}, forte: {hi: 0.85, lo: 0.15} };
   const ACT_LABEL = { marche: 'Marche', course: 'Course', velo: 'Vélo' };
+  const ACT_ICON = {
+    marche: '<svg class="aico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4" r="2"/><path d="M10 21l2-6-2.5-2.5L11 8l3 3 3 1M9.5 12.5L7 14v3M12 15l3 6"/></svg>',
+    course: '<svg class="aico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="15" cy="4" r="2"/><path d="M5 20l4-4 2 1 3-5-3-2-3 2M11 10l3-2 3 3 3 1M14 12l2 3-1 5"/></svg>',
+    velo: '<svg class="aico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="17" r="3.5"/><circle cx="18.5" cy="17" r="3.5"/><path d="M5.5 17l4-7h6l3 7M9.5 10l3 7h-7M13 6h3l-.5 4"/></svg>'
+  };
+
 
   // ---------- État d'une sortie ----------
   const fresh = () => ({ status: 'idle', activity: settings.activity, activeMs: 0, resumedAt: 0, startTime: 0, distance: 0, lastKm: 0,
@@ -1752,11 +1765,17 @@ body:not(.anim-off) .coachline,body:not(.anim-off) .meteo,body:not(.anim-off) .p
     $('dplus').textContent = nf0.format(S.dplus || 0);
     $('dist').textContent = nf2.format(S.distance / 1000);
     $('time').textContent = fmtClock(ms);
+    const act = actNow(); document.body.dataset.act = act;
     if (velo) { $('p3Lbl').textContent = 'Montée'; $('p3Val').innerHTML = nf0.format(S.dplus || 0) + '<small>m</small>'; }
+    else if (act === 'course') { const c = Math.round(window.__pedoCad ? window.__pedoCad * 60 : cadence()); $('p3Lbl').textContent = 'Cadence'; $('p3Val').innerHTML = (S.status === 'running' && c ? nf0.format(c) : '–') + '<small>pas/min</small>'; }
     else { $('p3Lbl').textContent = (S.status !== 'idle' && !S.motionOk) ? 'Pas estimés' : 'Pas'; $('p3Val').textContent = nf0.format(steps()); }
+    // course : l'allure passe en gros chiffre, la vitesse en petit
+    if (act === 'course') { const pc = S.status === 'running' && live >= 3 ? fmtPace(3600000, live * 1000) : '–'; $('speed').textContent = pc; document.querySelector('#v-sortie .speed-num .unit').textContent = 'min/km'; $('pace').textContent = nf1.format(live); document.querySelector('#pPace .lbl').textContent = 'Vitesse'; document.querySelector('#pPace .val small').textContent = 'km/h'; }
+    else { document.querySelector('#v-sortie .speed-num .unit').textContent = 'km/h'; document.querySelector('#pPace .lbl').textContent = 'Allure'; document.querySelector('#pPace .val small').textContent = 'min/km'; }
+    $('actBadge').innerHTML = ACT_ICON[act] + '<b>' + ACT_LABEL[act] + '</b>' + (S.status === 'running' ? '<i>en cours</i>' : S.status === 'paused' ? '<i>en pause</i>' : '');
     $('pPace').classList.toggle('hidden', velo);
     $('metaUp').classList.toggle('hidden', velo);
-    $('pace').textContent = fmtPace(ms, S.distance);
+    if (actNow() !== 'course') $('pace').textContent = fmtPace(ms, S.distance);
     $('kcal').textContent = nf0.format(S.kcal || 0);
     try { coachLine(live, ms); } catch (e) {}
     try { photoUi(); } catch (e) {}
@@ -2042,7 +2061,7 @@ body:not(.anim-off) .coachline,body:not(.anim-off) .meteo,body:not(.anim-off) .p
   async function pedoLiveStart() {
     const P = isNative && plugin('Pedometer'); if (!P) return;
     try {
-      if (!pedoLsn) pedoLsn = await P.addListener('steps', d => { if (!pedoLiveOn || S.status !== 'running' || S.veh) return; S.sensorSteps = pedoSegBase + (d.steps || 0); S.motionOk = true; queueRender(); });
+      if (!pedoLsn) pedoLsn = await P.addListener('steps', d => { if (!pedoLiveOn || S.status !== 'running' || S.veh) return; S.sensorSteps = pedoSegBase + (d.steps || 0); S.motionOk = true; window.__pedoCad = d.cadence || 0; queueRender(); });
       pedoSegBase = S.sensorSteps || 0;
       await P.start({ from: Date.now() }); pedoLiveOn = true;
     } catch (e) { pedoLiveOn = false; }
@@ -2435,17 +2454,17 @@ body:not(.anim-off) .coachline,body:not(.anim-off) .meteo,body:not(.anim-off) .p
   const runRow = (h, i, isNew) => {
     const act = ACT_LABEL[h.activity] || 'Sortie';
     return '<li><button type="button" class="run' + (isNew ? ' new' : '') + '" data-i="' + i + '">' + thumbSvg(h.track) +
-      '<div><div class="run-date">' + act + ', ' + df.format(new Date(h.date)) + (h.photos && h.photos.length ? ' · 📷 ' + h.photos.length : '') + '</div>' +
+      '<div><div class="run-date"><span class="run-act">' + (ACT_ICON[h.activity] || ACT_ICON.marche) + act + '</span> · ' + df.format(new Date(h.date)) + (h.photos && h.photos.length ? ' · 📷 ' + h.photos.length : '') + '</div>' +
       '<div class="run-dist num">' + nf2.format((h.distanceM || 0) / 1000) + '<small>km</small></div>' +
       '<div class="run-meta"><span>' + fmtDurWords(h.durationMs || 0) + (h.totalMs ? ' en mouvement' : '') + '</span>' +
-      (h.activity === 'velo' ? '<span>' + nf1.format(h.avgKmh || 0) + ' km/h</span>' : '<span>' + nf0.format(h.steps || 0) + (h.stepsEstimated ? ' pas estimés' : ' pas') + '</span>') +
+      (h.activity === 'velo' ? '<span>' + nf1.format(h.avgKmh || 0) + ' km/h</span>' : h.activity === 'course' ? '<span>' + fmtPace(h.durationMs || 0, h.distanceM || 0) + ' /km</span>' : '<span>' + nf0.format(h.steps || 0) + (h.stepsEstimated ? ' pas estimés' : ' pas') + '</span>') +
       (h.kcal != null ? '<span>' + nf0.format(h.kcal) + ' kcal actives</span>' : '') + (h.dplus ? '<span>+' + nf0.format(h.dplus) + ' m</span>' : '') + '</div></div></button></li>';
   };
   function renderHist() {
     const H = store.get(K_HIST, []), L = H.map((h, i) => [h, i]).filter(([h]) => hpFilter === 'tout' || h.activity === hpFilter);
     const sum = (A, f) => A.reduce((a, [h]) => a + (f(h) || 0), 0);
     let x = '<div class="hp-tot"><div><b class="num">' + L.length + '</b><span>sortie' + (L.length > 1 ? 's' : '') + '</span></div><div><b class="num">' + nf1.format(sum(L, h => h.distanceM) / 1000) + '</b><span>km</span></div><div><b class="num">' + nf0.format(Math.round(sum(L, h => h.durationMs) / 3600e3)) + '</b><span>heures</span></div><div><b class="num">' + nf0.format(sum(L, h => h.kcal)) + '</b><span>kcal</span></div></div>';
-    x += '<div class="chips hp-chips">' + [['tout', 'Tout'], ['marche', '🚶 Marche'], ['course', '🏃 Course'], ['velo', '🚲 Vélo']].map(([k, l]) => '<button type="button" class="chip" data-hpf="' + k + '" aria-pressed="' + (hpFilter === k) + '">' + l + '</button>').join('') + '</div>';
+    x += '<div class="chips hp-chips">' + [['tout', 'Tout'], ['marche', 'Marche'], ['course', 'Course'], ['velo', 'Vélo']].map(([k, l]) => '<button type="button" class="chip" data-hpf="' + k + '" aria-pressed="' + (hpFilter === k) + '">' + (ACT_ICON[k] || '') + l + '</button>').join('') + '</div>';
     x += '<button type="button" class="allmap-btn" data-allmap="1"><span>🗺️</span><b>Carte de tous mes parcours</b><small>Tes sorties superposées, avec tes photos</small><i>›</i></button>';
     if (!L.length) { $('hpBody').innerHTML = x + '<div class="block"><p class="empty">' + (H.length ? 'Aucune sortie de ce type pour l\'instant.' : 'Aucune sortie enregistrée pour l\'instant. Lance ta première sortie avec le bouton orange, puis touche « Terminer la sortie » pour l\'enregistrer ici.') + '</p></div>'; return; }
     const months = []; L.forEach(([h, i]) => { const d = new Date(h.date), k = d.getFullYear() + '-' + d.getMonth(); let m = months[months.length - 1]; if (!m || m.k !== k) { m = { k, d, items: [] }; months.push(m); } m.items.push([h, i]); });
